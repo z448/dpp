@@ -1,2 +1,3 @@
 github 4 local  metacpan - https://github.com/CPAN-API/cpan-api
 meta-api - https://explorer.metacpan.org/#/5521321
+stratopan graph -https://stratopan.com/widgets
