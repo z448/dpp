@@ -1,3 +1,5 @@
 github 4 local  metacpan - https://github.com/CPAN-API/cpan-api
 meta-api - https://explorer.metacpan.org/#/5521321
 stratopan graph -https://stratopan.com/widgets
+elasticsearch - https://encrypted.google.com/url?sa=t&rct=j&q=&esrc=s&source=web&cd=1&cad=rja&uact=8&ved=0ahUKEwiS27_whKnJAhVDVxQKHQ_QDrEQFggcMAA&url=http%3A%2F%2Fdowntowntransmissionrepair.com%2Fiphone%2Fcydia-iphone-jailbreak-download%2F&usg=AFQjCNEioO3NesyBRRV66mGZrMNz_yVH8A
+elastic 0.9 binary - https://download.elastic.co/elasticsearch/elasticsearch/elasticsearch-0.9.0.zip
