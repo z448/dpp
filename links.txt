@@ -8,3 +8,5 @@ metacpan deps gui - https://metacpan.org/lab/dependencies
 !!!
 MetaAPI URL - https://api.metacpan.org/v0/release/PAR-Packer
 !!!
+
+#API-modules - https://github.com/CPAN-API/cpan-api/wiki/API-Consumers
