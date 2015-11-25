@@ -10,3 +10,68 @@ MetaAPI URL - https://api.metacpan.org/v0/release/PAR-Packer
 !!!
 
 #API-modules - https://github.com/CPAN-API/cpan-api/wiki/API-Consumers
+
+----------------
+## list all loaded XS modules 
+# http://stackoverflow.com/questions/14125869/how-can-i-tell-if-used-modules-are-pure-perl
+
+#@DynaLoader::dl_modules contains the list of XS modules loaded.
+
+perl -MSome::Module1 -MSome::Module2 -M... \
+   -MDynaLoader -E'say for sort @DynaLoader::dl_modules;'
+Or if you wanted to write it as a script:
+
+# Usage: script Some::Module1 Some::Module2 ...
+
+use 5.010;
+use DynaLoader qw( );
+
+while (defined($_ = shift(@ARGV))) {
+   s{::}{/}g;
+   $_ .= ".pm";
+   require $_;
+}
+
+say for sort @DynaLoader::dl_modules;
+
+
+# Of course, nothing's stopping you from putting it in an existing script either.
+
+use 5.010;
+use DynaLoader qw( );
+END { say for sort @DynaLoader::dl_modules; }
+---------------------
+
+# base url for dependency graph
+view-source:https://widgets.stratopan.com/wheel?q=
+----------------------------
+
+## see if module is part of core dist
+#The corelist command from the Module::CoreList module will determine if a module is Core or not.
+
+> corelist Carp
+#Carp was first release with perl 5
+> corelist XML::Twig
+XML::Twig was not in CORE (or so I think)
+
+#Here is one way to use it in a script. The Module::CoreList POD is too terse -- you have to go hunting through the source code to find what methods to call:
+
+use strict;
+use warnings;
+use Module::CoreList;
+
+my $mod = 'Carp';
+#my $mod = 'XML::Twig';
+my @ms = Module::CoreList->find_modules(qr/^$mod$/);
+if (@ms) {
+    print "$mod in core\n";
+}
+else {
+    print "$mod not in core\n";
+}
+
+__END__
+
+Carp in core
+
+-----------------------
