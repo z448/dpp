@@ -1,40 +1,44 @@
 #!/usr/bin/env perl
+use MetaCPAN::Client;
+use Data::Dumper;
 
-use warnings;
-use strict;
-use feature 'say';
-use JSON::Tiny qw(decode_json);
+# note
+# add architecture (perl5/lib folder)A
+#
+my $m = MetaCPAN::Client->new();
+my $module = $m->module('PAR::Packer');
+my $release = $m->release('PAR-Packer');
+my $pod = $m->pod('PAR::Packer')->html;
 
-sub meta_req {
-    my $meta_api_url='https://api.metacpan.org/v1/release/'."$ARGV[1]";
-    my $meta_json=qx!curl -skL $meta_api_url!;
-    my $meta_pm=decode_json $meta_json;
-    #print $meta_json;
-    return $meta_pm;
-}
+##debug dumps
+#print $pm;
+#print $pod;
+#print Dumper $release;
+#print Dumper $module;
+my $d=$release->{data};
+my $meta=$d->{metadata};
 
-my $m=&meta_req;
-say $m->{name}.' - '.$m->{abstract};
-say 'Author: '.$m->{author};
-say $m->{version};
-say $m->{download_url};
+my @deps=$d->{dependency};
+my $name_pm=$module->{data}{module};
+my $package=$meta->{name};
+my $version=$d->{version};
+my $description=$meta->{abstract};
+my $licence=$d->{licence};  # ???
+my $author=$d->{author};
+my $homepage='https://metacpan.org/pod/'.'';
 
-say deps();
+my $src_url= $d->{download_url};
 
-sub deps{
-    say 'Deps:';
-    for my $hash(@{$m->{dependency}}){
-        if ($$hash{relationship} eq 'requires'){
-            say $$hash{module};
-        }
+print "package:  $package"."\n"."version:  $version"."\n"."description:  $description"."\n"."\n"."author:  $author"."\n";
+print "src url: $src_url"."\n";
+print "module name:  "; for(@$name_pm){ print $_->{name} }; print "\n";
+print "deps: "."\n";
+
+for $dep (@deps){
+    for $hash(@$dep){
+            if ($$hash{phase} eq 'runtime' and $$hash{relationship} eq 'requires'){
+                print "\t".$$hash{module}."\n";
+                #print $key."\-\>".$value."\n"; 
+            }
     }
-}
-
-
-
-
-
-#https://github.com/CPAN-API/cpan-api/wiki/API-Consumers
-
-
-
+}    
