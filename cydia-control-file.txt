@@ -37,3 +37,28 @@ Author: In contrast, the person who wrote the original software is called the "a
 Sponsor: Finally, there might be someone who is simply providing the influence or the cash to make the package happen. This person should be listed here in the form of "Maintainer" except using a resource URI instead of an e-mail address.
 
 Section: Under the "Install" tab in Cydia, packages are listed by "Section". If you would like to encode a space into your section name, use an underscore (Cydia will automatically convert these).
+
+
+
+
+Package: com.a3tweaks.polus
+Status: install ok installed
+Section: Tweaks
+Installed-Size: 2515
+Maintainer: BigBoss <bigboss@thebigboss.org>
+Architecture: iphoneos-arm
+Version: 2.0.9-1
+Depends: firmware (>= 7.0), mobilesubstrate (>= 0.9.5000), preferenceloader (>= 2.2.2), applist, libactivator, com.a3tweaks.flipswitch
+Description: Control Center launcher for apps & actions
+Author: A3tweaks <general@a3tweaks.com>
+Name: Polus
+Depiction: http://moreinfo.thebigboss.org/moreinfo/depiction.php?file=polusDp
+Homepage: http://moreinfo.thebigboss.org/moreinfo/depiction.php?file=polusDp
+Sponsor: thebigboss.org <http://thebigboss.org>
+dev: a3tweaks
+Tag: cydia::commercial, purpose::extension, compatible::ios7, compatible::ios8, compatible::ios9
+Icon: file:///Library/PreferenceBundles/PolusSettings.bundle/PolusIcon@2x.png
+
+
+
+
