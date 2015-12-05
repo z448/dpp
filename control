@@ -1,0 +1,25 @@
+#!/usr/bin/env perl
+
+use control;
+use feature 'say';
+
+my $meta4pm=$ARGV[0];
+my $m = get_control($meta4pm);
+
+say $m->{name}.' - '.$m->{abstract};
+say 'Author: '.$m->{author};
+say $m->{version};
+say $m->{download_url};
+
+say deps();
+
+sub deps {
+        say 'Deps:';
+        for my $hash(@{$m->{dependency}}){
+            if ($$hash{relationship} eq 'requires'){
+            say $$hash{module};
+        }
+    }
+}
+   
+
