@@ -1,0 +1,33 @@
+#!/usr/bin/env perl
+#
+#use PAR;
+#use lib 'mcpq.par';
+use JSON::XS;
+#use Data::Dumper;
+use Term::ANSIColor;
+use feature qw/say/;
+
+my $jurl='curl -kL https://metacpan.org/search/autocomplete?q=';
+my $srch=$ARGV[0];
+my $j=`$jurl$srch  2>/dev/null`;
+if ($ARGV[1] eq '-j') { print "$j\n" } 
+    else { jparse() }
+sub jparse {
+    my $p=JSON::XS->new->utf8->decode($j);
+    my $i==1;
+    print ">>Results\n";
+    for my $dist (@$p) {
+        if ($i % 2) {
+            print colored(qq!$$dist{'distribution'}!, q!blue on_black!);
+        } else {
+            print colored(qq!$$dist{'distribution'}!, q!bright_blue on_black!);
+        }
+        print colored(qq!\ \:\ !, q!white on_black!);
+        $i++;
+    }
+    print colored(qq!\n\n>>Use!, q!on_black!); 
+    print colored(qq! -i !, q!white on_black!);
+    print colored(qq!as a second parameter to build and install module!, q!on_black!);
+    print "\n";
+}
+#print Dumper ($p{'distribution'});
