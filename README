@@ -1,0 +1,18 @@
+# setupt env
+. ./env.sh
+
+# use search tool for distributions '::' to find name; for ex. to find JSON-XS dist use ':: json'
+
+:: json
+
+# try to use control to load control file for choosen distribution
+control JSON-XS
+
+# if it complains load missing libs from load.sh
+loadlib
+
+# try to use control again
+
+control JSON-XS
+
+#now it sold work

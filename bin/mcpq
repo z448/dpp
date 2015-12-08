@@ -25,9 +25,9 @@ sub jparse {
         print colored(qq!\ \:\ !, q!white on_black!);
         $i++;
     }
-    print colored(qq!\n\n>>Use!, q!on_black!); 
-    print colored(qq! -i !, q!white on_black!);
-    print colored(qq!as a second parameter to build and install module!, q!on_black!);
+#    print colored(qq!\n\n>>Use!, q!on_black!); 
+#    print colored(qq! -i !, q!white on_black!);
+#    print colored(qq!as a second parameter to build and install module!, q!on_black!);
     print "\n";
 }
 #print Dumper ($p{'distribution'});
