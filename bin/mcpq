@@ -1,7 +1,7 @@
 #!/usr/bin/env perl
 #
-#use lib '/var/mobile/scripts/lib/perl5';
-#use PAR '/var/mobile/scripts/lib/perl5/lib.par';
+use lib '/var/mobile/scripts/lib/perl5';
+use PAR '/var/mobile/scripts/lib/perl5/lib.par';
 use JSON::Tiny qw(decode_json);
 use Term::ANSIColor;
 use feature qw/say/;
@@ -21,7 +21,7 @@ sub jparse {
         } else {
             print colored(qq!$$dist{'distribution'}!, q!bright_blue on_black!);
         }
-        print colored(qq!\ \:\ !, q!white on_black!);
+        print colored(qq!\ \:\:\ !, q!red on_black!);
         $i++;
     }
 #    print colored(qq!\n\n>>Use!, q!on_black!); 
