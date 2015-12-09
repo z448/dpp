@@ -1,9 +1,8 @@
 #!/usr/bin/env perl
 #
-#use PAR;
-#use lib 'mcpq.par';
-use JSON::XS;
-#use Data::Dumper;
+#use lib '/var/mobile/scripts/lib/perl5';
+#use PAR '/var/mobile/scripts/lib/perl5/lib.par';
+use JSON::Tiny qw(decode_json);
 use Term::ANSIColor;
 use feature qw/say/;
 
@@ -13,7 +12,7 @@ my $j=`$jurl$srch  2>/dev/null`;
 if ($ARGV[1] eq '-j') { print "$j\n" } 
     else { jparse() }
 sub jparse {
-    my $p=JSON::XS->new->utf8->decode($j);
+    my $p=decode_json $j;
     my $i==1;
     print ">>Results\n";
     for my $dist (@$p) {
