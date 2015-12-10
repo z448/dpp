@@ -1,0 +1,13 @@
+Package: 
+Name: 
+Version: 
+Architecture: 
+Description: 
+Homepage: 
+Depiction: 
+Maintainer: 
+Author: 
+Sponsor: 
+Section: 
+Depends:T64CsF{QRY 
+
