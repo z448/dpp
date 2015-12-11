@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 
-package Control;
+package Cydia::Control;
 
 use strict;
 use warnings;

@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 
-package Deb;
+package Cydia::Deb;
 use Term::ANSIColor;
 use IO::All;
 
