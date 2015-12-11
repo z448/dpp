@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 
-use control;
+use Cydia::Control;
 use feature 'say';
 
 my $meta4pm=$ARGV[0];

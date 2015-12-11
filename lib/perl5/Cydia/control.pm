@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 
-package control;
+package Control;
 
 use strict;
 use warnings;

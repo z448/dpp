@@ -1,5 +1,6 @@
 #!/usr/bin/env perl
 
+package Deb;
 use Term::ANSIColor;
 use IO::All;
 

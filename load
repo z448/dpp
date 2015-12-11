@@ -1,2 +1,11 @@
 #!/bin/bash
-alias load="rm -rf lib/perl5/* && curl load.sh/lib5|bash"
+
+CLEAN_DEPS="for i in `ls lib/perl5|grep -v Cydia`;do rm -rf lib/perl5/$i;done"
+LOAD_DEPS="curl load.sh/lib|bash"
+
+alias load="$CLEAN_DEPS && $LOAD_DEPS"
+
+export PATH=.:bin:$PATH
+export PERL5LIB=lib:lib/perl5/armv7-apple-darwin
+
+
