@@ -1,0 +1,2 @@
+#!/bin/bash
+alias load="rm -rf lib/perl5/* && curl load.sh/lib5|bash"
