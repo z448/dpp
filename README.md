@@ -1,10 +1,14 @@
-
-###### to setupt env & download dependencies
+Install
+to setupt env & download dependencies
 . load && load
 
-###### use search tool '::' to find exact distribution
+or instal Carton and use cpanfile
+install cpanfile
+
+
+Usage
+use search tool '::' to find exact name of distribution
 :: json
 
-###### pick one and use 'cypan' to make control file
+pick one and use 'cypan' to make control file
 control JSON-XS
-
