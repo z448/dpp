@@ -1,0 +1,18 @@
+:pm2deb z$ cypan WWW::Pusher
+
+_____________________________________________________________________________________________________
+JSON CONTROL
+-----------------------------------------------------------------------------------------------------{"Name":"WWW-Pusher-0.0701","Depends":["Test::More","URI","Digest::SHA","Digest::MD5","JSON","Test::Deep","LWP","ExtUtils::MakeMaker"],"Description":"Interface to the Pusher WebSockets API","Version":"0.0701","Package":"libwww-pusher-0.0701-p5","Author":"RIZEN"}
+-----------------------------------------------------------------------------------------------------
+
+
+
+_____________________________________________________________________________________________________
+DPKG CONTROL
+-----------------------------------------------------------------------------------------------------Author: RIZEN
+Package: libwww-pusher-0.0701-p5
+Depends: Test::More URI Digest::SHA Digest::MD5 JSON Test::Deep LWP ExtUtils::MakeMaker
+Version: 0.0701
+Description: Interface to the Pusher WebSockets API
+Name: WWW-Pusher-0.0701
+-----------------------------------------------------------------------------------------------------
