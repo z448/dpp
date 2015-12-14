@@ -14,14 +14,14 @@ load
 - use search tool ```::``` to find exact name of distribution
 ```:: json```
 
-# list results
+**list results**
 JSON :: JSONP :: JSONY :: JSON-T :: App-JSON-to :: App-SerializeUtils :: JSON-PP :: JSON-XS :: App-SerializeUtils :: JS-JSON :: JSON-ON :: JSON :: JSON-PP :: JSON-SL :: JSON-XS :: App-SerializeUtils :: App-PipeFilter :: App-PipeFilter :: Eve :: Geo-JSON ::
 
 - pick one and use ```cypan``` to make debian control file
 
 ```cypan JSON-XS```
 
-# creates json+debian files
+**creates json+debian files**
  ```
  __________________________________________________________________________
  JSON CONTROL
