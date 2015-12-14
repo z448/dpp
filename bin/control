@@ -1,25 +1,59 @@
-#!/usr/bin/env perl
+ #!/usr/bin/env perl
 
-use Cydia::Control;
-use feature 'say';
+ use Cydia::Control;
+ use JSON::Tiny qw(encode_json);
+ use feature 'say';
 
-my $meta4pm=$ARGV[0];
-my $m = get_control($meta4pm);
+ my $meta4pm;
+ my %dis;
+ my $dis;
+ my $control_json;
 
-say $m->{name}.' - '.$m->{abstract};
-say 'Author: '.$m->{author};
-say $m->{version};
-say $m->{download_url};
+ unless($ARGV[0]){
+     $meta4pm='IO-All';
+ }
 
-say deps();
+ my $m = get_control($meta4pm);
 
-sub deps {
-        say 'Deps:';
-        for my $hash(@{$m->{dependency}}){
-            if ($$hash{relationship} eq 'requires'){
-            say $$hash{module};
-        }
-    }
-}
-   
+ $dis{Package} = 'lib'.lc $m->{name}.'-p5';
+ $dis{Name} = $m->{name};
+ $dis{Description} = $m->{abstract};
+ $dis{Author} = $m->{author};
+ $dis{Version} = $m->{version};
+ $dis{Depends} =  deps();
+ $control_json = { %dis };
+ $control_json = encode_json $control_json;
+
+ print $control_json."\n"."\n";
+
+
+             while (($key, $value) = each %dis) {
+               print $key, ":\ ";
+               print $hash{$key}."\n";   # This is safe
+             }
+
+
+ say 'Package: '.'lib'.lc $m->{name}.'-p5';
+ say 'Name: '.$m->{name};
+ say 'Description: '.$m->{abstract};
+ say 'Author: '.$m->{author};
+ say 'Version: '.$m->{version};
+ say 'Depends :'.say @{deps()};
+
+ #do { for (@{deps()}){ say $_ } };
+ my $package_url = $m->{download_url};
+ #my $readme = $package_url;
+ #$readme=~s/tar\.gz/readme/;
+ #say qx!curl -sf $readme!;
+ #say qx!curl -sf $readme!;
+
+
+ sub deps {
+         for my $hash(@{$m->{dependency}}){
+             if ($$hash{relationship} eq 'requires'){
+                 push @deps, $$hash{module};
+         }
+     }
+     return \@deps;
+ }
 
