@@ -1,59 +1,72 @@
- #!/usr/bin/env perl
+#!/usr/bin/env perl
 
- use Cydia::Control;
- use JSON::Tiny qw(encode_json);
- use feature 'say';
+use Term::ANSIColor;
+use Cydia::Control;
+use JSON::Tiny qw(encode_json);
+use feature 'say';
 
- my $meta4pm;
- my %dis;
- my $dis;
- my $control_json;
+my $dis_req;
+my %ctrl;
+my $ctrl_json;
 
- unless($ARGV[0]){
-     $meta4pm='IO-All';
- }
+unless($ARGV[0]){
+     $dis_req='IO-All';
+ } else { $dis_req=$ARGV[0] }
 
- my $m = get_control($meta4pm);
+$dis_req =~ s/\:\:/\-/g;
 
- $dis{Package} = 'lib'.lc $m->{name}.'-p5';
- $dis{Name} = $m->{name};
- $dis{Description} = $m->{abstract};
- $dis{Author} = $m->{author};
- $dis{Version} = $m->{version};
- $dis{Depends} =  deps();
- $control_json = { %dis };
- $control_json = encode_json $control_json;
+my $m = get_control($dis_req);
 
- print $control_json."\n"."\n";
-
-
-             while (($key, $value) = each %dis) {
-               print $key, ":\ ";
-               print $hash{$key}."\n";   # This is safe
-             }
-
-
- say 'Package: '.'lib'.lc $m->{name}.'-p5';
- say 'Name: '.$m->{name};
- say 'Description: '.$m->{abstract};
- say 'Author: '.$m->{author};
- say 'Version: '.$m->{version};
- say 'Depends :'.say @{deps()};
-
- #do { for (@{deps()}){ say $_ } };
- my $package_url = $m->{download_url};
- #my $readme = $package_url;
- #$readme=~s/tar\.gz/readme/;
- #say qx!curl -sf $readme!;
- #say qx!curl -sf $readme!;
-
-
- sub deps {
-         for my $hash(@{$m->{dependency}}){
-             if ($$hash{relationship} eq 'requires'){
-                 push @deps, $$hash{module};
-         }
+sub deps {
+    my @deps;
+     for my $hash(@{$m->{dependency}}){
+         if ($$hash{relationship} eq 'requires'){
+             push @deps, $$hash{module};
      }
-     return \@deps;
  }
+ return \@deps;
+}
 
+sub make_control {
+    while (($key, $value) = each %ctrl) {
+        unless ($key eq 'Depends'){
+            print $key, ":\ ";
+            print $ctrl{$key}."\n";
+        } else {
+            print $key.': ';
+            print $_."\ " for @{$ctrl{$key}};
+            print "\n";
+        }
+    }
+}
+
+sub term_dim { # todo: stty bin check
+    my@x=qx!stty -a!; 
+    my@y=split(/;/,$x[0]);
+    my@w=split(/columns/,$y[2]); 
+    $w[1]=~s/^\s+|\s+$//g;
+    return $w[0];
+}
+
+sub render {
+    my $term=&term_dim;
+    #json
+    print "\n".("_"x$term)."\n".colored(['bright_white'],'JSON CONTROL')."\n".("-"x$term).$ctrl_json."\n".("-"x$term)."\n";;
+
+    
+    print "\n\n\n".("_"x$term)."\n".colored(['bright_white'],'DPKG CONTROL')."\n".("-"x$term);
+    make_control();
+    print ("-"x$term)."\n\n\n";
+}
+
+$ctrl{Package} = 'lib'.lc $m->{name}.'-p5';
+$ctrl{Name} = $m->{name};
+$ctrl{Description} = $m->{abstract};
+$ctrl{Author} = $m->{author};
+$ctrl{Version} = $m->{version};
+$ctrl{Depends} =  deps();
+$ctrl_hash = { %ctrl };
+$ctrl_json = encode_json $ctrl_hash;
+
+
+render();
