@@ -7,7 +7,9 @@ use IO::All;
 use JSON::XS; #do it fast
 use List::MoreUtils qw/ uniq /;
 use Term::ANSIColor;
+# needs curl from default Telesphoreo repo
 
+my $get_pkg_details = qx!curl -Lo 02packages.details.txt.gz http://www.cpan.org/modules/02packages.details.txt.gz!; # gunzip -> txt (848K)
 my @lines = io('02packages.details.txt')->slurp; # slurp file to array
 my (@pkgs, %pkg, $opt);
 
@@ -57,9 +59,7 @@ sub srch {
         print colored(qq!\ \:\:\ !, q!red on_bright_black!);
         $i++;
     }
-    #print colored(qq!\n\n>>Use!, q!on_bright_black!);
-    #print colored(qq! -i !, q!white on_bright_black!);
-    #print colored(qq!as a second parameter to build and install module!, q!on_bright_black!);
+    
     print "\n";
     }
 }
