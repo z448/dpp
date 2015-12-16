@@ -9,8 +9,8 @@ use List::MoreUtils qw/ uniq /;
 use Term::ANSIColor;
 # needs curl from default Telesphoreo repo
 
-my $get_pkg_details = qx!curl -Lo 02packages.details.txt.gz http://www.cpan.org/modules/02packages.details.txt.gz!; # gunzip -> txt (848K)
-my @lines = io('02packages.details.txt')->slurp; # slurp file to array
+qx!rm -rf bin/02packages.details.txt && curl -Lo bin/02packages.details.txt.gz http://www.cpan.org/modules/02packages.details.txt.gz && gunzip bin/02packages.details.txt.gz!; # gunzip -> txt (848K)
+my @lines = io('bin/02packages.details.txt')->slurp; # slurp file to array
 my (@pkgs, %pkg, $opt);
 
 $opt=$ARGV[0]; 
@@ -37,7 +37,7 @@ sub unique {
 sub jay { #to json
     my $p = \@p;
     my $j = encode_json $p;
-    $j > io('minicpan.json');
+    $j > io('bin/minicpan.json');
     #print $j;
     srch(\$p);
 }
@@ -63,4 +63,3 @@ sub srch {
     print "\n";
     }
 }
-
