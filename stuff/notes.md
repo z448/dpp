@@ -22,5 +22,6 @@ perl -e 'for(@INC){print $_."\n" if /Extras/}'
 use lib q!/var/mobile/Documents/pm2deb/lib/perl5!;
 use PAR q!/var/mobile/Documents/pm2deb/lib/perl5/lib.par!;
 
-
+**stratopan embed**
+<iframe src="//widgets.stratopan.com/wheel?q=Moose-2.1205" width="720" height="620" frameborder="0"></iframe>
 
