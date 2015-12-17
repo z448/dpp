@@ -1,7 +1,8 @@
 #### debian manual
 https://www.debian.org/doc/debian-policy/index.html#contents
 
-
+## article
+http://cheeaun.com/blog/2012/03/how-i-built-hacker-news-mobile-web-app/
 
 use File::Copy;
 
