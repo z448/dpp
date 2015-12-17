@@ -34,7 +34,12 @@ sub make_control {
             print $ctrl{$key}."\n";
         } else {
             print $key.': ';
-            print $_."\ " for @{$ctrl{$key}};
+            for(@{$ctrl{$key}}){
+                unless($_ eq 'perl'){
+                    s/\:\:/\-/g;
+                    print "lib".lc($_)."\-p5"."\,\ ";
+            } else { print "perl5\,\ " }
+            };
             print "\n";
         }
     }
@@ -54,9 +59,10 @@ sub render {
     print "\n".("_"x$term)."\n".colored(['bright_white'],'JSON CONTROL')."\n".("-"x$term).$ctrl_json."\n".("-"x$term)."\n";;
 
     
-    print "\n\n\n".("_"x$term)."\n".colored(['bright_white'],'DPKG CONTROL')."\n".("-"x$term);
+    print "\n\n\n".("_"x$term)."\n".colored(['bright_white'],'DPKG CONTROL')."\n".("-"x$term)."\n\n";
+
     make_control();
-    print ("-"x$term)."\n\n\n";
+    print "\n\n".("-"x$term)."\n\n\n";
 }
 
 $ctrl{Package} = 'lib'.lc $m->{name}.'-p5';
