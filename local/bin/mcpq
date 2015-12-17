@@ -6,9 +6,17 @@ use JSON::Tiny qw(decode_json);
 use Term::ANSIColor;
 use feature qw/say/;
 
-my $jurl='curl -kL https://metacpan.org/search/autocomplete?q=';
-my $srch=$ARGV[0];
-my $j=`$jurl$srch  2>/dev/null`;
+use HTTP::Tiny;
+
+die "Usage:\n\n\ mcpq <Module::Name>\n\n" unless @ARGV;
+
+my $pm_request='http://metacpan.org/search/autocomplete?q='."$ARGV[0]";
+my $get_jsonn = HTTP::Tiny->new->get("$pm_request");
+die "Failed!\n" unless $mcp_url->{success};
+print $mcp_url->{content} if length $mcp_url->{content};
+
+die;
+my $j=`$jurl$pm_req  2>/dev/null`;
 if ($ARGV[1] eq '-j') { print "$j\n" } 
     else { jparse() }
 sub jparse {
