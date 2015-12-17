@@ -11,6 +11,12 @@ load
 
 ```carton install```
 
+*or if you have 'cpanm' (App::cpanminus)*
+```cpanm -Llocal -nq --installdeps .```
+
+*if you have 'curl'*
+```curl -L cpanmin.us > cpanm && chmod +x cpanm && cpanm -Llocal -nq --installdeps .```
+
 
 **Usage**
 
