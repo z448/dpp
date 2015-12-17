@@ -39,4 +39,6 @@ use PAR q!/var/mobile/Documents/pm2deb/lib/perl5/lib.par!;
 **stratopan embed**
 <iframe src="//widgets.stratopan.com/wheel?q=Moose-2.1205" width="720" height="620" frameborder="0"></iframe>
 
-test
+*list installed modules & create cpan bundle*
+http://perldoc.perl.org/perlfaq3.html#How-do-I-find-which-modules-are-installed-on-my-system%3f
+
