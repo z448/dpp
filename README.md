@@ -19,7 +19,6 @@ load
 ```
 :: json
 
-# list results
 JSON :: JSONP :: JSONY :: JSON-T :: App-JSON-to :: App-SerializeUtils :: JSON-PP :: JSON-XS :: App-SerializeUtils :: JS-JSON :: JSON-ON :: JSON :: JSON-PP :: JSON-SL :: JSON-XS :: App-SerializeUtils :: App-PipeFilter :: App-PipeFilter :: Eve :: Geo-JSON```
 
 *pick one and use ```cypan``` to make debian control file*
@@ -32,8 +31,6 @@ JSON :: JSONP :: JSONY :: JSON-T :: App-JSON-to :: App-SerializeUtils :: JSON-PP
 -----------------------------------------
  {"Name":"WWW-Pusher-0.0701","Depends":["Test::More","URI","Digest::SHA","Digest::MD5","JSON","Test::Deep","LWP","ExtUtils::MakeMaker"],"Description":"Interface to the Pusher WebSockets API","Version":"0.0701","Package":"libwww-pusher-0.0701-p5","Author":"RIZEN"}
  ----------------------------------------
-```
-```
  DPKG CONTROL
 -----------------------------------------
 Author: RIZEN
