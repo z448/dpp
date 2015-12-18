@@ -1,40 +1,44 @@
-#!/usr/bin/env perl
-#
-use lib '/var/mobile/scripts/lib/perl5';
-use PAR '/var/mobile/scripts/lib/perl5/lib.par';
-use JSON::Tiny qw(decode_json);
-use Term::ANSIColor;
-use feature qw/say/;
+ #!/usr/bin/env perl
+ #
+ use Term::ANSIColor;
+ use HTTP::Tiny;
+ use JSON::PP;
+ use Getopt::Std;
 
-use HTTP::Tiny;
+ die "Usage:\n\n\ mcpq <Module::Name>\n\n" unless @ARGV;
+ # use >>> http://api.metacpan.org/v0/module/JSON::XS?join=release
+ # see API DOCS >>> https://github.com/CPAN-API/cpan-api/blob/master/docs/API-docs.md
 
-die "Usage:\n\n\ mcpq <Module::Name>\n\n" unless @ARGV;
+ getopts('ls:', \%opts);
+ print $opts{s};
+ print $opts{l};
 
-my $pm_request='http://metacpan.org/search/autocomplete?q='."$ARGV[0]";
-my $get_jsonn = HTTP::Tiny->new->get("$pm_request");
-die "Failed!\n" unless $mcp_url->{success};
-print $mcp_url->{content} if length $mcp_url->{content};
+ my $pm_request='http://api.metacpan.org/v0/module/'."$opts{s}".'?join=release';
+ print $pm_request;
+ my $get_jsonn = HTTP::Tiny->new->get("$pm_request");
+ die "Failed!\n" unless $get_jsonn->{success};
+ print $mcp_url->{content} if length $mcp_url->{content};
 
-die;
-my $j=`$jurl$pm_req  2>/dev/null`;
-if ($ARGV[1] eq '-j') { print "$j\n" } 
-    else { jparse() }
-sub jparse {
-    my $p=decode_json $j;
-    my $i==1;
-    print ">>Results\n";
-    for my $dist (@$p) {
-        if ($i % 2) {
-            print colored(qq!$$dist{'distribution'}!, q!blue on_black!);
-        } else {
-            print colored(qq!$$dist{'distribution'}!, q!bright_blue on_black!);
-        }
-        print colored(qq!\ \:\:\ !, q!red on_black!);
-        $i++;
-    }
-#    print colored(qq!\n\n>>Use!, q!on_black!); 
-#    print colored(qq! -i !, q!white on_black!);
-#    print colored(qq!as a second parameter to build and install module!, q!on_black!);
-    print "\n";
-}
-#print Dumper ($p{'distribution'});
+ my $j=`$jurl$pm_req  2>/dev/null`;
+ if ($ARGV[1] eq '-j') { print "$j\n" }
+     else { jparse() }
+ sub jparse {
+     my $p=decode_json $j;
+     my $i==1;
+     print ">>Results\n";
+     for my $dist (@$p) {
+         if ($i % 2) {
+             print colored(qq!$$dist{'distribution'}!, q!blue on_black!);
+         } else {
+             print colored(qq!$$dist{'distribution'}!, q!bright_blue on_black!);
+         }
+         print colored(qq!\ \:\:\ !, q!red on_black!);
+         $i++;
+     }
+ #    print colored(qq!\n\n>>Use!, q!on_black!);
+ #    print colored(qq! -i !, q!white on_black!);
+ #    print colored(qq!as a second parameter to build and install module!, q!on_black!);
+     print "\n";
+ }
+ #print Dumper ($p{'distribution'});
+ ~
