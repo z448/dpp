@@ -2,25 +2,26 @@
 
 *To setupt env & download dependencies*
 
+*using [Carton](https://metacpan.org/pod/Carton) and use cpanfile*
+
 ```
-. load
+carton install
+```
+
+*using 'cpanm' (App::cpanminus)*
+```
+cpanm -Llocal -nq --installdeps .
+```
+
+*using 'curl'*
+```
+. set.env
 load
 ```
 
-*or instal [Carton](https://metacpan.org/pod/Carton) and use cpanfile*
-
-```carton install```
-
-*or if you have 'cpanm' (App::cpanminus)*
-```cpanm -Llocal -nq --installdeps .```
-
-*if you have 'curl'*
-```curl -L cpanmin.us > cpanm && chmod +x cpanm && cpanm -Llocal -nq --installdeps .```
-
-
 **Usage**
 
-*use search tool ```::``` to find exact name of distribution*
+*use search tool :: to find exact name of distribution*
 
 ```
 :: json
