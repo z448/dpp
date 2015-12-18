@@ -2,7 +2,7 @@
 
 *To setupt env & download dependencies*
 
-*using '[Carton](https://metacpan.org/pod/Carton)' and use cpanfile*
+*using [Carton](https://metacpan.org/pod/Carton) and use cpanfile*
 
 ```
 carton install
@@ -24,7 +24,7 @@ load
 *use search tool :: to find exact name of distribution*
 
 ```
-':: json'
+:: json
 
 JSON :: JSONP :: JSONY :: JSON-T :: App-JSON-to :: App-SerializeUtils :: JSON-PP :: JSON-XS :: App-SerializeUtils :: JS-JSON :: JSON-ON :: JSON :: JSON-PP :: JSON-SL :: JSON-XS :: App-SerializeUtils :: App-PipeFilter :: App-PipeFilter :: Eve :: Geo-JSON
 ```
