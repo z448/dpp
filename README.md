@@ -1,8 +1,8 @@
 #### wip
 
 #### cypan 
-**CLI tool to build debian packages of perl modules distribution. Has no non-core dependencies, using Metacpan API to create `control` file and to resove dependencies**
 
+CLI tool to build debian packages of perl modules distribution. Has no non-core dependencies, using Metacpan API to create `control` file and to resove dependencies
 
 
 **Install**
