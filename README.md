@@ -15,7 +15,7 @@ using [Carton](https://metacpan.org/pod/Carton)
 carton install
 ```
 
-using 'cpanm' (to get it install App::cpanminus module or `curl -L cpanmin.us > cpanm && chmod +x cpanm` )
+using ['cpanm'](https://metacpan.org/pod/App::cpanminus) (to get it install App::cpanminus module or `curl -LO cpanmin.us > cpanm && chmod +x cpanm` )
 
 ```
 cpanm -Llocal -nq --installdeps .
