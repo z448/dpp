@@ -20,7 +20,7 @@ my $m = get_control($dis_req);
 sub deps {
     my @deps;
      for my $hash(@{$m->{dependency}}){
-         if ($$hash{relationship} eq 'requires'){
+         if ($$hash{phase} eq 'runtime'){
              push @deps, $$hash{module};
      }
  }
