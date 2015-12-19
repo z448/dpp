@@ -40,7 +40,7 @@ JSON :: JSONP :: JSONY :: JSON-T :: App-JSON-to :: App-SerializeUtils :: JSON-PP
 pick one and use ```cypan``` to make debian control file
 
 ```
-cypan JSON-XS
+cypan pusher
  
 JSON CONTROL
 {"Name":"WWW-Pusher-0.0701","Depends":["Test::More","URI","Digest::SHA","Digest::MD5","JSON","Test::Deep","LWP","ExtUtils::MakeMaker"],"Description":"Interface to the Pusher WebSockets API","Version":"0.0701","Package":"libwww-pusher-0.0701-p5","Author":"RIZEN"}
