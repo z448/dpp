@@ -3,9 +3,11 @@
 #### cypan 
 **CLI tool to build debian packages of perl modules distribution. Has no non-core dependencies, using Metacpan API to create `control` file and to resove dependencies**
 
+
+
 **Install**
 
-*To setupt env & download dependencies*
+To setupt env & download dependencies
 
 using [Carton](https://metacpan.org/pod/Carton)
 
