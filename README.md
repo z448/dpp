@@ -1,14 +1,20 @@
+#### wip
+
+#### cypan 
+** CLI tool to build debian packages of perl modules distribution. Has no non-core dependencies, using Metacpan API to create `control` file and to resove dependencies **
+
 **Install**
 
 *To setupt env & download dependencies*
 
-*using [Carton](https://metacpan.org/pod/Carton) and use cpanfile*
+*using [Carton](https://metacpan.org/pod/Carton)*
 
 ```
 carton install
 ```
 
-*using 'cpanm' (App::cpanminus)*
+*using 'cpanm' (to get it install App::cpanminus module or* `curl -L cpanmin.us > cpanm && chmod +x cpanm` ) 
+
 ```
 cpanm -Llocal -nq --installdeps .
 ```
@@ -31,13 +37,13 @@ JSON :: JSONP :: JSONY :: JSON-T :: App-JSON-to :: App-SerializeUtils :: JSON-PP
 
 *pick one and use ```cypan``` to make debian control file*
 
- ```
- cypan JSON-XS
+```
+cypan JSON-XS
  
- JSON CONTROL
- {"Name":"WWW-Pusher-0.0701","Depends":["Test::More","URI","Digest::SHA","Digest::MD5","JSON","Test::Deep","LWP","ExtUtils::MakeMaker"],"Description":"Interface to the Pusher WebSockets API","Version":"0.0701","Package":"libwww-pusher-0.0701-p5","Author":"RIZEN"}
+JSON CONTROL
+{"Name":"WWW-Pusher-0.0701","Depends":["Test::More","URI","Digest::SHA","Digest::MD5","JSON","Test::Deep","LWP","ExtUtils::MakeMaker"],"Description":"Interface to the Pusher WebSockets API","Version":"0.0701","Package":"libwww-pusher-0.0701-p5","Author":"RIZEN"}
 
- DPKG CONTROL
+DPKG CONTROL
 Author: RIZEN
 Package: libwww-pusher-0.0701-p5
 Depends: Test::More URI Digest::SHA Digest::MD5 JSON Test::Deep LWP ExtUtils::MakeMaker
