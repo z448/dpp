@@ -7,19 +7,19 @@
 
 *To setupt env & download dependencies*
 
-*using [Carton](https://metacpan.org/pod/Carton)*
+using [Carton](https://metacpan.org/pod/Carton)
 
 ```
 carton install
 ```
 
-*using 'cpanm' (to get it install App::cpanminus module or* `curl -L cpanmin.us > cpanm && chmod +x cpanm` ) 
+using 'cpanm' (to get it install App::cpanminus module or `curl -L cpanmin.us > cpanm && chmod +x cpanm` )
 
 ```
 cpanm -Llocal -nq --installdeps .
 ```
 
-*using 'curl'*
+using 'curl'
 ```
 . set.env
 load
@@ -27,7 +27,7 @@ load
 
 **Usage**
 
-*use search tool :: to find exact name of distribution*
+use search tool `::` to find exact name of distribution
 
 ```
 :: json
@@ -35,7 +35,7 @@ load
 JSON :: JSONP :: JSONY :: JSON-T :: App-JSON-to :: App-SerializeUtils :: JSON-PP :: JSON-XS :: App-SerializeUtils :: JS-JSON :: JSON-ON :: JSON :: JSON-PP :: JSON-SL :: JSON-XS :: App-SerializeUtils :: App-PipeFilter :: App-PipeFilter :: Eve :: Geo-JSON
 ```
 
-*pick one and use ```cypan``` to make debian control file*
+pick one and use ```cypan``` to make debian control file
 
 ```
 cypan JSON-XS
