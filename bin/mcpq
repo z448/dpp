@@ -1,44 +1,35 @@
- #!/usr/bin/env perl
- #
- use Term::ANSIColor;
- use HTTP::Tiny;
- use JSON::PP;
- use Getopt::Std;
+#!/usr/bin/env perl
+# takes -s <module::name> and returns 21 distribution-names that match pattern
+# use it before build to find exact dist-name 
 
- die "Usage:\n\n\ mcpq <Module::Name>\n\n" unless @ARGV;
- # use >>> http://api.metacpan.org/v0/module/JSON::XS?join=release
- # see API DOCS >>> https://github.com/CPAN-API/cpan-api/blob/master/docs/API-docs.md
+use Term::ANSIColor;
+use HTTP::Tiny;
+use JSON::PP;
+use Getopt::Std;
 
- getopts('ls:', \%opts);
- print $opts{s};
- print $opts{l};
+die "Usage:\n\n\ mcpq -s <Module::Name>\n\n" unless @ARGV;
 
- my $pm_request='http://api.metacpan.org/v0/module/'."$opts{s}".'?join=release';
- print $pm_request;
- my $get_jsonn = HTTP::Tiny->new->get("$pm_request");
- die "Failed!\n" unless $get_jsonn->{success};
- print $mcp_url->{content} if length $mcp_url->{content};
+getopts('s:', \%opts);
 
- my $j=`$jurl$pm_req  2>/dev/null`;
- if ($ARGV[1] eq '-j') { print "$j\n" }
-     else { jparse() }
- sub jparse {
-     my $p=decode_json $j;
-     my $i==1;
-     print ">>Results\n";
-     for my $dist (@$p) {
-         if ($i % 2) {
-             print colored(qq!$$dist{'distribution'}!, q!blue on_black!);
-         } else {
-             print colored(qq!$$dist{'distribution'}!, q!bright_blue on_black!);
-         }
-         print colored(qq!\ \:\:\ !, q!red on_black!);
-         $i++;
-     }
- #    print colored(qq!\n\n>>Use!, q!on_black!);
- #    print colored(qq! -i !, q!white on_black!);
- #    print colored(qq!as a second parameter to build and install module!, q!on_black!);
-     print "\n";
- }
- #print Dumper ($p{'distribution'});
- ~
+my $pm_req='https://metacpan.org/search/autocomplete?q='."$opts{s}";
+my $meta_json = HTTP::Tiny->new->get("$pm_req");
+die "https request failed!\n" unless $meta_json->{success};
+
+_parse($meta_json->{content}) if length $meta_json->{content};
+
+sub _parse {
+    my $j = shift;
+    my $pm = decode_json $j;
+    my $i==1;
+
+    for my $dist (@$pm) {
+        if ($i % 2) {
+            print colored(qq!$$dist{'distribution'}!, q!white on_black!);
+        } else {
+            print colored(qq!$$dist{'distribution'}!, q!bright_white on_black!);
+        }
+        print colored(qq!\ \:\:\ !, q!red on_black!);
+        $i++;
+    }
+    print "\n";
+}
