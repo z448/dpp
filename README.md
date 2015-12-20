@@ -4,6 +4,7 @@
 
 CLI tool to build debian packages of perl modules distribution. Has no non-core dependencies, using Metacpan API to create `control` file and to resove dependencies
 
+![control](https://github.com/z448/pm2deb/lib/control.gif)
 
 **Install**
 
