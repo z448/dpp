@@ -1,2 +1,5 @@
-requires 'JSON::Tiny', '0.54';
+requires 'JSON::Tiny', 'any';
+requires 'JSON::PP', 'any';
+
+
 
