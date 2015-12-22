@@ -16,7 +16,7 @@ BEGIN {
 }
 
 our $control = '';
-my $dist = '';
+my $dist = $ARGV[0];
 my $meta_api_url = '';
 my $meta_json = '';
 my $meta = '';
@@ -30,7 +30,7 @@ my $control_conf = sub {
 my $get_control = sub {
     $dist=shift;
     $meta_api_url='https://api.metacpan.org/v0/release/'."$dist";
-    $meta_json=qx!curl -skL $meta_api_url!;
+    $meta_json=qx!curl -sL $meta_api_url!;
     $meta=decode_json $meta_json;
     return $meta;
 };

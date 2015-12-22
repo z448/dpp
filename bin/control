@@ -56,13 +56,13 @@ sub term_dim { # todo: stty bin check
 sub render {
     my $term=&term_dim;
     #json
-    print "\n".("_"x$term)."\n".colored(['bright_white'],'JSON CONTROL')."\n".("-"x$term).$ctrl_json."\n".("-"x$term)."\n";;
+#    print "\n".("_"x$term)."\n".colored(['bright_white'],'JSON CONTROL')."\n".("-"x$term).$ctrl_json."\n".("-"x$term)."\n";;
 
     
-    print "\n\n\n".("_"x$term)."\n".colored(['bright_white'],'DPKG CONTROL')."\n".("-"x$term)."\n\n";
+#    print "\n\n\n".("_"x$term)."\n".colored(['bright_white'],'DPKG CONTROL')."\n".("-"x$term)."\n\n";
 
     make_control();
-    print "\n\n".("-"x$term)."\n\n\n";
+#    print "\n\n".("-"x$term)."\n\n\n";
 }
 
 $ctrl{Package} = 'lib'.lc $m->{name}.'-p5';

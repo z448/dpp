@@ -10,7 +10,7 @@ $perl_ver = '5.18.2';
 
 #print $cwd;
 #unless($ARGV[0] =~ /.*/){ $dir = '~/cypan-build/usr/local/lib/perl5/lib' }
-unless($ARGV[0] =~ /.*/){ $dir = 'build/usr/local/lib/perl5/lib' }
+$dir = 'build/usr/local/lib/perl5/lib';
 print $dir;
 @files=grep{/packlist/}io->dir('build/usr/local/lib/perl5')->All;
 
@@ -23,7 +23,9 @@ for (@files){
         unless(/build/){ next } else {
         print $_;
         move("build/usr/local/lib/perl5/lib/perl5", "build/usr/local/lib/perl5/lib/".$perl_ver);
-        move("build/usr/local/lib/perl5/lib", "build/usr/local/lib/perl5/site_perl");
+        move("build/usr/local/lib/perl5/lib/".$perl_ver, "build/usr/local/lib/perl5/site_perl");
         }
     }
 }
+
+
