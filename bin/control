@@ -1,9 +1,12 @@
 #!/usr/bin/env perl
 
+use FindBin;
+use lib "$FindBin::Bin/../lib";
 use Term::ANSIColor;
 use Cydia::Control;
 use JSON::Tiny qw(encode_json);
 use feature 'say';
+
 
 my $dis_req;
 my %ctrl;

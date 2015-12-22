@@ -1,26 +1,5 @@
 # carton snapshot format: version 1.0
 DISTRIBUTIONS
-  IO-All-0.86
-    pathname: I/IN/INGY/IO-All-0.86.tar.gz
-    provides:
-      IO::All 0.86
-      IO::All::Base undef
-      IO::All::DBM undef
-      IO::All::Dir undef
-      IO::All::File undef
-      IO::All::Filesys undef
-      IO::All::Link undef
-      IO::All::MLDBM undef
-      IO::All::Pipe undef
-      IO::All::STDIO undef
-      IO::All::Socket undef
-      IO::All::String undef
-      IO::All::Temp undef
-    requirements:
-      Cwd 0
-      ExtUtils::MakeMaker 0
-      Scalar::Util 0
-      perl 5.008001
   JSON-Tiny-0.54
     pathname: D/DA/DAVIDO/JSON-Tiny-0.54.tar.gz
     provides:

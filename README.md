@@ -10,7 +10,12 @@ CLI tool to build debian packages of perl modules distribution. Has no non-core 
 
 To setupt env & download dependencies
 
-using [Carton](https://metacpan.org/pod/Carton)
+```
+. set.env
+setup
+```
+
+use [Carton](https://metacpan.org/pod/Carton)
 
 ```
 carton install
@@ -22,11 +27,6 @@ using [cpanm](https://metacpan.org/pod/App::cpanminus) ( to get it install App::
 cpanm -Llocal -nq --installdeps .
 ```
 
-using 'curl'
-```
-. set.env
-load
-```
 
 **Usage**
 
@@ -54,3 +54,38 @@ Version: 0.0701
 Description: Interface to the Pusher WebSockets API
 Name: WWW-Pusher-0.0701
 ```
+
+**current dir structure**
+.
+|--README.md
+|--bin
+|  |--control
+|  |--control-broken
+|  |--control-fix.pl
+|  |--mcpq
+|  `--mcpq-local-mirror
+|--build
+|  |--DEBIAN
+|  |  `--control
+|  `--usr
+|     `--local
+|        `--lib
+|           `--perl5
+|              `--site_perl
+|--cpanfile
+|--cpanfile.snapshot
+|--docs
+|  |--control.gif
+|  |--deb-control.man
+|  `--deb-control.man.html
+|--lib
+|  `--Cydia
+|     |--Control.pm
+|     |--Deb.pm
+|     |--control-local-mirror.pm
+|     |--control-tmp
+|     |--default_control.pm
+|     |--dir-structure.pl
+|     `--pkg-parser.pm
+|--local
+`--set.env
