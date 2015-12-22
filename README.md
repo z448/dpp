@@ -11,7 +11,7 @@ CLI tool to build debian packages of perl modules distribution. Has no non-core 
 To setupt env & download dependencies
 
 ```
-. set.env
+. env
 setup
 ```
 
