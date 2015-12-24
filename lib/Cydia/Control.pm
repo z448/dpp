@@ -12,10 +12,9 @@ BEGIN {
     require Exporter;
     our $VERSION = 1.00;
     our @ISA = qw(Exporter);
-    our @EXPORT = qw($control get_control);
+    our @EXPORT = qw(get_control);
 }
 
-our $control = '';
 my $dist = $ARGV[0];
 my $meta_api_url = '';
 my $meta_json = '';
@@ -29,16 +28,14 @@ my $control_conf = sub {
 
 my $get_control = sub {
     $dist=shift;
-    $meta_api_url='https://api.metacpan.org/v0/release/'."$dist";
+    $meta_api_url='http://api.metacpan.org/v0/release/'."$dist";
     $meta_json=qx!curl -sL $meta_api_url!;
     $meta=decode_json $meta_json;
-    return $meta;
+    return \$meta;
 };
 
 sub get_control {
-    $dist = shift;
-    $control = $get_control->($dist);
-    return $control;
+    return $get_control->($dist);
 }
 
 1;
