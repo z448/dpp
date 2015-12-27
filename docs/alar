@@ -1,0 +1,9 @@
+#!/bin/bash
+
+
+tar czf ../data.tar.gz [a-z]*
+cd DEBIAN
+tar czf ../../control.tar.gz *
+cd ../..
+echo 2.0 > debian-binary
+ar r mypackage-42.deb debian-binary control.tar.gz data.tar.gz

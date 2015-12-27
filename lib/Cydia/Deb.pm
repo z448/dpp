@@ -6,63 +6,91 @@ package Cydia::Deb;
 #use open qw< :encoding(UTF-8) >;
 #use Cydia::Control qw(get_control);;
 use JSON;
+use Term::ANSIColor;
 use Getopt::Std;
 use File::Copy;
 use Filesys::Tree;
-use File::Path;
+use File::Path qw(make_path remove_tree);
 use Data::Dumper;
-use IO::All;
-use File::Copy;
 
 getopts('m:p:', \%opts);
 
 my $control = sub {
-    $dist=shift;
-    $meta_api_url='http://api.metacpan.org/v0/release/'."$dist";
-    $meta_json=qx!curl -sL $meta_api_url!;
+    $dist = shift;
+    $meta_api_url = 'http://api.metacpan.org/v0/release/'."$dist";
+    $meta_json = qx!curl -sL $meta_api_url!;
     $meta = decode_json $meta_json;
     return $meta;
 };
 
 my $pkg = sub {
-    my $pm = shift; my %b;
-    $b{'control'} = $control->($pm);
-    $b{'path_control'} = 
+    my $pm = shift; 
+    my $cont = $control->($pm);
+
+    my %b;
     $b{'prefix'} = $opts{'p'};
-    $b{'name'} = $b{ prefix }.lc $b{'control'}{'name'};
+    $b{'name'} = $b{ prefix }.lc $$cont{'name'};
     $b{'package'} = $b{'name'};
     $b{'path_cpanm'} = 'build/' . $b{'name'} . '/usr/local/lib/perl5/lib';
     $b{'path_debian'} = 'build/' . $b{'name'} . '/DEBIAN';
     $b{'suffix'} = '.deb';
     $b{'path_control'} = $b{'path_debian'};
     $b{'dpkg_name'} = $b{'name'}.$b{'suffix'};
+    $b{'control'} = \%$cont;
     return \%b;
 };
 
 
 sub meta {
-    my @control = ();
-    my $m = $pkg->($opts{'m'}); 
-    while (($key, $value) = each %$m) {
-        unless( $key eq 'control' ){
-            print $key.' -> '.$value."\n";
-            push @control, $key."\: "."$value";
-        } else {
-            print 'depends'."\:\ ";
-            my @deps = @{$$value{'dependency'}};
+    my $tuff = shift;
+    my @dependency = ();
+    my $meta = $pkg->($tuff);
 
-            for( @deps ){
-                $_->{'module'} =~ s/\:\:/\-/g;
+    
+    my $deps = sub {
+        my $c = shift;
+
+        my $straight_deps = sub {
+            my $all_deps = shift;
+            my @deps = ();
+            for( @{$all_deps} ){
                 if( $_->{phase} eq 'runtime' and $_->{relationship} eq 'requires' ){
-                    unless( $_->{module} eq $deps[$#deps] ){
-                        print $m->{'prefix'}.lc $_->{module}."\,\ ";
-                    } else { print lc $_->{module} };
-                        push @control, $_->{module};
+                    push @deps, lc $meta->{prefix}.$_->{module};
                 }
             }
-            print "\n";
+
+            my $deps_line = "Depends: ";
+            for( @deps ){
+                s/\:\:/\-/g;
+                unless( $_ eq 'perl'){
+                    $deps_line = $deps_line.$_.', ';
+                }
+            }
+            return $deps_line;
+        };
+
+        for( keys %$c ){
+            unless( $_ eq 'dependency' ){
+                print $_.': '.$c->{$_}."\n";
+            } else { 
+                return $straight_deps->( $c->{$_} ).'perl'."\n"; # append perl w/o colon
+            }
         }
+
+    };
+
+    print "\n".colored(['black on_white'], ' DPKG META ' )."\n";
+    for( keys %$meta ){
+        unless( $_ eq 'control' ){
+            print $_.': '.$meta->{"$_"}."\n";
+        } else { print $deps->($meta->{$_}) }
     }
+    make_path( $meta->{path_cpanm}, $meta->{path_debian} );
+    print "Tree has been created for build\n";
+    print `tree build`;
 }
-meta();
+
+
+meta($opts{'m'});
+
 
