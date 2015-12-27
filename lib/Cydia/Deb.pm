@@ -6,107 +6,63 @@ package Cydia::Deb;
 #use open qw< :encoding(UTF-8) >;
 #use Cydia::Control qw(get_control);;
 use JSON;
+use Getopt::Std;
 use File::Copy;
 use Filesys::Tree;
 use File::Path;
-use Getopt::Std;
 use Data::Dumper;
+use IO::All;
+use File::Copy;
 
-getopts('p:m:i:', \%opts);
+getopts('m:p:', \%opts);
 
 my $control = sub {
-    my $dist=shift;
-    $api_url='http://api.metacpan.org/v0/release/'."$dist";
-    $meta_j=qx!curl -sL $api_url!;
-    $m = decode_json $meta_j;
-
-    while (($key, $value) = each %$m) {
-            print $key.' ------> '.$value."\n";
-    }
-
-    print $m->{'author'}.'lalalala'.$$m{'author'}."\n\n\n\n";
-    
-    my $deps = sub {
-        print 'lllllllllllllll'.$m->{'version'};
-        die;
-    };
-    my $deps = sub {
-        my @deps;
-        for my $dep(@{$m->{dependency}}){
-            if ($$dep{relationship} eq 'requires'){
-                push @deps, $$dep{module};
-            }
-        }
-    return \@deps;
-    };
-
-    print '$m->{name} is '.$m->{name}."\n";
-    print '$m{name} is '.$m{name}.'--'."\n";
-    
-    my $c = (
-        'Package' => $key{'name'},
-        'Name' => $m->{name},
-        'Description' => $m->{'abstract'},
-        'Author' => @{$m->{author}},
-        'Version' => $m->{'version'},
-        'Depends' =>  $deps->()
-    );
-return \%c;
-};   #print $c{Depends};
-
-
-my $pkg = sub {
-    my $pm = shift; 
-    #my $ct = $control->($pm);
-     
-    #print $c;
-    my %meta_pkg = (
-        'Prefix' => $opts{'p'},
-        'Name' => $opts{'p'}.'-'.$ct{'name'},
-        'path_dir' => 'build/'.$ct{'name'} . '/usr/local/lib/perl5/lib',
-        'path_debian' => 'build/'.$ct{'Name'}.'/DEBIAN',
-        'Depends' => @{$ct{'Depends'}},
-        'pkg_name' => $opts{'p'}.'-'.lc($ct{'Name'}),
-        'deb_name' => $opts{'p'}.'-'.lc($ct{'Name'})
-    );
-    return \%meta_pkg;
-
-    #$b{'control'} = $control->($pm);
-    #$b{'prefix'} = $opts{'p'};
-    #$b{'name'} = $b{'prefix'}.'-'.lc($b{'control'}{'name'});
-    #$b{'path_dir'} = 'build/' . $b{'name'} . '/usr/local/lib/perl5/lib';
-    #$b{'path_debian'} = 'build/' . $b{'name'} . '/DEBIAN';
-    #$b{'pkg_name'} = $b{'name'};
-    #$b{'deb_name'} = $b{'name'}.'.deb';
-    #return \%b;
+    $dist=shift;
+    $meta_api_url='http://api.metacpan.org/v0/release/'."$dist";
+    $meta_json=qx!curl -sL $meta_api_url!;
+    $meta = decode_json $meta_json;
+    return $meta;
 };
 
-print %{$control->($pm)};
-    
-sub build {
-    my $build = $pkg->($opts{'m'}); 
-    while (($key, $value) = each %$build) {
-            print $key.' -> '.$value."\n";
-    }
-}
+my $pkg = sub {
+    my $pm = shift; my %b;
+    $b{'control'} = $control->($pm);
+    $b{'path_control'} = 
+    $b{'prefix'} = $opts{'p'};
+    $b{'name'} = $b{ prefix }.lc $b{'control'}{'name'};
+    $b{'package'} = $b{'name'};
+    $b{'path_cpanm'} = 'build/' . $b{'name'} . '/usr/local/lib/perl5/lib';
+    $b{'path_debian'} = 'build/' . $b{'name'} . '/DEBIAN';
+    $b{'suffix'} = '.deb';
+    $b{'path_control'} = $b{'path_debian'};
+    $b{'dpkg_name'} = $b{'name'}.$b{'suffix'};
+    return \%b;
+};
 
-&build();
 
-__DATA__
+sub meta {
+    my @control = ();
+    my $m = $pkg->($opts{'m'}); 
     while (($key, $value) = each %$m) {
         unless( $key eq 'control' ){
             print $key.' -> '.$value."\n";
+            push @control, $key."\: "."$value";
         } else {
-            print 'Depends: ';
-            for( @{$$value{'dependency'}} ){
-                s/\:\:/\-/g;
-                if( $_->{phase} eq 'runtime' ){
-                    print $_->{module}."\,\ ";
+            print 'depends'."\:\ ";
+            my @deps = @{$$value{'dependency'}};
+
+            for( @deps ){
+                $_->{'module'} =~ s/\:\:/\-/g;
+                if( $_->{phase} eq 'runtime' and $_->{relationship} eq 'requires' ){
+                    unless( $_->{module} eq $deps[$#deps] ){
+                        print $m->{'prefix'}.lc $_->{module}."\,\ ";
+                    } else { print lc $_->{module} };
+                        push @control, $_->{module};
                 }
             }
             print "\n";
         }
     }
 }
+meta();
 
-build();
