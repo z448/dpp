@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
-# takes -s <module::name> and returns 21 distribution-names that match pattern
-# use it before build to find exact dist-name 
+# takes -s <module::name> as arg and returns 20 distribution-names that match pattern
+# use it before build to find exact dist-name
 
 use Term::ANSIColor;
 use HTTP::Tiny;
@@ -12,10 +12,10 @@ die "Usage:\n\n\ mcpq -s <Module::Name>\n\n" unless @ARGV;
 getopts('s:', \%opts);
 
 my $pm_req='https://metacpan.org/search/autocomplete?q='."$opts{s}";
-my $meta_json = HTTP::Tiny->new->get("$pm_req");
-die "https request failed!\n" unless $meta_json->{success};
+my $meta_json =qx!curl -sL $pm_req!;
+die "https request failed!\n" unless decode_json $meta_json;
 
-_parse($meta_json->{content}) if length $meta_json->{content};
+_parse($meta_json);
 
 sub _parse {
     my $j = shift;
@@ -26,7 +26,7 @@ sub _parse {
         if ($i % 2) {
             print colored(qq!$$dist{'distribution'}!, q!white on_black!);
         } else {
-            print colored(qq!$$dist{'distribution'}!, q!bright_white on_black!);
+            print colored(qq!$$dist{'distribution'}!, q!white on_black!);
         }
         print colored(qq!\ \:\:\ !, q!red on_black!);
         $i++;
