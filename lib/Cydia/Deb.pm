@@ -44,6 +44,8 @@ my $pkg = sub {
 sub meta {
     my $tuff = shift;
     my @dependency = ();
+
+    $tuff =~ s/\:\:/\-/g;
     my $meta = $pkg->($tuff);
 
     
