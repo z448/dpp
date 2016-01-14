@@ -8,14 +8,13 @@ CLI tool to build debian packages of perl modules distribution. Has no non-core 
 
 **Install**
 
-To setupt env & download dependencies
+To setupt env
 
 ```
-. env
-setup
+. set.env
 ```
 
-use [Carton](https://metacpan.org/pod/Carton)
+use [Carton](https://metacpan.org/pod/Carton) to download dependencies
 
 ```
 carton install
