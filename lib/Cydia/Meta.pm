@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-
+#
 package Cydia::Meta;
 use 5.010;
 use warnings;
