@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-#
+
 package Cydia::Meta;
 use 5.010;
 use warnings;
@@ -27,11 +27,12 @@ BEGIN {
 
 my $control = sub {
     my ( $module, $prefix ) = @_;
-    my %m;
     my $metacpan = 'https://metacpan.org/pod/';
     my $meta_url = 'http://api.metacpan.org/v0/module/'."$module".'?join=release';
+    my $graph = 'https://widgets.stratopan.com/wheel?q=';
     my $meta_json = qx!curl -sL $meta_url!;
     my $meta = decode_json $meta_json;
+    my $m = $meta->{release}->{_source};
      
     my $deps = sub {
         my $strings = shift;
@@ -41,30 +42,25 @@ my $control = sub {
     };
 
     my $remote = {
-        Name         => $meta->{release}->{_source}->{name},
-        Version      => $meta->{release}->{_source}->{version},
-        Author       => $meta->{release}->{_source}->{author},
-        Description  => $meta->{release}->{_source}->{abstract}."\n".$meta->{release}->{description},  
+        Name         => $m->{name},
+        Version      => $m->{version},
+        Author       => $m->{author},
+        Description  => $m->{abstract}."\n".$meta->{release}->{description},  
         Homepage     => $metacpan.$meta->{module}[0]->{name},
-        Depends      => $deps->($meta->{release}->{_source}->{metadata}->{prereqs}->{runtime}->{requires}),
+        Depends      => $deps->($m->{metadata}->{prereqs}->{runtime}->{requires}),
         module_name  => $meta->{module}[0]->{name},
         release_date => $meta->{date},
-        source_url   => $meta->{release}->{_source}->{download_url},
+        source_url   => $m->{download_url},
+        deps_graph   => $graph.$m->{name}, #Moose-2.1205
         #pod         => $meta->{pod},
+        prefix       => $prefix,
+        package      => $prefix . lc $m->{name},
+        build_path   => 'build/' . $m->{name} . '/usr/local/lib/perl5/lib',
+        control_path => 'build/' . $m->{name} . '/DEBIAN/control',
+        deb_name     => $m->{name} . '.deb',
     };
 
-    my $local = {
-        prefix => $prefix,
-        package => $prefix . lc $remote->{Name},
-        build_path => 'build/' . $remote->{Name} . '/usr/local/lib/perl5/lib',
-        control_path => 'build/' . $remote->{Name} . '/DEBIAN/control',
-        deb_name => $remote->{Name} . '.deb',
-    };
-
-    $m{remote} = $remote;
-    $m{local} = $local;
-
-    return \%m;
+    return $remote;
 
 
 };
@@ -90,6 +86,9 @@ sub meta_pm {
     #my $c = $control->($ARGV[0]);
     my $meta = $control->(@ARGV);
     p $meta;
+    my $open = 'open_chrome_single_window.sh';
+    my $deps_graph=system("$open $meta->{deps_graph} &2>1 /dev/null");
+    #qx!$deps_graph!;
     #for( keys %$c ){
     #    say $_.' -> '.$c->{ $_ };
     #}
@@ -101,4 +100,3 @@ sub meta_pm {
 }
 
 meta_pm();
-
