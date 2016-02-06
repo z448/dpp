@@ -1,0 +1,49 @@
+#!/usr/bin/env perl
+
+use 5.010;
+use Net::OpenSSH;
+use Term::ANSIColor;
+
+my @hosts = qw( root@10.0.0.33 z8@10.0.0.36 z@10.0.0.35 );
+my $pm = $ARGV[0];
+my $cypm_base_path;
+# my $cmd = qq!bash -c 'source ~/.cypm && cpan $pm'!;
+
+# make final path
+# my $p5v = '5.14.4'; #tmp
+# mkdir "_build_/$this_pm_dir".'/usr/local/lib/perl5/site_perl/'.$p5v;
+# mv bin usr/local/;
+# mv lib/* usr/local/lib/perl5/site_perl/5.14.4;
+
+
+my $pm_string = sub {
+    my $m = lc $ARGV[0];
+    $m =~s/\:\:/\-/g;
+    return $m;
+};
+
+my $this_pm_dir = &$pm_string;
+
+unless ( $ARGV[1] ){
+    $cypm_base_path = '$HOME/';
+} else { $cypm_base_path = '$HOME/'.$ARGV[1] }
+
+my $cmd = q!source ~/.cypm && which cpanm && cpanm -L !.$cypm_base_path.'_build_/'.$this_pm_dir.'/'.'usr/local '.$pm;
+
+
+# parallel test; uncoment below and tail /tmp/out-$host.txt on local host
+#my $cmd = 'for i in `seq 1 20`;do echo $i;sleep 3;done';
+
+# say info where is command running; put command string into separate line
+say "\nrunning:"; print colored( "$cmd\n", 'blue' ); say "on: @hosts ".$this_pm_dir;
+
+
+my %conn = map { $_ => Net::OpenSSH->new($_, async => 1) } @hosts;
+my @pid;
+for my $host (@hosts) {
+    open my($fh), '>', "/tmp/out-$host.txt"
+      or die "unable to create file: $!";
+    push @pid, $conn{$host}->spawn({stdout_fh => $fh}, $cmd);
+}
+
+waitpid($_, 0) for @pid;

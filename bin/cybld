@@ -1,0 +1,76 @@
+#!/usr/bin/env perl
+
+use v5.10;
+use warnings;
+use strict;
+
+use File::Find;
+use Term::ANSIColor;
+use Data::Printer;
+use UUID::Tiny ':std';
+use Archive::Ar;
+
+my @directories = ();
+
+unless( $ARGV[0] ){
+    push @directories, '_build_';
+} else {
+    push @directories, $ARGV[0];
+}
+
+my $current_dir = '_build_';
+my @dir_content = ();
+my $packlist = '.packlist';
+my @packlist = ();
+my %found;
+
+find(\&wanted, @directories );
+
+sub wanted {
+    if ( $_ eq $packlist ){
+        push @packlist, "$File::Find::dir/$_";
+    }
+}
+
+
+my $make_paths = sub {
+    my( @build_path, @ignored_system_path, @build_path_new) = (); 
+    for my $packlist( @packlist ){
+        my @current_build_path = ();
+        open my $fh, $packlist or say "Could not open $packlist: $!";
+
+        while( my $line = <$fh>)  {   
+            chomp( $line );
+            if( $line =~ /\_build\_/ ){
+                say "$line added to pack queue" and  push @current_build_path, $line;    
+                push @build_path, $line;
+                #$line =~ s#(_build_/.*?/)((lib|bin).*)#$1usr/local/$2#;   
+                #say "line changed to $line" and push @build_path_new,$line;
+                } else { 
+                    say "ignoring system path $line" and push @ignored_system_path, $line;
+                }
+            }
+        close $fh;
+            my $ar = Archive::Ar->new;
+            my $uuid = create_uuid_as_string(UUID_V1).'.ar';
+            $ar->add_files(@current_build_path);
+            my $archive = $ar->write("$uuid");
+            unless( $archive ){
+                say "something went wrong while building $uuid" and die $!;
+            } else {
+                say "$uuid build successful";
+            }
+    }
+
+    my $path = {
+        build_orig => \@build_path,
+        build_new => \@build_path_new,
+        ignored_sys => \@ignored_system_path,
+    };
+    return $path;
+};
+
+my $paths = &$make_paths;
+p($paths);
+
+#print $path
