@@ -26,7 +26,7 @@ my $this_pm_dir = &$pm_string;
 
 unless ( $ARGV[1] ){
     $cypm_base_path = '$HOME/';
-} else { $cypm_base_path = '$HOME/'.$ARGV[1] }
+} else { $cypm_base_path = '$HOME/'.$ARGV[1].'/' }
 
 my $cmd = q!source ~/.cypm && which cpanm && cpanm -L !.$cypm_base_path.'_build_/'.$this_pm_dir.'/'.'usr/local '.$pm;
 
