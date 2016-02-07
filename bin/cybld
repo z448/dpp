@@ -4,7 +4,7 @@ use v5.10;
 use warnings;
 use strict;
 
-#use File::Find;
+use File::Find;
 use File::Copy;
 use File::Path qw/make_path/;
 use Term::ANSIColor;
@@ -14,8 +14,7 @@ use Archive::Ar;
 use Archive::Tar;
 
 my @directories = ( './');
-my @packlist = ();
-my @packlist2 = ();
+my @packlist_orig;
 my $p5_version = sub {
      my @v5 = qx|perl -v|;
      for( @v5 ){
@@ -23,66 +22,81 @@ my $p5_version = sub {
 };
 my $p5v = &$p5_version;
 
-#find(\&wanted, @directories );
 
 #move( "usr/local/bin/perl5/man", "usr/local/" );
 move( "usr/local/lib/perl5/bin", "usr/local/bin" );
-move( "bin", "usr/local/bin" );
+#move( "bin", "usr/local/bin" );
 move( "usr/local/lib/perl5/bin", "usr/local" );
 move( "usr/local/lib/perl5/lib/perl5", 'usr/local/lib/perl5/lib/'.$p5v );
 move( "usr/local/lib/perl5/lib", "usr/local/lib/perl5/site_perl" );
-push @packlist, `find .`;
-for( @packlist ){ chomp( $_ ); push @packlist2, $_ }
-#sub wanted { push @packlist, "$File::Find::dir/$_" }
+#push @packlist, `find .`;
+#for( @packlist ){ chomp( $_ ); push @packlist2, $_ }
         
+
+
+sub wanted { 
+    if ( $_ eq '.packlist'){
+        chomp;
+        push @packlist_orig, "$File::Find::dir/$_";
+    }
+    return \@packlist_orig
+}
+find(\&wanted, @directories );
+
+say @packlist_orig; 
 
 
 my $archive_pack_ = sub {
     my $p = shift;
+    say "received @$p \n";
     my $uuid = create_uuid_as_string(UUID_V1);
     #my $packline = sub { for( @$p ){ $stf = $stf.', '.$_ }; print "$stf" };
 
     my $pkg = {
-        content =>  $p,
-        path    =>  './',
-        tgz     =>  './data.tar.gz',
-        deb     =>  "./$uuid".'.deb',
+        tgz     =>  'data.tar.gz',
+        deb     =>  "$uuid".'.deb',
     };
 
-    my $ar = Archive::Ar->new;
-    my $tar = Archive::Tar->new;
 
-    say "packing \-\-\>\t ";
+    say "packing \-\-\>\n ";
 #.$pkg->{content};
-    
+    print "printing @$p";
+    my $tar = Archive::Tar->new;
     $tar->add_files( @$p );
-    $tar->write( $pkg->{tgz} );
-    $ar->add_files( $pkg->{tgz} );
-    $ar->write( $pkg->{deb} );
+    $tar->write( 'data.tar.gz' );
+    my $ar = Archive::Ar->new;
+    $ar->add_files( 'data.tar.gz' );
+    $ar->write( "$uuid" );
+    unlink ('data.tar.gz');
 
-    print "\tdone\n\tremoving \-\-\>\t".p( @$p );
-    #unlink( @$p );
+    unlink @$p and print "done.\n\tremoving ".p( @$p );
 };
 
 my $pack_list_ = sub {
-    my $packlist = shift;
-    my @packlist = ();
-
-    for my $packlist( @$packlist ){
+    my $pck = shift;
+    for my $packlist( @$pck ){
         my @pack = ();
 
-        open my $fh, $packlist or say "Could not open $packlist: $!";
+        open( my $fh, $packlist );
+        while(<$fh>){
+            chomp;
+            s/(.*?\.cypm\/)(.*)/$2/; 
+            s/(usr\/local\/lib\/perl5\/)(lib\/perl5)(.*)/$1site_perl\/$p5v$3/;
+            s/(usr\/local\/)(lib\/perl5\/bin)(.*)/$1bin$3/;
+            s/(usr\/local\/)(lib\/perl5\/man)(.*)/$1man$3/;
+            push @pack, $_ unless /^\// and say "adding into packlist $_";
 
-        while( my $line = <$fh>)  {   
-            chomp( $line );
-            push @pack, $line;
-        }
+            #usr/local/lib/perl5/bin/perltidy
+            #usr/local/lib/perl5/lib/perl5/Perl/Tidy.pm
+            #usr/local/lib/perl5/lib/perl5/Perl/Tidy.pod
+
+        }; say 'packlist sepatated';
+        $archive_pack_->( \@pack );
         close $fh;
     }
 };
 
-my $arch = $archive_pack_->( \@packlist2 );
-#my $paths = $pack_list_->(\@packlist2);
-p($arch);
+#my $arch = $archive_pack_->( \@packlist2 );
+$pack_list_->(\@packlist_orig);
 
 #print $path
