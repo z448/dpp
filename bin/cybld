@@ -4,73 +4,85 @@ use v5.10;
 use warnings;
 use strict;
 
-use File::Find;
+#use File::Find;
+use File::Copy;
+use File::Path qw/make_path/;
 use Term::ANSIColor;
 use Data::Printer;
 use UUID::Tiny ':std';
 use Archive::Ar;
+use Archive::Tar;
 
-my @directories = ();
-
-unless( $ARGV[0] ){
-    push @directories, '_build_';
-} else {
-    push @directories, $ARGV[0];
-}
-
-my $current_dir = '_build_';
-my @dir_content = ();
-my $packlist = '.packlist';
+my @directories = ( './');
 my @packlist = ();
-my %found;
+my @packlist2 = ();
+my $p5_version = sub {
+     my @v5 = qx|perl -v|;
+     for( @v5 ){
+         if( /\(v5/ ){ s/(.*?\(v)(5.*?)\)(.*)/$1$2/; return $2 and last; }}
+};
+my $p5v = &$p5_version;
 
-find(\&wanted, @directories );
+#find(\&wanted, @directories );
 
-sub wanted {
-    if ( $_ eq $packlist ){
-        push @packlist, "$File::Find::dir/$_";
-    }
-}
+#move( "usr/local/bin/perl5/man", "usr/local/" );
+move( "usr/local/lib/perl5/bin", "usr/local/bin" );
+move( "bin", "usr/local/bin" );
+move( "usr/local/lib/perl5/bin", "usr/local" );
+move( "usr/local/lib/perl5/lib/perl5", 'usr/local/lib/perl5/lib/'.$p5v );
+move( "usr/local/lib/perl5/lib", "usr/local/lib/perl5/site_perl" );
+push @packlist, `find .`;
+for( @packlist ){ chomp( $_ ); push @packlist2, $_ }
+#sub wanted { push @packlist, "$File::Find::dir/$_" }
+        
 
 
-my $make_paths = sub {
-    my( @build_path, @ignored_system_path, @build_path_new) = (); 
-    for my $packlist( @packlist ){
-        my @current_build_path = ();
+my $archive_pack_ = sub {
+    my $p = shift;
+    my $uuid = create_uuid_as_string(UUID_V1);
+    #my $packline = sub { for( @$p ){ $stf = $stf.', '.$_ }; print "$stf" };
+
+    my $pkg = {
+        content =>  $p,
+        path    =>  './',
+        tgz     =>  './data.tar.gz',
+        deb     =>  "./$uuid".'.deb',
+    };
+
+    my $ar = Archive::Ar->new;
+    my $tar = Archive::Tar->new;
+
+    say "packing \-\-\>\t ";
+#.$pkg->{content};
+    
+    $tar->add_files( @$p );
+    $tar->write( $pkg->{tgz} );
+    $ar->add_files( $pkg->{tgz} );
+    $ar->write( $pkg->{deb} );
+
+    print "\tdone\n\tremoving \-\-\>\t".p( @$p );
+    #unlink( @$p );
+};
+
+my $pack_list_ = sub {
+    my $packlist = shift;
+    my @packlist = ();
+
+    for my $packlist( @$packlist ){
+        my @pack = ();
+
         open my $fh, $packlist or say "Could not open $packlist: $!";
 
         while( my $line = <$fh>)  {   
             chomp( $line );
-            if( $line =~ /\_build\_/ ){
-                say "$line added to pack queue" and  push @current_build_path, $line;    
-                push @build_path, $line;
-                #$line =~ s#(_build_/.*?/)((lib|bin).*)#$1usr/local/$2#;   
-                #say "line changed to $line" and push @build_path_new,$line;
-                } else { 
-                    say "ignoring system path $line" and push @ignored_system_path, $line;
-                }
-            }
+            push @pack, $line;
+        }
         close $fh;
-            my $ar = Archive::Ar->new;
-            my $uuid = create_uuid_as_string(UUID_V1).'.ar';
-            $ar->add_files(@current_build_path);
-            my $archive = $ar->write("$uuid");
-            unless( $archive ){
-                say "something went wrong while building $uuid" and die $!;
-            } else {
-                say "$uuid build successful";
-            }
     }
-
-    my $path = {
-        build_orig => \@build_path,
-        build_new => \@build_path_new,
-        ignored_sys => \@ignored_system_path,
-    };
-    return $path;
 };
 
-my $paths = &$make_paths;
-p($paths);
+my $arch = $archive_pack_->( \@packlist2 );
+#my $paths = $pack_list_->(\@packlist2);
+p($arch);
 
 #print $path
