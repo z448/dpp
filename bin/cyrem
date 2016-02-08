@@ -6,6 +6,8 @@ use Term::ANSIColor;
 
 my @hosts = qw( root@10.0.0.33 z8@10.0.0.36 z@10.0.0.35 );
 my $pm = $ARGV[0];
+my $pm_folder = lc $pm;
+$pm_folder =~ s/\:\:/\-/;
 # my $cmd = qq!bash -c 'source ~/.cypm && cpan $pm'!;
 
 # make final path
@@ -15,9 +17,9 @@ my $pm = $ARGV[0];
 # mv lib/* usr/local/lib/perl5/site_perl/5.14.4;
 
 
-my $cypm_base_path = '~/.cypm/usr/local/lib/perl5';
+my $cypm_base_path = "~/.cypm/$pm_folder/usr/local/lib/perl5";
 #my $cmd = q!source ~/.cypm.cfg && which cpanm && cpanm -L !.$cypm_base_path.'/usr/local '.$pm;
-my $cmd = q!source ~/.cypm.env && which cpanm && cpanm -L !.$cypm_base_path.' '.$pm;
+my $cmd = "source ~/.cypm.env && cpanm -l $cypm_base_path $pm";
 
 
 # parallel test; uncoment below and tail /tmp/out-$host.txt on local host
