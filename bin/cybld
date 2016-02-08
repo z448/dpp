@@ -22,12 +22,11 @@ my $p5_version = sub {
 };
 my $p5v = &$p5_version;
 
-
 #move( "usr/local/bin/perl5/man", "usr/local/" );
 move( "usr/local/lib/perl5/bin", "usr/local/bin" );
 #move( "bin", "usr/local/bin" );
 move( "usr/local/lib/perl5/bin", "usr/local" );
-move( "usr/local/lib/perl5/lib/perl5", 'usr/local/lib/perl5/lib/'.$p5v );
+move( "usr/local/lib/perl5/lib/perl5", "usr/local/lib/perl5/lib/".$p5v );
 move( "usr/local/lib/perl5/lib", "usr/local/lib/perl5/site_perl" );
 #push @packlist, `find .`;
 #for( @packlist ){ chomp( $_ ); push @packlist2, $_ }
@@ -45,6 +44,21 @@ find(\&wanted, @directories );
 
 say @packlist_orig; 
 
+
+sub dpkg { 
+    my $pm = shift;
+    my $ar = <<"_DEB";
+    tar czf ../data.tar.gz [a-z]*;
+    cd DEBIAN/;
+    tar czf ../../control.tar.gz *;
+    cd ../..;
+    echo 2.0 > debian-binary;
+    /var/root/perlpowertools/bin/ar r $pm.deb debian-binary control.tar.gz data.tar.gz;
+_DEB
+    my $dpkg_deb = system("$ar");
+    say "dpkg_deb status: $dpkg_deb";
+    $dpkg_deb;
+}
 
 my $archive_pack_ = sub {
     my $p = shift;
@@ -64,12 +78,17 @@ my $archive_pack_ = sub {
     my $tar = Archive::Tar->new;
     $tar->add_files( @$p );
     $tar->write( 'data.tar.gz' );
-    my $ar = Archive::Ar->new;
-    $ar->add_files( 'data.tar.gz' );
-    $ar->write( "$uuid" );
-    unlink ('data.tar.gz');
+    system("rm -r usr");
+    $tar->extract();
+    system("rm data.tar.gz");   
+    #my $ar = Archive::Ar->new;
+    #$ar->add_files( 'data.tar.gz' );
+    #$ar->write( "$uuid" );
+#DEBIAN/control debian-binary
+    #unlink ('data.tar.gz');
 
-    unlink @$p and print "done.\n\tremoving ".p( @$p );
+    #unlink @$p and print "done.\n\tremoving ".p( @$p );
+    dpkg($ARGV[0]);
 };
 
 my $pack_list_ = sub {
@@ -80,12 +99,12 @@ my $pack_list_ = sub {
         open( my $fh, $packlist );
         while(<$fh>){
             chomp;
-            s/(.*?\.cypm\/)(.*)/$2/; 
+            s/(.*?\.cypm\/.*?\/)(.*)/$2/; 
             s/(usr\/local\/lib\/perl5\/)(lib\/perl5)(.*)/$1site_perl\/$p5v$3/;
             s/(usr\/local\/)(lib\/perl5\/bin)(.*)/$1bin$3/;
             s/(usr\/local\/)(lib\/perl5\/man)(.*)/$1man$3/;
             push @pack, $_ unless /^\// and say "adding into packlist $_";
-
+            
             #usr/local/lib/perl5/bin/perltidy
             #usr/local/lib/perl5/lib/perl5/Perl/Tidy.pm
             #usr/local/lib/perl5/lib/perl5/Perl/Tidy.pod
@@ -95,6 +114,11 @@ my $pack_list_ = sub {
         close $fh;
     }
 };
+
+
+
+    
+
 
 #my $arch = $archive_pack_->( \@packlist2 );
 $pack_list_->(\@packlist_orig);
