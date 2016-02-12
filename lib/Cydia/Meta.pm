@@ -84,10 +84,11 @@ my $control = sub {
 
 sub meta_pm {
     #my $c = $control->($ARGV[0]);
-    my $meta = $control->(@ARGV);
-    p $meta;
     my $open = 'open_chrome_single_window.sh';
-    my $deps_graph=system("$open $meta->{deps_graph} &2>1 /dev/null");
+    my $meta = $control->(@ARGV);
+    system("clear");
+    p $meta;
+    my $deps_graph=system("$open $meta->{deps_graph} 2>&1 /dev/null");
     #qx!$deps_graph!;
     #for( keys %$c ){
     #    say $_.' -> '.$c->{ $_ };

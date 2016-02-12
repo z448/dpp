@@ -18,8 +18,8 @@ $pm_folder =~ s/\:\:/\-/g;
 
 
 my $cypm_base_path = "~/.cypm/$pm_folder/usr/local/lib/perl5";
-#my $cmd = q!source ~/.cypm.cfg && which cpanm && cpanm -L !.$cypm_base_path.'/usr/local '.$pm;
-my $cmd = "source ~/.cypm.env && cpanm --reinstall -l $cypm_base_path $pm";
+#my $cmd = q!source ~/.cypm.cfg && which cpanm && cpanm -l !.$cypm_base_path.'/usr/local '.$pm;
+my $cmd = "source ~/.cypm.env && cpanm --reinstall -L $cypm_base_path $pm";
 
 
 # parallel test; uncoment below and tail /tmp/out-$host.txt on local host
