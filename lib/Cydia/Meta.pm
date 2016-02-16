@@ -26,7 +26,7 @@ BEGIN {
 }
 
 my $meta = sub {
-    my ( $module, $prefix ) = @_;
+    my ( $module ) = @_;
     my $metacpan = 'https://metacpan.org/pod/';
     my $meta_url = 'http://api.metacpan.org/v0/module/'."$module".'?join=release';
     my $graph = 'https://widgets.stratopan.com/wheel?q=';
@@ -34,6 +34,7 @@ my $meta = sub {
 #    print $meta_j;
     my $meta_p = decode_json $meta_j;
     my $m = $meta_p->{release}->{_source};
+    my $prefix = 'lib';
      
     #my $deps = sub {
     #    my $strings = shift;
@@ -43,7 +44,7 @@ my $meta = sub {
     #};
 
     my $remote = {
-        Name         => $m->{distribution} . '-perl5',
+        Name         => $m->{distribution},
         Version      => $m->{version},
         Author       => $m->{author},
         Section      => 'Perl',
@@ -86,29 +87,46 @@ my $meta = sub {
     #
     
 sub control {
-    my $pm = shift; my $px = shift;;
-    my $m = $meta->($pm, $px);
-    p $m;
+    my $pm = shift;
+    my $m = $meta->($pm);
+    my @d = keys %{$m->{deps}};
 
-    print colored(["black on_white"], 'CONTROL')."\n";
-    my @c = qw( Name Version Author Package Section Maintainer Homepage Description);
-    for( @c ){
-        print $_.': '.$m->{$_}."\n";
-    }
+    print colored(["black on_white"], "CONTROL: $pm")."\n";
 
-    print "Depends: ";
-    my @deps = keys %{$m->{deps}};
-    for( @deps ){ 
-        s/\:\:/\-/g;
-        unless( $_ eq $deps[$#deps] ){
-            print "$px".lc $_.'-p5, ';
-        } else { print "$px".lc $_.'-p5, perl5'."\n" }
-    }
+        my @c = qw( Name Version Author Package Section Maintainer Homepage Description);
+        my $c = '';
 
+        for( @c ){
+            $c = $c . $_.': '.$m->{$_}."\n";
+        }
+
+        my $dep = "Depends: ";
+
+        for( @d ){ 
+            s/\:\:/\-/g;
+            if( /^perl$/ ){ next }
+            unless( $_ eq $d[$#d] ){
+                $dep = "$dep".lc $_.'-p5, ';
+            } else { 
+                $dep = "$dep".lc $_.'-p5, perl5'."\n" }
+        }
+        $c = $c.$dep; 
+        return $c;
 }
 
-control(@ARGV);
+sub queue_control {
+     my $pm = shift;
+     my $m = $meta->($pm);
+     my @q = keys %{$m->{deps}};
+     return \@q;
+}
 
+print "Queueing library dependencies:\n".@{queue_control(@ARGV)};
+
+for( @{queue_control(@ARGV)} ){
+        print "Generating control for $_ \n";
+        print control($_)."\n";
+}
 __DATA__
 
 Name Version Author Package Depends Section Maintainer Homepage Description   
