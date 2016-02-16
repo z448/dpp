@@ -22,33 +22,36 @@ my $p5_version = sub {
 };
 my $p5v = &$p5_version;
 
-#move( "usr/local/bin/perl5/man", "usr/local/" );
+move( "usr/local/lib/perl5/man", "usr/local/man" );
 move( "usr/local/lib/perl5/bin", "usr/local/bin" );
+#move( "usr/local/lib/perl5/man", "usr/local/man" );
 #move( "bin", "usr/local/bin" );
-move( "usr/local/lib/perl5/bin", "usr/local" );
+#move( "usr/local/lib/perl5/bin", "usr/local" );
 move( "usr/local/lib/perl5/lib/perl5", "usr/local/lib/perl5/lib/".$p5v );
 move( "usr/local/lib/perl5/lib", "usr/local/lib/perl5/site_perl" );
+unlink("usr/local/lib/perl5/lib/perl5/arm-iphoneos-2level/auto/ExtUtils/MakeMaker/.packlist");
 #push @packlist, `find .`;
 #for( @packlist ){ chomp( $_ ); push @packlist2, $_ }
         
 
 
 sub wanted { 
-    if ( $_ eq '.packlist'){
+    if ( $_ eq '.packlist' ){
         chomp;
         push @packlist_orig, "$File::Find::dir/$_";
     }
-    return \@packlist_orig
+    return \@packlist_orig 
 }
 find(\&wanted, @directories );
 
+say "original packlist";
 say @packlist_orig; 
 
+#tar czf ../data.tar.gz [a-z]*;
 
 sub dpkg { 
     my $pm = shift;
     my $ar = <<"_DEB";
-    tar czf ../data.tar.gz [a-z]*;
     cd DEBIAN/;
     tar czf ../../control.tar.gz *;
     cd ../..;
@@ -62,33 +65,21 @@ _DEB
 
 my $archive_pack_ = sub {
     my $p = shift;
+    say "packlist $p";
     say "received @$p \n";
-    my $uuid = create_uuid_as_string(UUID_V1);
-    #my $packline = sub { for( @$p ){ $stf = $stf.', '.$_ }; print "$stf" };
+    
 
-    my $pkg = {
-        tgz     =>  'data.tar.gz',
-        deb     =>  "$uuid".'.deb',
-    };
-
-
-    say "packing \-\-\>\n ";
-#.$pkg->{content};
-    print "printing @$p";
     my $tar = Archive::Tar->new;
     $tar->add_files( @$p );
-    $tar->write( 'data.tar.gz' );
-    system("rm -r usr");
-    $tar->extract();
-    system("rm data.tar.gz");   
-    #my $ar = Archive::Ar->new;
-    #$ar->add_files( 'data.tar.gz' );
-    #$ar->write( "$uuid" );
-#DEBIAN/control debian-binary
-    #unlink ('data.tar.gz');
-
-    #unlink @$p and print "done.\n\tremoving ".p( @$p );
+    my $data = "../data.tar.gz";
+    $tar->write( $data, COMPRESS_GZIP );
+    system("mv usr ../");
+    #$tar->extract(@$p);
+    #$tar->write( $data );
     dpkg($ARGV[0]);
+    system("rm -r usr");
+    #system("mv ../usr .");
+
 };
 
 my $pack_list_ = sub {
@@ -110,8 +101,8 @@ my $pack_list_ = sub {
             #usr/local/lib/perl5/lib/perl5/Perl/Tidy.pod
 
         }; say 'packlist sepatated';
-        $archive_pack_->( \@pack );
         close $fh;
+        $archive_pack_->( \@pack );
     }
 };
 

@@ -1,0 +1,20 @@
+#!/bin/bash
+
+. ~/.cypm/.env
+
+if [ "$1" = "-d" ]; then
+    perl -E 'push @l,qx!find . | grep packlist > pack.list!; qx!tar -zcvf packlists.tgz -T pack.list!;'
+    mv pack* '../packlist'
+    cd '../packlist'
+    tar -xvf "packlists.tgz"
+    cd ../pool
+    echo "leaving packlist"
+    find . | grep packlist | grep -v $2
+    find . | grep packlist | grep -v $2 > p
+    while read i;do rm $i;done < p
+    rm p
+else
+    find . | grep packlist 
+fi
+
+
