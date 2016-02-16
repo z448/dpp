@@ -31,7 +31,7 @@ my $meta = sub {
     my $meta_url = 'http://api.metacpan.org/v0/module/'."$module".'?join=release';
     my $graph = 'https://widgets.stratopan.com/wheel?q=';
     my $meta_j = qx!curl -sL $meta_url!;
-    print $meta_j;
+#    print $meta_j;
     my $meta_p = decode_json $meta_j;
     my $m = $meta_p->{release}->{_source};
     my $prefix = 'lib';
@@ -48,8 +48,9 @@ my $meta = sub {
         Version      => $m->{version},
         Author       => $m->{author},
         Section      => 'Perl',
-        #Description  => $m->{abstract},
-        Description  => $m->{abstract}."\n".$meta_p->{description},  
+        Description  => $m->{abstract},
+        #Description  => $m->{abstract}.$meta_p->{description},  
+        description  => do { if( $meta_p->{description}){ return $meta_p->{description} }},
         Homepage     => $metacpan.$meta_p->{module}[0]->{name},
         Maintainer   => 'z8',
         #Depends      => $deps->($m->{metadata}->{prereqs}->{runtime}->{requires}),
@@ -88,12 +89,12 @@ my $meta = sub {
     
 sub control {
     my $pm = shift;
-    my $m = $meta->($pm);
-    my @d = keys %{$m->{deps}};
+    my $m = $meta->("$pm");
+    my @d = keys %{"$m->{deps}"};
 
-    print colored(["black on_white"], "CONTROL: $pm")."\n";
+    #print colored(["black on_white"], "CONTROL: $pm")."\n";
 
-        my @c = qw( Name Version Author Package Section Maintainer Homepage Description);
+        my @c = qw( Name Version Author Package Section Maintainer Homepage Description );
         my $c = '';
 
         for( @c ){
@@ -111,6 +112,9 @@ sub control {
                 $dep = "$dep".lc $_.'-p5, perl5'."\n" }
         }
         $c = $c.$dep; 
+
+        if( $m->{description} ){ $c = $c.$m->{description} }
+
         return $c;
 }
 
@@ -121,14 +125,14 @@ sub queue_control {
      return \@q;
 }
 
-print "Queueing library dependencies:\n".@{queue_control(@ARGV)};
+#print "Queueing library dependencies:\n".@{queue_control(@ARGV)};
 
 #for( @{queue_control(@ARGV)} ){
 #        print "Generating control for $_ \n";
 #        print control($_)."\n";
 #}
 
-print control(@ARGV)."\n";
+print control(@ARGV);
 __DATA__
 
 Name Version Author Package Depends Section Maintainer Homepage Description   
