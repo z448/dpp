@@ -22,42 +22,47 @@ BEGIN {
     require Exporter;
     our $VERSION = 0.01;
     our @ISA = qw(Exporter);
-    our @EXPORT = qw( meta );
+    our @EXPORT = qw( control );
 }
 
-my $control = sub {
+my $meta = sub {
     my ( $module, $prefix ) = @_;
     my $metacpan = 'https://metacpan.org/pod/';
     my $meta_url = 'http://api.metacpan.org/v0/module/'."$module".'?join=release';
     my $graph = 'https://widgets.stratopan.com/wheel?q=';
-    my $meta_json = qx!curl -sL $meta_url!;
-    my $meta = decode_json $meta_json;
-    my $m = $meta->{release}->{_source};
+    my $meta_j = qx!curl -sL $meta_url!;
+#    print $meta_j;
+    my $meta_p = decode_json $meta_j;
+    my $m = $meta_p->{release}->{_source};
      
-    my $deps = sub {
-        my $strings = shift;
-        my @d = ();
-        for( keys %$strings ){ push @d, "$_"."\,\ " } 
-        return \@d;
-    };
+    #my $deps = sub {
+    #    my $strings = shift;
+    #    my @d = ();
+    #    for( keys %$strings ){ push @d, "$_"."\,\ " } 
+    #    return \@d;
+    #};
 
     my $remote = {
-        Name         => $m->{name},
+        Name         => $m->{distribution} . '-perl5',
         Version      => $m->{version},
         Author       => $m->{author},
-        Description  => $m->{abstract}."\n".$meta->{release}->{description},  
-        Homepage     => $metacpan.$meta->{module}[0]->{name},
-        Depends      => $deps->($m->{metadata}->{prereqs}->{runtime}->{requires}),
-        module_name  => $meta->{module}[0]->{name},
-        release_date => $meta->{date},
+        Section      => 'Perl',
+        Description  => $m->{abstract},
+        #Description  => $m->{abstract}."\n".$m->{release}->{description},  
+        Homepage     => $metacpan.$meta_p->{module}[0]->{name},
+        Maintainer   => 'z8',
+        #Depends      => $deps->($m->{metadata}->{prereqs}->{runtime}->{requires}),
+        deps         => $m->{metadata}->{prereqs}->{runtime}->{requires},
+        module_name  => $meta_p->{module}[0]->{name},
+        release_date => $meta_p->{date},
         source_url   => $m->{download_url},
         deps_graph   => $graph.$m->{name}, #Moose-2.1205
-        #pod         => $meta->{pod},
+        #pod         => $meta_p->{pod},
         prefix       => $prefix,
-        package      => $prefix . lc $m->{name},
+        Package      => $prefix . lc $m->{distribution} . '-p5',
         build_path   => 'build/' . $m->{name} . '/usr/local/lib/perl5/lib',
         control_path => 'build/' . $m->{name} . '/DEBIAN/control',
-        deb_name     => $m->{name} . '.deb',
+        deb_name     => lc $m->{name} . '.deb',
     };
 
     return $remote;
@@ -80,15 +85,41 @@ my $control = sub {
     #   add & rw defaults from json here;
     #
     
+sub control {
+    my $pm = shift; my $px = shift;;
+    my $m = $meta->($pm, $px);
+    p $m;
+
+    print colored(["black on_white"], 'CONTROL')."\n";
+    my @c = qw( Name Version Author Package Section Maintainer Homepage Description);
+    for( @c ){
+        print $_.': '.$m->{$_}."\n";
+    }
+
+    print "Depends: ";
+    my @deps = keys %{$m->{deps}};
+    for( @deps ){ 
+        s/\:\:/\-/g;
+        unless( $_ eq $deps[$#deps] ){
+            print "$px".lc $_.'-p5, ';
+        } else { print "$px".lc $_.'-p5, perl5'."\n" }
+    }
+
+}
+
+control(@ARGV);
+
+__DATA__
+
+Name Version Author Package Depends Section Maintainer Homepage Description   
 
 
 sub meta_pm {
     #my $c = $control->($ARGV[0]);
-    my $open = 'open_chrome_single_window.sh';
-    my $meta = $control->(@ARGV);
-    system("clear");
-    p $meta;
-    my $deps_graph=system("$open $meta->{deps_graph} 2>&1 /dev/null");
+    my $c = $meta->(@ARGV);
+    p $c;
+    #my $open = 'open_chrome_single_window.sh';
+    #my $deps_graph=system("$open $c->{deps_graph} &2>1 /dev/null");
     #qx!$deps_graph!;
     #for( keys %$c ){
     #    say $_.' -> '.$c->{ $_ };
