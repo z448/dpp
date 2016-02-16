@@ -31,7 +31,7 @@ my $meta = sub {
     my $meta_url = 'http://api.metacpan.org/v0/module/'."$module".'?join=release';
     my $graph = 'https://widgets.stratopan.com/wheel?q=';
     my $meta_j = qx!curl -sL $meta_url!;
-#    print $meta_j;
+    print $meta_j;
     my $meta_p = decode_json $meta_j;
     my $m = $meta_p->{release}->{_source};
     my $prefix = 'lib';
@@ -41,15 +41,15 @@ my $meta = sub {
     #    my @d = ();
     #    for( keys %$strings ){ push @d, "$_"."\,\ " } 
     #    return \@d;
-    #};#####
+    #};
 
     my $remote = {
         Name         => $m->{distribution},
         Version      => $m->{version},
         Author       => $m->{author},
         Section      => 'Perl',
-        Description  => $m->{abstract},
-        #Description  => $m->{abstract}."\n".$m->{release}->{description},  
+        #Description  => $m->{abstract},
+        Description  => $m->{abstract}."\n".$meta_p->{description},  
         Homepage     => $metacpan.$meta_p->{module}[0]->{name},
         Maintainer   => 'z8',
         #Depends      => $deps->($m->{metadata}->{prereqs}->{runtime}->{requires}),
@@ -123,10 +123,12 @@ sub queue_control {
 
 print "Queueing library dependencies:\n".@{queue_control(@ARGV)};
 
-for( @{queue_control(@ARGV)} ){
-        print "Generating control for $_ \n";
-        print control($_)."\n";
-}
+#for( @{queue_control(@ARGV)} ){
+#        print "Generating control for $_ \n";
+#        print control($_)."\n";
+#}
+
+print control(@ARGV)."\n";
 __DATA__
 
 Name Version Author Package Depends Section Maintainer Homepage Description   
