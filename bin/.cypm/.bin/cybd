@@ -1,6 +1,7 @@
 #!/usr/bin/env perl
+# repath and archive finished build on remote host
 
-use v5.10;
+use 5.010;
 use warnings;
 use strict;
 
