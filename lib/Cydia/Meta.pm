@@ -49,7 +49,7 @@ my $meta = sub {
         Author       => $m->{author},
         Section      => 'Perl',
         #Description  => $m->{abstract},
-        Description  => $m->{abstract}.$meta_p->{description},  
+        Description  => $m->{abstract}."\n".$meta_p->{description},  
         #description  => do { if( $meta_p->{description}){ return $meta_p->{description} }},
         Homepage     => $metacpan.$meta_p->{module}[0]->{name},
         Maintainer   => 'z8',
@@ -60,7 +60,7 @@ my $meta = sub {
         source_url   => $m->{download_url},
         deps_graph   => $graph.$m->{name}, #Moose-2.1205
         #pod         => $meta_p->{pod},
-        prefix       => $prefix,
+        prefix       => 'lib',
         Package      => $prefix . lc $m->{distribution} . '-p5',
         build_path   => 'build/' . $m->{name} . '/usr/local/lib/perl5/lib',
         control_path => 'build/' . $m->{name} . '/DEBIAN/control',
@@ -108,9 +108,9 @@ sub control {
             s/\:\:/\-/g;
             if( /^perl$/ ){ next }
             unless( $_ eq $deps[$#deps] ){
-                $dep = "$dep".lc $_.'-p5, ';
+                $dep = "$dep".'lib'.lc $_.'-p5, ';
             } else { 
-                $dep = "$dep".lc $_.'-p5, perl5'."\n" }
+                $dep = "$dep".'lib'.lc $_.'-p5, perl5'."\n" }
         }
         $c = $c.$dep."\n";; 
 
