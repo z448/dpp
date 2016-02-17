@@ -5,6 +5,7 @@ use 5.010;
 use warnings;
 use strict;
 
+use JSON::PP;
 use File::Find;
 use File::Copy;
 use File::Path qw/make_path/;
@@ -13,6 +14,7 @@ use Data::Printer;
 use UUID::Tiny ':std';
 use Archive::Ar;
 use Archive::Tar;
+use Cydia::Meta;
 
 my @directories = ( './');
 my @packlist_orig;
@@ -25,16 +27,9 @@ my $p5v = &$p5_version;
 
 move( "usr/local/lib/perl5/man", "usr/local/man" );
 move( "usr/local/lib/perl5/bin", "usr/local/bin" );
-#move( "usr/local/lib/perl5/man", "usr/local/man" );
-#move( "bin", "usr/local/bin" );
-#move( "usr/local/lib/perl5/bin", "usr/local" );
 move( "usr/local/lib/perl5/lib/perl5", "usr/local/lib/perl5/lib/".$p5v );
 move( "usr/local/lib/perl5/lib", "usr/local/lib/perl5/site_perl" );
 unlink("usr/local/lib/perl5/lib/perl5/arm-iphoneos-2level/auto/ExtUtils/MakeMaker/.packlist");
-#push @packlist, `find .`;
-#for( @packlist ){ chomp( $_ ); push @packlist2, $_ }
-        
-
 
 sub wanted { 
     if ( $_ eq '.packlist' ){
@@ -48,11 +43,10 @@ find(\&wanted, @directories );
 say "original packlist";
 say @packlist_orig; 
 
-#tar czf ../data.tar.gz [a-z]*;
-
 sub dpkg { 
     my $pm = shift;
     my $ar = <<"_DEB";
+    tar czf ../data.tar.gz [a-z]*;
     cd DEBIAN/;
     tar czf ../../control.tar.gz *;
     cd ../..;
@@ -65,46 +59,70 @@ _DEB
 }
 
 my $archive_pack_ = sub {
-    my $p = shift;
-    say "packlist $p";
-    say "received @$p \n";
+    my $packlist = shift;
+
+    my @m = @$packlist;
+
+    for my $pack( @m ){
+    say "\nreceived packlist for $pack->{ pm_name }";
+    say "\tpath: $pack->{ path }"; print "content: \n";
+    say "\t".$_ for @{$pack->{ packlist }};
     
+        unless( $pack->{pm_name} eq $ARGV[0] ){
+            next;
+        }
+            else {
+                my $fh = undef;
+                my $fn = '/var/root/.cypm/pool/DEBIAN/control';
+                open( $fh, '>', $fn ) or die "can't open $fn: $!";
+                print $fh "control($pack->{pm_name})";
+                close $fh;
+                my $tar = Archive::Tar->new;
+                $tar->add_files( @{$pack->{packlist}} );
 
-    my $tar = Archive::Tar->new;
-    $tar->add_files( @$p );
-    my $data = "../data.tar.gz";
-    $tar->write( $data, COMPRESS_GZIP );
-    system("mv usr ../");
-    #$tar->extract(@$p);
-    #$tar->write( $data );
-    dpkg($ARGV[0]);
-    system("rm -r usr");
-    #system("mv ../usr .");
-
+                move( "~/.cypm/pool/usr", "~/.cypm/.stash/usr" );
+                $tar->extract();
+                dpkg($pack->{ pkg });
+                move( "~/.cypm/.stash/usr", "~/.cypm/pool/usr" );
+        }
+    }
 };
 
-my $pack_list_ = sub {
-    my $pck = shift;
-    for my $packlist( @$pck ){
-        my @pack = ();
 
-        open( my $fh, $packlist );
+my $pack_list_ = sub {
+    my $packlist = shift;
+    my @meta = ();
+
+    for my $path( @$packlist ){
+        my $pm_name = $path; $pm_name =~ s/(auto.*?\/)(.*?)(\/\.packlist)/$2/; $pm_name = $2;
+        my $pkg_name = 'lib'.lc $pm_name.'-p5';
+        $pm_name =~ s/\//\:\:/g;
+        open( my $fh, $path );
+
+        my ( @packlist, %packlist ) = ();
         while(<$fh>){
             chomp;
             s/(.*?\.cypm\/.*?\/)(.*)/$2/; 
             s/(usr\/local\/lib\/perl5\/)(lib\/perl5)(.*)/$1site_perl\/$p5v$3/;
             s/(usr\/local\/)(lib\/perl5\/bin)(.*)/$1bin$3/;
             s/(usr\/local\/)(lib\/perl5\/man)(.*)/$1man$3/;
-            push @pack, $_ unless /^\// and say "adding into packlist $_";
-            
-            #usr/local/lib/perl5/bin/perltidy
-            #usr/local/lib/perl5/lib/perl5/Perl/Tidy.pm
-            #usr/local/lib/perl5/lib/perl5/Perl/Tidy.pod
+            push @packlist, $_ unless /^\// and say "adding into packlist $_";
 
-        }; say 'packlist sepatated';
+        }; say "packlist repath done";
         close $fh;
-        $archive_pack_->( \@pack );
+        
+        my $packlist = {
+            pkg         =>  $pkg_name,
+            pm_name     =>  $pm_name,
+            path        =>  $path,
+            packlist    =>  \@packlist,
+
+        }; push @meta, $packlist;
+        
     }
+    say encode_json \@meta;
+    $archive_pack_->( \@meta );
+#$archive_pack_->( \@packlist, $packpath );
 };
 
 
