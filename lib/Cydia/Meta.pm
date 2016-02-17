@@ -104,6 +104,7 @@ sub control {
         my $dep = "Depends: ";
 
         for( @deps ){ 
+            if( /^Test\:\:More$/ ){ next }
             s/\:\:/\-/g;
             if( /^perl$/ ){ next }
             unless( $_ eq $deps[$#deps] ){
@@ -111,7 +112,7 @@ sub control {
             } else { 
                 $dep = "$dep".lc $_.'-p5, perl5'."\n" }
         }
-        $c = $c.$dep; 
+        $c = $c.$dep."\n";; 
 
         #if( $m->{description} ){ $c = $c.$m->{description} }
 
