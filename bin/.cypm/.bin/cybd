@@ -64,9 +64,9 @@ my $archive_pack_ = sub {
     my @m = @$packlist;
 
     for my $pack( @m ){
-    say "\nreceived packlist for $pack->{ pm_name }";
-    say "\tpath: $pack->{ path }"; print "content: \n";
-    say "\t".$_ for @{$pack->{ packlist }};
+        say "\nreceived packlist for $pack->{ pm_name }";
+        say "\tpath: $pack->{ path }"; print "content: \n";
+        say "\t".$_ for @{$pack->{ packlist }};
     
         unless( $pack->{pm_name} eq $ARGV[0] ){
             next;
@@ -75,15 +75,18 @@ my $archive_pack_ = sub {
                 my $fh = undef;
                 my $fn = '/var/root/.cypm/pool/DEBIAN/control';
                 open( $fh, '>', $fn ) or die "can't open $fn: $!";
-                print $fh "control($pack->{pm_name})";
+                print $fh control($pack->{pm_name})."\n";
                 close $fh;
                 my $tar = Archive::Tar->new;
                 $tar->add_files( @{$pack->{packlist}} );
-
                 move( "~/.cypm/pool/usr", "~/.cypm/.stash/usr" );
+                #$tar->write( "../data.tar.gz", COMPRESS_GZIP);
                 $tar->extract();
                 dpkg($pack->{ pkg });
-                move( "~/.cypm/.stash/usr", "~/.cypm/pool/usr" );
+                move( "~/.cypm/pool/usr", "~/.cypm/.stash/usr" );
+                #$tar->extract("$pack->{ pkg }");
+                #move( "data.tar.gz", "../" );
+                #move( "~/.cypm/.stash/usr", "~/.cypm/pool/usr" );
         }
     }
 };
@@ -96,6 +99,7 @@ my $pack_list_ = sub {
     for my $path( @$packlist ){
         my $pm_name = $path; $pm_name =~ s/(auto.*?\/)(.*?)(\/\.packlist)/$2/; $pm_name = $2;
         my $pkg_name = 'lib'.lc $pm_name.'-p5';
+        $pkg_name =~ s/\//\-/g;
         $pm_name =~ s/\//\:\:/g;
         open( my $fh, $path );
 
