@@ -26,7 +26,7 @@ BEGIN {
 }
 
 my $meta = sub {
-    my ( $module ) = @_;
+    my $module = shift;
     my $metacpan = 'https://metacpan.org/pod/';
     my $meta_url = 'http://api.metacpan.org/v0/module/'."$module".'?join=release';
     my $graph = 'https://widgets.stratopan.com/wheel?q=';
@@ -48,9 +48,9 @@ my $meta = sub {
         Version      => $m->{version},
         Author       => $m->{author},
         Section      => 'Perl',
-        Description  => $m->{abstract},
-        #Description  => $m->{abstract}.$meta_p->{description},  
-        description  => do { if( $meta_p->{description}){ return $meta_p->{description} }},
+        #Description  => $m->{abstract},
+        Description  => $m->{abstract}.$meta_p->{description},  
+        #description  => do { if( $meta_p->{description}){ return $meta_p->{description} }},
         Homepage     => $metacpan.$meta_p->{module}[0]->{name},
         Maintainer   => 'z8',
         #Depends      => $deps->($m->{metadata}->{prereqs}->{runtime}->{requires}),
@@ -88,9 +88,9 @@ my $meta = sub {
     #
     
 sub control {
-    my $pm = shift;
+    my( $pm ) = @_;
     my $m = $meta->("$pm");
-    my @d = keys %{"$m->{deps}"};
+    my @deps = keys %{$m->{deps}};
 
     #print colored(["black on_white"], "CONTROL: $pm")."\n";
 
@@ -103,17 +103,17 @@ sub control {
 
         my $dep = "Depends: ";
 
-        for( @d ){ 
+        for( @deps ){ 
             s/\:\:/\-/g;
             if( /^perl$/ ){ next }
-            unless( $_ eq $d[$#d] ){
+            unless( $_ eq $deps[$#deps] ){
                 $dep = "$dep".lc $_.'-p5, ';
             } else { 
                 $dep = "$dep".lc $_.'-p5, perl5'."\n" }
         }
         $c = $c.$dep; 
 
-        if( $m->{description} ){ $c = $c.$m->{description} }
+        #if( $m->{description} ){ $c = $c.$m->{description} }
 
         return $c;
 }
@@ -123,7 +123,7 @@ sub queue_control {
      my $m = $meta->($pm);
      my @q = keys %{$m->{deps}};
      return \@q;
-}
+ }
 
 #print "Queueing library dependencies:\n".@{queue_control(@ARGV)};
 
