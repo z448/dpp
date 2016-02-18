@@ -46,13 +46,13 @@ say @packlist_orig;
 sub dpkg { 
     my $pm = shift;
     my $ar = <<"_DEB";
-    tar czf ../data.tar.gz [a-z]*;
     cd DEBIAN/;
     tar czf ../../control.tar.gz *;
     cd ../..;
     echo 2.0 > debian-binary;
     /var/root/perlpowertools/bin/ar r $pm.deb debian-binary control.tar.gz data.tar.gz;
 _DEB
+    #tar czf ../data.tar.gz [a-z]*;
     my $dpkg_deb = system("$ar");
     say "dpkg_deb status: $dpkg_deb";
     $dpkg_deb;
@@ -60,35 +60,37 @@ _DEB
 
 my $archive_pack_ = sub {
     my $packlist = shift;
-
     my @m = @$packlist;
 
     for my $pack( @m ){
-        say "\nreceived packlist for $pack->{ pm_name }";
-        say "\tpath: $pack->{ path }"; print "content: \n";
-        say "\t".$_ for @{$pack->{ packlist }};
+        #      unless( $pack->{pm_name} eq $ARGV[0] ){
+        #   next;
+        #  }
+        #else {
+            say "\nreceived packlist for $pack->{ pm_name }";
+            say "\tpath: $pack->{ path }"; print "processing content: \n";
+            say "\t".$_ for @{$pack->{ packlist }};
     
-        unless( $pack->{pm_name} eq $ARGV[0] ){
-            next;
+            my $fh = undef;
+            my $fn = '/var/root/.cypm/pool/DEBIAN/control';
+            open( $fh, '>', $fn ) or die "can't open $fn: $!";
+            print $fh control($pack->{pm_name})."\n";
+            close $fh;
+
+            my $tar = Archive::Tar->new;
+            $tar->add_files( @{$pack->{packlist}} );
+            $tar->create_archive( '../data.tar.gz', COMPRESS_GZIP, @{$pack->{packlist}} );
+            #move( "~/.cypm/pool/usr", "~/.cypm/.stash/usr" );
+            #$tar->write( "../data.tar.gz", COMPRESS_GZIP);
+            #$tar->extract( @{$pack->{packlist}} );
+            dpkg($pack->{ pkg });
+            #die;
+            #move( "~/.cypm/pool/usr", "~/.cypm/.stash/usr" );
+            #$tar->extract("$pack->{ pkg }");
+            #move( "data.tar.gz", "../" );
+            #move( "~/.cypm/.stash/usr", "~/.cypm/pool/usr" );
+            #unlink($pack->{ path });
         }
-            else {
-                my $fh = undef;
-                my $fn = '/var/root/.cypm/pool/DEBIAN/control';
-                open( $fh, '>', $fn ) or die "can't open $fn: $!";
-                print $fh control($pack->{pm_name})."\n";
-                close $fh;
-                my $tar = Archive::Tar->new;
-                $tar->add_files( @{$pack->{packlist}} );
-                move( "~/.cypm/pool/usr", "~/.cypm/.stash/usr" );
-                #$tar->write( "../data.tar.gz", COMPRESS_GZIP);
-                $tar->extract();
-                dpkg($pack->{ pkg });
-                move( "~/.cypm/pool/usr", "~/.cypm/.stash/usr" );
-                #$tar->extract("$pack->{ pkg }");
-                #move( "data.tar.gz", "../" );
-                #move( "~/.cypm/.stash/usr", "~/.cypm/pool/usr" );
-        }
-    }
 };
 
 
@@ -103,31 +105,37 @@ my $pack_list_ = sub {
         $pm_name =~ s/\//\:\:/g;
         open( my $fh, $path );
 
-        my ( @packlist, %packlist ) = ();
+        my ( @pack ) = ();
         while(<$fh>){
-            chomp;
-            s/(.*?\.cypm\/.*?\/)(.*)/$2/; 
-            s/(usr\/local\/lib\/perl5\/)(lib\/perl5)(.*)/$1site_perl\/$p5v$3/;
-            s/(usr\/local\/)(lib\/perl5\/bin)(.*)/$1bin$3/;
-            s/(usr\/local\/)(lib\/perl5\/man)(.*)/$1man$3/;
-            push @packlist, $_ unless /^\// and say "adding into packlist $_";
+                chomp;
+                my $base = qr/$ENV{HOME}/; 
+                unless( /$base\/.cypm/ ){
+                    say "skiping $_"; next }
+                else  {
+                    s/(.*?\.cypm\/.*?\/)(.*)/$2/; 
+                    s/(usr\/local\/lib\/perl5\/)(lib\/perl5)(.*)/$1site_perl\/$p5v$3/;
+                    s/(usr\/local\/)(lib\/perl5\/bin)(.*)/$1bin$3/;
+                    s/(usr\/local\/)(lib\/perl5\/man)(.*)/$1man$3/;
+                    
+                    push @pack, $_ unless /perllocal/ and say "adding into packlist $_" 
+                }
+                        
+                    
+            }; say "packlist repath done:".@pack;
+            
+            my $pack = {
+                pkg         =>  $pkg_name,
+                pm_name     =>  $pm_name,
+                path        =>  $path,
+                packlist    =>  \@pack,
 
-        }; say "packlist repath done";
+            }; push @meta, $pack;
+        
         close $fh;
-        
-        my $packlist = {
-            pkg         =>  $pkg_name,
-            pm_name     =>  $pm_name,
-            path        =>  $path,
-            packlist    =>  \@packlist,
-
-        }; push @meta, $packlist;
-        
-    }
-    say encode_json \@meta;
-    $archive_pack_->( \@meta );
-#$archive_pack_->( \@packlist, $packpath );
-};
+        $archive_pack_->( \@meta );
+        }
+        #say encode_json \@meta;
+    };
 
 
 

@@ -35,6 +35,7 @@ my $meta = sub {
     my $meta_p = decode_json $meta_j;
     my $m = $meta_p->{release}->{_source};
     my $prefix = 'lib';
+    my( $remote ) = ();
      
     #my $deps = sub {
     #    my $strings = shift;
@@ -43,13 +44,13 @@ my $meta = sub {
     #    return \@d;
     #};
 
-    my $remote = {
+    $remote = {
         Name         => $m->{distribution},
         Version      => $m->{version},
         Author       => $m->{author},
         Section      => 'Perl',
-        #Description  => $m->{abstract},
-        Description  => $m->{abstract}."\n\t".$meta_p->{description},  
+        Description  => $m->{abstract},
+        description  => eval { $meta_p->{description} },
         #description  => do { if( $meta_p->{description}){ return $meta_p->{description} }},
         Homepage     => $metacpan.$meta_p->{module}[0]->{name},
         Maintainer   => 'z8',
@@ -97,25 +98,27 @@ sub control {
         my @c = qw( Name Version Author Package Section Maintainer Homepage Description );
         my $c = '';
 
-        for( @c ){
-            $c = $c . $_.': '.$m->{$_}."\n";
+        if( $m->{description} ){
+            $m->{Description} .= "\n\t".$m->{description}; 
         }
 
-        my $dep = "Depends: ";
+        for( @c ){
+                $c = $c . $_.': '.$m->{$_}."\n";
+        }
+
+        my $dep = "";
 
         for( @deps ){ 
             if( /^Test\:\:More$/ ){ next }
             s/\:\:/\-/g;
             if( /^perl$/ ){ next }
-            unless( $_ eq $deps[$#deps] ){
+            unless( $_ eq "$deps[$#deps]" ){
                 $dep = "$dep".'lib'.lc $_.'-p5, ';
             } else { 
                 $dep = "$dep".'lib'.lc $_.'-p5, perl5'."\n" }
         }
+        $dep = "Depends: ".$dep;
         $c = $c.$dep."\n";; 
-
-        #if( $m->{description} ){ $c = $c.$m->{description} }
-
         return $c;
 }
 
@@ -125,6 +128,7 @@ sub queue_control {
      my @q = keys %{$m->{deps}};
      return \@q;
  }
+#print control(@ARGV);
 
 #print "Queueing library dependencies:\n".@{queue_control(@ARGV)};
 
@@ -133,7 +137,6 @@ sub queue_control {
 #        print control($_)."\n";
 #}
 
-print control(@ARGV);
 __DATA__
 
 Name Version Author Package Depends Section Maintainer Homepage Description   
