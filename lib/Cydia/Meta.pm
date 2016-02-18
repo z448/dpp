@@ -22,7 +22,7 @@ BEGIN {
     require Exporter;
     our $VERSION = 0.01;
     our @ISA = qw(Exporter);
-    our @EXPORT = qw( control );
+    our @EXPORT = qw( control, queue_control);
 }
 
 my $meta = sub {
