@@ -22,7 +22,7 @@ BEGIN {
     require Exporter;
     our $VERSION = 0.01;
     our @ISA = qw(Exporter);
-    our @EXPORT = qw( control, queue_control);
+    our @EXPORT = qw( control  queue  meta );
 }
 
 my $meta = sub {
@@ -37,13 +37,6 @@ my $meta = sub {
     my $prefix = 'lib';
     my( $remote ) = ();
      
-    #my $deps = sub {
-    #    my $strings = shift;
-    #    my @d = ();
-    #    for( keys %$strings ){ push @d, "$_"."\,\ " } 
-    #    return \@d;
-    #};
-
     $remote = {
         Name         => $m->{distribution},
         Version      => $m->{version},
@@ -51,16 +44,14 @@ my $meta = sub {
         Section      => 'Perl',
         Description  => $m->{abstract},
         description  => eval { $meta_p->{description} },
-        #description  => do { if( $meta_p->{description}){ return $meta_p->{description} }},
         Homepage     => $metacpan.$meta_p->{module}[0]->{name},
         Maintainer   => 'z8',
-        #Depends      => $deps->($m->{metadata}->{prereqs}->{runtime}->{requires}),
         deps         => $m->{metadata}->{prereqs}->{runtime}->{requires},
         module_name  => $meta_p->{module}[0]->{name},
         release_date => $meta_p->{date},
         source_url   => $m->{download_url},
         deps_graph   => $graph.$m->{name}, #Moose-2.1205
-        #pod         => $meta_p->{pod},
+        pod          => $meta_p->{pod},
         prefix       => 'lib',
         Package      => $prefix . lc $m->{distribution} . '-p5',
         build_path   => 'build/' . $m->{name} . '/usr/local/lib/perl5/lib',
@@ -88,6 +79,12 @@ my $meta = sub {
     #   add & rw defaults from json here;
     #
     
+sub meta {
+    my $pm = shift;
+    my $m = $meta->{ $pm };
+    $m;
+}
+
 sub control {
     my( $pm ) = @_;
     my $m = $meta->("$pm");
@@ -122,7 +119,7 @@ sub control {
         return $c;
 }
 
-sub queue_control {
+sub queue {
      my $pm = shift;
      my $m = $meta->($pm);
      my @q = keys %{$m->{deps}};
