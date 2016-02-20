@@ -43,7 +43,7 @@ find(\&wanted, @directories );
 say "original packlist";
 say @packlist_orig; 
 
-sub dpkg { 
+sub pack { 
     my $pm = shift;
     my $ar = <<"_DEB";
     cd DEBIAN/;
@@ -58,15 +58,11 @@ _DEB
     $dpkg_deb;
 }
 
-my $archive_pack_ = sub {
+my $check_pack = sub {
     my $packlist = shift;
     my @m = @$packlist;
 
     for my $pack( @m ){
-        #      unless( $pack->{pm_name} eq $ARGV[0] ){
-        #   next;
-        #  }
-        #else {
             say "\nreceived packlist for $pack->{ pm_name }";
             say "\tpath: $pack->{ path }"; print "processing content: \n";
             say "\t".$_ for @{$pack->{ packlist }};
@@ -77,24 +73,19 @@ my $archive_pack_ = sub {
             print $fh control($pack->{pm_name})."\n";
             close $fh;
 
-            my $tar = Archive::Tar->new;
-            $tar->add_files( @{$pack->{packlist}} );
-            $tar->create_archive( '../data.tar.gz', COMPRESS_GZIP, @{$pack->{packlist}} );
-            #move( "~/.cypm/pool/usr", "~/.cypm/.stash/usr" );
-            #$tar->write( "../data.tar.gz", COMPRESS_GZIP);
-            #$tar->extract( @{$pack->{packlist}} );
-            dpkg($pack->{ pkg });
-            #die;
-            #move( "~/.cypm/pool/usr", "~/.cypm/.stash/usr" );
-            #$tar->extract("$pack->{ pkg }");
-            #move( "data.tar.gz", "../" );
-            #move( "~/.cypm/.stash/usr", "~/.cypm/pool/usr" );
-            #unlink($pack->{ path });
-        }
+            my $packlist_fh = undef;
+            open( $packlist_fh, '>', './pack_items' ) || die "cant open it $!";
+            while( <$packlist_fh> ){
+                for(@{$pack->{ packlist }}){ print $_."\n"; };
+            }; close $packlist_fh;
+
+            my $tar = system("tar cz -T 'pack_items' -f 'data.tar.gz'");
+            pack($pack->{ pkg });
+    }
 };
 
 
-my $pack_list_ = sub {
+my $list_pack = sub {
     my $packlist = shift;
     my @meta = ();
 
@@ -132,7 +123,7 @@ my $pack_list_ = sub {
             }; push @meta, $pack;
         
         close $fh;
-        $archive_pack_->( \@meta );
+        $check_pack->( \@meta );
         }
         #say encode_json \@meta;
     };
@@ -143,6 +134,6 @@ my $pack_list_ = sub {
 
 
 #my $arch = $archive_pack_->( \@packlist2 );
-$pack_list_->(\@packlist_orig);
+$list_pack->(\@packlist_orig);
 
 #print $path
