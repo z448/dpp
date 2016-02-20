@@ -4,19 +4,13 @@ package Cydia::Meta;
 use 5.010;
 use warnings;
 use strict;
-#use FindBin;
-#use lib "$FindBin::Bin/../lib";
-#use open qw< :encoding(UTF-8) >;
-use JSON;
-use Term::ANSIColor;
-use Getopt::Std;
+use FindBin;
+use lib "$FindBin::Bin/../lib";
+use open qw< :encoding(UTF-8) >;
+use JSON::PP;
 use File::Copy;
 use Filesys::Tree;
-use File::Path qw(make_path remove_tree);
-use Data::Dumper;
 use Data::Printer;
-use Archive::Tar;
-use PAR::Dist;
 
 BEGIN {
     require Exporter;
@@ -45,10 +39,12 @@ my $meta = sub {
         Description  => $m->{abstract},
         description  => eval { $meta_p->{description} },
         Homepage     => $metacpan.$meta_p->{module}[0]->{name},
-        Maintainer   => 'z8',
+        Maintainer   => 'zb (z8) <_p@module.pm>',
+        #Depends      => $deps->($m->{metadata}->{prereqs}->{runtime}->{requires}),
         deps         => $m->{metadata}->{prereqs}->{runtime}->{requires},
         module_name  => $meta_p->{module}[0]->{name},
         release_date => $meta_p->{date},
+        Architecture => 'iphoneos-arm',
         source_url   => $m->{download_url},
         deps_graph   => $graph.$m->{name}, #Moose-2.1205
         pod          => $meta_p->{pod},
@@ -92,7 +88,7 @@ sub control {
 
     #print colored(["black on_white"], "CONTROL: $pm")."\n";
 
-        my @c = qw( Name Version Author Package Section Maintainer Homepage Description );
+        my @c = qw( Name Version Author Architecture Package Section Maintainer Homepage Description );
         my $c = '';
 
         if( $m->{description} ){
