@@ -47,6 +47,8 @@ say @packlist_orig;
 sub make_pack { 
     my $pm = shift;
     my $ar = <<"_DEB";
+    cd $pm; tar -xf data.tar.gz;
+    tar czf ../data.tar.gz us*;
     cd DEBIAN/;
     tar czf ../../control.tar.gz *;
     cd ../..;
@@ -70,8 +72,10 @@ my $check_pack = sub {
             say "\tpath: $pack->{ path }"; print "processing content: \n";
             say "\t".$_ for @{$pack->{ packlist }};
     
+            my $make_path = system("mkdir -p $pack->{ pkg }/DEBIAN");
+            my $control = system("touch $pack->{ pkg }/DEBIAN/control");
             my $fh = undef;
-            my $fn = "$ENV{HOME}/.cypm/pool/DEBIAN/control";
+            my $fn = "$ENV{HOME}/.cypm/pool/$pack->{ pkg }/DEBIAN/control";
             open( $fh, '>', $fn ) or die "can't open $fn: $!";
             print $fh control($pack->{pm_name})."\n";
             close $fh;
@@ -83,7 +87,7 @@ my $check_pack = sub {
             }
             close $packlist_fh;
 
-            my $tar = system("tar cz -T 'pack_items' -f '../data.tar.gz'");
+            my $tar = system("tar cz -T 'pack_items' -f '$pack->{ pkg }/data.tar.gz'");
             my $status = make_pack($pack->{ pkg });
             say colored(['red'],":: >> ")."$pack->{ pkg } ready (deb in stash)" unless $status;
     }

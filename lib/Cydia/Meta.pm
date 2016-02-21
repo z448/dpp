@@ -37,7 +37,7 @@ my $meta = sub {
         Author       => $m->{author},
         Section      => 'Perl',
         Description  => $m->{abstract},
-        description  => eval { $meta_p->{description} },
+        #description  => $meta_p->{description},
         Homepage     => $metacpan.$meta_p->{module}[0]->{name},
         Maintainer   => 'zb (z8) <_p@module.pm>',
         #Depends      => $deps->($m->{metadata}->{prereqs}->{runtime}->{requires}),
@@ -88,12 +88,15 @@ sub control {
 
     #print colored(["black on_white"], "CONTROL: $pm")."\n";
 
-        my @c = qw( Name Version Author Architecture Package Section Maintainer Homepage Description );
+        my @c = qw( Name Version Author Architecture Package Section Maintainer Homepage );
         my $c = '';
-
-        if( $m->{description} ){
-            $m->{Description} .= "\n\t".$m->{description}; 
-        }
+        my $description = $m->{Description};
+        $description =~ s/\n/\ /g;
+        $description = 'Description: '.$description;
+        #if( $m->{description} =~ /.../ ){
+        #    $description = $description."\n"."\t$m->{description}"; 
+        #} 
+        
 
         for( @c ){
                 $c = $c . $_.': '.$m->{$_}."\n";
@@ -108,10 +111,10 @@ sub control {
             unless( $_ eq "$deps[$#deps]" ){
                 $dep = "$dep".'lib'.lc $_.'-p5, ';
             } else { 
-                $dep = "$dep".'lib'.lc $_.'-p5, perl5'."\n" }
+                $dep = "$dep".'lib'.lc $_.'-p5, perl5' }
         }
-        $dep = "Depends: ".$dep;
-        $c = $c.$dep."\n";; 
+        $dep = "Depends: ".$dep."\n";
+        $c = $c.$dep.$description."\n";
         return $c;
 }
 
