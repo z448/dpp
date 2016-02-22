@@ -96,13 +96,13 @@ my $check_pack = sub {
             close $fh;
 
             my $packlist_fh = undef;
-            open( $packlist_fh, "> ./pack_items" ) or die "cant open it $!";
+            open( $packlist_fh, "> ./.pack.list" ) or die "cant open it $!";
             for(@{$pack->{ packlist }}){
                 print $packlist_fh $_."\n";
             }
             close $packlist_fh;
 
-            my $tar = system("tar cz -T 'pack_items' -f '$pack->{ pkg }/data.tar.gz'");
+            my $tar = system("tar cz -T '.pack.list' -f '$pack->{ pkg }/data.tar.gz'");
             my $status = make_pack($pack->{ pkg });
             say colored(['red'],"pm::ok > ")."$pack->{ pkg } ready (deb in stash)" unless $status;
             #my $cleanup = $clean->($pack->{ pkg });
