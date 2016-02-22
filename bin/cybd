@@ -48,6 +48,7 @@ sub make_pack {
     my $pm = shift;
     my $ar = <<"_DEB";
     cd $pm; tar -xf data.tar.gz;
+    rm data.tar.gz;
     tar czf ../data.tar.gz us*;
     cd DEBIAN/;
     tar czf ../../control.tar.gz *;
@@ -56,12 +57,25 @@ sub make_pack {
     /var/root/perlpowertools/bin/ar r $pm.deb debian-binary control.tar.gz data.tar.gz;
 _DEB
     #tar czf ../data.tar.gz [a-z]*;
+
     my $pack = sub {
         my $packer = shift;
-        my $status = system("$packer");
+        my $status  = system("$packer");
         return $status;
-    }; $pack->($ar);
+    }; 
+    my $s_pack = $pack->($ar);
+
+    my $clean = sub {
+        my $mess = shift;
+        say 'now in make_pack->$clean';
+        my $s_clean = system("rm -r $mess");
+        return $s_clean;
+    }
+    my $usr = 'usr';
+    my $s_clean = $clean->($usr);
+    return $s_clean;
 }
+
 
 my $check_pack = sub {
     my $packlist = shift;
@@ -89,7 +103,10 @@ my $check_pack = sub {
 
             my $tar = system("tar cz -T 'pack_items' -f '$pack->{ pkg }/data.tar.gz'");
             my $status = make_pack($pack->{ pkg });
-            say colored(['red'],":: >> ")."$pack->{ pkg } ready (deb in stash)" unless $status;
+            say colored(['red'],"pm::ok > ")."$pack->{ pkg } ready (deb in stash)" unless $status;
+            #my $cleanup = $clean->($pack->{ pkg });
+            #say colored(['blue on_white'],"$pack->{ pkg } data pack moved to  stash") unless $cleanup;
+            return $status;
     }
 };
 

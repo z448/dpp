@@ -1,0 +1,11 @@
+#!/bin/bash
+
+cd $1; 
+tar -xf data.tar.gz;
+tar czf ../data.tar.gz us*;
+cd DEBIAN/;
+tar czf ../../control.tar.gz *;
+cd ../..;
+echo 2.0 > debian-binary;
+/var/root/perlpowertools/bin/ar r $1.deb debian-binary control.tar.gz data.tar.gz;
+

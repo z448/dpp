@@ -84,8 +84,8 @@ sub meta {
 }
 
 sub control {
-    my( $pm ) = @_;
-    my $m = $meta->("$pm");
+    my $pm  = shift;
+    my $m = $meta->($pm);
     my @deps = keys %{$m->{deps}};
 
     #print colored(["black on_white"], "CONTROL: $pm")."\n";
@@ -93,7 +93,7 @@ sub control {
         my @c = qw( Name Version Author Architecture Package Section Maintainer Homepage );
         my $c = '';
         my $description = $m->{Description};
-        $description =~ s/\n/\ /g;
+        #$description =~ s/\n/\ /g;
         $description = 'Description: '.$description;
 
         for( @c ){
