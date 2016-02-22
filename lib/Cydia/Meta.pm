@@ -7,10 +7,11 @@ use strict;
 use FindBin;
 use lib "$FindBin::Bin/../lib";
 use open qw< :encoding(UTF-8) >;
-use JSON::PP;
+use JSON::XS;
 use File::Copy;
 use Filesys::Tree;
 use Data::Printer;
+use Encode;
 
 BEGIN {
     require Exporter;
@@ -21,12 +22,13 @@ BEGIN {
 
 my $meta = sub {
     my $module = shift;
+    #my $json     = JSON::PP->new->utf8;
     my $metacpan = 'https://metacpan.org/pod/';
     my $meta_url = 'http://api.metacpan.org/v0/module/'."$module".'?join=release';
     my $graph = 'https://widgets.stratopan.com/wheel?q=';
     my $meta_j = qx!curl -sL $meta_url!;
 #    print $meta_j;
-    my $meta_p = decode_json $meta_j;
+    my $meta_p = decode_json( encode( 'utf8', $meta_j ) );
     my $m = $meta_p->{release}->{_source};
     my $prefix = 'lib';
     my( $remote ) = ();
@@ -93,10 +95,6 @@ sub control {
         my $description = $m->{Description};
         $description =~ s/\n/\ /g;
         $description = 'Description: '.$description;
-        #if( $m->{description} =~ /.../ ){
-        #    $description = $description."\n"."\t$m->{description}"; 
-        #} 
-        
 
         for( @c ){
                 $c = $c . $_.': '.$m->{$_}."\n";
@@ -113,8 +111,8 @@ sub control {
             } else { 
                 $dep = "$dep".'lib'.lc $_.'-p5, perl5' }
         }
-        $dep = "Depends: ".$dep."\n";
-        $c = $c.$dep.$description."\n";
+        $dep = "Depends: ".$dep;
+        $c = $c.$dep."\n".$description."\n";
         return $c;
 }
 
