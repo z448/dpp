@@ -54,8 +54,9 @@ sub make_pack {
     tar czf ../../control.tar.gz *;
     cd ../..;
     echo 2.0 > debian-binary;
-    /var/root/perlpowertools/bin/ar r $pm.deb debian-binary control.tar.gz data.tar.gz;
+    arfp r $pm.deb debian-binary control.tar.gz data.tar.gz;
 _DEB
+    #/var/root/perlpowertools/bin/ar r $pm.deb debian-binary control.tar.gz data.tar.gz;
     #tar czf ../data.tar.gz [a-z]*;
 
     my $pack = sub {
@@ -68,9 +69,9 @@ _DEB
     my $clean = sub {
         my $mess = shift;
         say 'now in make_pack->$clean';
-        my $s_clean = system("rm -r $mess");
+        my $s_clean = system("rm -rf $mess");
         return $s_clean;
-    }
+    };
     my $usr = 'usr';
     my $s_clean = $clean->($usr);
     return $s_clean;
