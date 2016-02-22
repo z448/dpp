@@ -65,26 +65,27 @@ _DEB
         return $status;
     }; 
     my $s_pack = $pack->($ar);
+    return $s_pack;
 
-    my $clean = sub {
-        my $mess = shift;
-        say 'now in make_pack->$clean';
-        my $s_clean = system("rm -rf $mess");
-        return $s_clean;
-    };
-    my $usr = 'usr';
-    my $s_clean = $clean->($usr);
-    return $s_clean;
+    #my $clean = sub {
+    #    my $mess = shift;
+    #    say 'now in make_pack->$clean';
+    #    my $s_clean = system("rm -rf $mess");
+    #    return $s_clean;
+    #};
+#    my $usr = 'usr';
+#    my $s_clean = $clean->($usr);
+#    return $s_clean;
 }
 
 
 my $check_pack = sub {
-    my $packlist = shift;
-    my @m = @$packlist;
+    my $p = shift;
+    my @m = @$p;
 
     for my $pack( @m ){
-            say "\nreceived packlist for $pack->{ pm_name }";
-            say "\tpath: $pack->{ path }"; print "processing content: \n";
+            say "\ncheck_pack received packlist for $pack->{ pm_name }";
+            say "\tpath: $pack->{ path }"; print "check_pack processing content: \n";
             say "\t".$_ for @{$pack->{ packlist }};
     
             my $make_path = system("mkdir -p $pack->{ pkg }/DEBIAN");
@@ -107,16 +108,18 @@ my $check_pack = sub {
             say colored(['red'],"pm::ok > ")."$pack->{ pkg } ready (deb in stash)" unless $status;
             #my $cleanup = $clean->($pack->{ pkg });
             #say colored(['blue on_white'],"$pack->{ pkg } data pack moved to  stash") unless $cleanup;
-            return $status;
+            say "check_pack received status $status";
     }
 };
 
 
 my $list_pack = sub {
-    my $packlist = shift;
+    my $p = shift;
     my @meta = ();
+    say "list_pack received \$p \t-> $p\ncontent is:";
+    for( @$p ){ say "\t$_" }
 
-    for my $path( @$packlist ){
+    for my $path( @$p ){
         my $pm_name = $path; $pm_name =~ s/(auto.*?\/)(.*?)(\/\.packlist)/$2/; $pm_name = $2;
         my $pkg_name = 'lib'.lc $pm_name.'-p5';
         $pkg_name =~ s/\//\-/g;
@@ -127,7 +130,8 @@ my $list_pack = sub {
         while(<$fh>){
                 chomp;
                 my $base = qr/$ENV{HOME}/; 
-                unless( /$base\/.cypm/ ){
+                unless( /\/.cypm/ ){
+                    #unless( /$base\/.cypm/ ){
                     say "skiping $_"; next }
                 else  {
                     s/(.*?\.cypm\/.*?\/)(.*)/$2/; 
@@ -150,8 +154,8 @@ my $list_pack = sub {
             }; push @meta, $pack;
         
         close $fh;
-        $check_pack->( \@meta );
         }
+        $check_pack->( \@meta );
         #say encode_json \@meta;
     };
 
