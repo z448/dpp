@@ -7,7 +7,7 @@ use strict;
 use FindBin;
 use lib "$FindBin::Bin/../lib";
 use open qw< :encoding(UTF-8) >;
-use JSON::XS;
+use JSON;
 use File::Copy;
 use Filesys::Tree;
 use Data::Printer;
