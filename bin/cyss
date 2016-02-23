@@ -4,7 +4,7 @@ use 5.010;
 use Net::OpenSSH;
 use Term::ANSIColor;
 
-my @hosts = qw( z@10.0.0.35 );
+my @hosts = qw( root@10.0.0.33 );
 my $pm = $ARGV[0];
 
 my $cypm_base = "~/.cypm/pool/usr/local/lib/perl5";

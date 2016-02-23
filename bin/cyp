@@ -1,0 +1,3 @@
+#!/bin/bash
+cyss $1
+cybd $1
