@@ -17,12 +17,37 @@ BEGIN {
     require Exporter;
     our $VERSION = 0.01;
     our @ISA = qw(Exporter);
-    our @EXPORT = qw( control  queue  meta );
+    our @EXPORT = qw( control  queue  meta deps);
 }
+
+my $deps = sub {
+    my $pm = shift;
+
+    my $dep_dis = sub {
+        my $m = shift;
+        my $j = qx|curl -skL http://api.metacpan.org/v0/module/$m?join=release|;
+        my $p  = decode_json( encode( 'utf8', $j )); 
+        my $d = $p->{release}->{_source}->{distribution};
+        return $d;
+    };
+
+    my $dep_pm = sub {
+        my $m = shift;
+        my $j = qx|curl -skL http://api.metacpan.org/v0/module/$m?join=release|;
+        my $p  = decode_json( encode( 'utf8', $j )); 
+        my @d = keys %{$p->{release}->{_source}->{metadata}->{prereqs}->{runtime}->{requires}};
+        return \@d;
+    };
+     
+    my @deps = ( );
+    for( @{$dep_pm->($pm)} ){
+        push @deps, $dep_dis->($_);
+    }
+    return \@deps;
+};
 
 my $meta = sub {
     my $module = shift;
-    #my $json     = JSON::PP->new->utf8;
     my $metacpan = 'https://metacpan.org/pod/';
     my $meta_url = 'http://api.metacpan.org/v0/module/'."$module".'?join=release';
     my $graph = 'https://widgets.stratopan.com/wheel?q=';
@@ -32,6 +57,8 @@ my $meta = sub {
     my $m = $meta_p->{release}->{_source};
     my $prefix = 'lib';
     my( $remote ) = ();
+
+
      
     $remote = {
         Name         => $m->{distribution},
@@ -43,7 +70,8 @@ my $meta = sub {
         Homepage     => $metacpan.$meta_p->{module}[0]->{name},
         Maintainer   => 'zb (z8) <_p@module.pm>',
         #Depends      => $deps->($m->{metadata}->{prereqs}->{runtime}->{requires}),
-        deps         => $m->{metadata}->{prereqs}->{runtime}->{requires},
+        #deps         => $m->{metadata}->{prereqs}->{runtime}->{requires},
+
         module_name  => $meta_p->{module}[0]->{name},
         release_date => $meta_p->{date},
         Architecture => 'iphoneos-arm',
@@ -55,6 +83,8 @@ my $meta = sub {
         build_path   => 'build/' . $m->{name} . '/usr/local/lib/perl5/lib',
         control_path => 'build/' . $m->{name} . '/DEBIAN/control',
         deb_name     => lc $m->{name} . '.deb',
+        meta_api_url => $meta_url,
+        #dependencies => $deps->($module),
     };
 
     return $remote;
@@ -82,6 +112,13 @@ sub meta {
     my $m = $meta->{ $pm };
     $m;
 }
+
+sub deps {
+    my $pm = shift;
+    my $d = $deps->($pm);
+    $d;
+}
+
 
 sub control {
     my $pm  = shift;
