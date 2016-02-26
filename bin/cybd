@@ -10,6 +10,9 @@ use File::Find;
 use File::Copy;
 use Data::Printer;
 use Term::ANSIColor;
+use FindBin;
+use lib "$FindBin::Bin/../lib";
+use open qw< :encoding(UTF-8) >;
 use Cydia::Meta;
 
 my @directories = ( './');
@@ -59,12 +62,12 @@ _DEB
     #/var/root/perlpowertools/bin/ar r $pm.deb debian-binary control.tar.gz data.tar.gz;
     #tar czf ../data.tar.gz [a-z]*;
 
-    my $pack = sub {
+    my $package = sub {
         my $packer = shift;
         my $status  = system("$packer");
         return $status;
     }; 
-    my $s_pack = $pack->($ar);
+    my $s_pack = $package->($ar);
     return $s_pack;
 
     #my $clean = sub {
@@ -83,18 +86,23 @@ my $check_pack = sub {
     my $p = shift;
     my @m = @$p;
 
+    
+
     for my $pack( @m ){
             say "\ncheck_pack received packlist for $pack->{ pm_name }";
             say "\tpath: $pack->{ path }"; print "check_pack processing content: \n";
             say "\t".$_ for @{$pack->{ packlist }};
+            
     
             my $make_path = system("mkdir -p $pack->{ pkg }/DEBIAN");
-            my $control = system("touch $pack->{ pkg }/DEBIAN/control");
+            my $control = system("touch $pack->{ pkg }/DEBIAN/".'control');
             my $fh = undef;
-            my $fn = "$ENV{HOME}/.cypm/pool/$pack->{ pkg }/DEBIAN/control";
+            say 'now processing control'."$pack->{ pkg }";
+            my $fn = "$ENV{HOME}/.cypm/pool/$pack->{ pkg }/DEBIAN/".'control';
             open( $fh, '>', $fn ) or die "can't open $fn: $!";
-            print $fh control($pack->{pm_name})."\n";
+            print $fh control("$pack->{pm_name}") . "\n";
             close $fh;
+            print 'now printing to control file content'."\n\t". control("$pack->{pm_name}") . "\n";
 
             my $packlist_fh = undef;
             open( $packlist_fh, "> ./.pack.list" ) or die "cant open it $!";
@@ -121,43 +129,50 @@ my $list_pack = sub {
 
     for my $path( @$p ){
         my $pm_name = $path; $pm_name =~ s/(auto.*?\/)(.*?)(\/\.packlist)/$2/; $pm_name = $2;
-        my $pkg_name = 'lib'.lc $pm_name.'-p5';
-        $pkg_name =~ s/\//\-/g;
         $pm_name =~ s/\//\:\:/g;
+
+
+        #    my $pkg_name = 'lib'.lc $pm_name.'-p5';
+        #$pkg_name =~ s/\//\-/g;
         open( my $fh, $path );
 
         my ( @pack ) = ();
         while(<$fh>){
-                chomp;
-                my $base = qr/$ENV{HOME}/; 
-                unless( /\/.cypm/ ){
-                    #unless( /$base\/.cypm/ ){
-                    say "skiping $_"; next }
-                else  {
-                    s/(.*?\.cypm\/.*?\/)(.*)/$2/; 
-                    s/(usr\/local\/lib\/perl5\/)(lib\/perl5)(.*)/$1site_perl\/$p5v$3/;
-                    s/(usr\/local\/)(lib\/perl5\/bin)(.*)/$1bin$3/;
-                    s/(usr\/local\/)(lib\/perl5\/man)(.*)/$1man$3/;
-                    
-                    push @pack, $_ unless /perllocal/ and say "adding into packlist $_" 
-                }
-                        
-                    
-            }; say "packlist repath done:".@pack;
-            
-            my $pack = {
-                pkg         =>  $pkg_name,
-                pm_name     =>  $pm_name,
-                path        =>  $path,
-                packlist    =>  \@pack,
-
-            }; push @meta, $pack;
-        
-        close $fh;
+            chomp;
+            my $base = qr/$ENV{HOME}/; 
+            unless( /\/.cypm/ ){
+                #unless( /$base\/.cypm/ ){
+                say "skiping $_"; next }
+            else  {
+                s/(.*?\.cypm\/.*?\/)(.*)/$2/; 
+                s/(usr\/local\/lib\/perl5\/)(lib\/perl5)(.*)/$1site_perl\/$p5v$3/;
+                s/(usr\/local\/)(lib\/perl5\/bin)(.*)/$1bin$3/;
+                s/(usr\/local\/)(lib\/perl5\/man)(.*)/$1man$3/;
+                
+            push @pack, $_ unless /perllocal/ and say "adding into packlist $_" 
         }
-        $check_pack->( \@meta );
-        #say encode_json \@meta;
-    };
+                        
+        }; say "packlist repath done:".@pack;
+
+    my $meta = meta($pm_name);
+    my $pkg = $meta->{pkg};
+
+    my $pack = {
+        pkg         =>  $pkg,
+        pm_name     =>  $pm_name,
+        path        =>  $path,
+        packlist    =>  \@pack,
+
+    };         
+
+            
+    push @meta, $pack;
+    close $fh;
+
+    }
+
+    $check_pack->( \@meta );
+};
 
 
 

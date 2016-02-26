@@ -4,14 +4,14 @@ package Cydia::Meta;
 use 5.010;
 use warnings;
 use strict;
-use FindBin;
-use lib "$FindBin::Bin/../lib";
-use open qw< :encoding(UTF-8) >;
 use JSON;
 use File::Copy;
 use Filesys::Tree;
 use Data::Printer;
 use Encode;
+use FindBin;
+use lib "$FindBin::Bin/../lib";
+
 
 BEGIN {
     require Exporter;
@@ -41,13 +41,10 @@ my $deps = sub {
 
     my $deps = '';
     for ( @{$dep_pm->($pm)} ){
-        $deps .= $deps . 'lib-'.$dep_dis->($_) .'-p5' . ', ';
+        $deps = $deps . 'lib'.lc $dep_dis->($_) .'-p5' . ', ';
     }
     $deps = $deps . 'perl';
     return $deps;
-    #my $deps_inline = $control_format->(\@deps);
-    #my $deps = $control_format->(\@deps);
-    #my @deps$dep_dis->($pm)};
 };
 
 my $meta = sub {
@@ -60,11 +57,11 @@ my $meta = sub {
     my $meta_p = decode_json( encode( 'utf8', $meta_j ) );
     my $m = $meta_p->{release}->{_source};
     my $prefix = 'lib';
-    my( $remote ) = ();
+    #my( $remote ) = ();
 
 
      
-    $remote = {
+    my $remote = {
         Name         => $m->{distribution},
         Version      => $m->{version},
         Author       => $m->{author},
@@ -75,7 +72,6 @@ my $meta = sub {
         Maintainer   => 'zb (z8) <_p@module.pm>',
         #Depends      => $deps->($m->{metadata}->{prereqs}->{runtime}->{requires}),
         #deps         => $m->{metadata}->{prereqs}->{runtime}->{requires},
-        Dependencies => $deps->($module),
         module_name  => $meta_p->{module}[0]->{name},
         release_date => $meta_p->{date},
         Architecture => 'iphoneos-arm',
@@ -84,11 +80,12 @@ my $meta = sub {
         pod          => $meta_p->{pod},
         prefix       => 'lib',
         Package      => $prefix . lc $m->{distribution} . '-p5',
+        pkg =>       => $prefix . lc $m->{distribution} . '-p5',
         build_path   => 'build/' . $m->{name} . '/usr/local/lib/perl5/lib',
         control_path => 'build/' . $m->{name} . '/DEBIAN/control',
         deb_name     => lc $m->{name} . '.deb',
         meta_api_url => $meta_url,
-        #dependencies => $deps->($module),
+        Dependencies => $deps->($module),
     };
     return $remote;
 
@@ -112,8 +109,8 @@ my $meta = sub {
     
 sub meta {
     my $pm = shift;
-    my $m = $meta->{ $pm };
-    $m;
+    my $m = $meta->( $pm );
+    return $m;
 }
 
 sub control {
@@ -122,7 +119,9 @@ sub control {
     my @c = qw( Name Version Author Architecture Package Section Maintainer Homepage Dependencies Description );
     
     my $c= '';
-    for( @c ){ $c = $c . $_.': '.$m->{$_}."\n" }
+    for( @c ){
+            $c = $c . $_.': '.$m->{$_}."\n";
+    }
     return $c;
 }
 
