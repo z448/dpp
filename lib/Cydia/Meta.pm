@@ -17,7 +17,7 @@ BEGIN {
     require Exporter;
     our $VERSION = 0.01;
     our @ISA = qw(Exporter);
-    our @EXPORT = qw( control  queue  meta deps);
+    our @EXPORT = qw( control  queue  meta );
 }
 
 my $deps = sub {
@@ -38,12 +38,16 @@ my $deps = sub {
         my @d = keys %{$p->{release}->{_source}->{metadata}->{prereqs}->{runtime}->{requires}};
         return \@d;
     };
-     
-    my @deps = ( );
-    for( @{$dep_pm->($pm)} ){
-        push @deps, $dep_dis->($_);
+
+    my $deps = '';
+    for ( @{$dep_pm->($pm)} ){
+        $deps .= $deps . 'lib-'.$dep_dis->($_) .'-p5' . ', ';
     }
-    return \@deps;
+    $deps = $deps . 'perl';
+    return $deps;
+    #my $deps_inline = $control_format->(\@deps);
+    #my $deps = $control_format->(\@deps);
+    #my @deps$dep_dis->($pm)};
 };
 
 my $meta = sub {
@@ -71,7 +75,7 @@ my $meta = sub {
         Maintainer   => 'zb (z8) <_p@module.pm>',
         #Depends      => $deps->($m->{metadata}->{prereqs}->{runtime}->{requires}),
         #deps         => $m->{metadata}->{prereqs}->{runtime}->{requires},
-
+        Dependencies => $deps->($module),
         module_name  => $meta_p->{module}[0]->{name},
         release_date => $meta_p->{date},
         Architecture => 'iphoneos-arm',
@@ -86,7 +90,6 @@ my $meta = sub {
         meta_api_url => $meta_url,
         #dependencies => $deps->($module),
     };
-
     return $remote;
 
 
@@ -113,52 +116,22 @@ sub meta {
     $m;
 }
 
-sub deps {
-    my $pm = shift;
-    my $d = $deps->($pm);
-    $d;
-}
-
-
 sub control {
     my $pm  = shift;
     my $m = $meta->($pm);
-    my @deps = keys %{$m->{deps}};
-
-    #print colored(["black on_white"], "CONTROL: $pm")."\n";
-
-        my @c = qw( Name Version Author Architecture Package Section Maintainer Homepage );
-        my $c = '';
-        my $description = $m->{Description};
-        #$description =~ s/\n/\ /g;
-        $description = 'Description: '.$description;
-
-        for( @c ){
-                $c = $c . $_.': '.$m->{$_}."\n";
-        }
-
-        my $dep = "";
-
-        for( @deps ){ 
-            if( /^Test\:\:More$/ ){ next }
-            s/\:\:/\-/g;
-            if( /^perl$/ ){ next }
-            unless( $_ eq "$deps[$#deps]" ){
-                $dep = "$dep".'lib'.lc $_.'-p5, ';
-            } else { 
-                $dep = "$dep".'lib'.lc $_.'-p5, perl5' }
-        }
-        $dep = "Depends: ".$dep;
-        $c = $c.$dep."\n".$description."\n";
-        return $c;
+    my @c = qw( Name Version Author Architecture Package Section Maintainer Homepage Dependencies Description );
+    
+    my $c= '';
+    for( @c ){ $c = $c . $_.': '.$m->{$_}."\n" }
+    return $c;
 }
 
-sub queue {
-     my $pm = shift;
-     my $m = $meta->($pm);
-     my @q = keys %{$m->{deps}};
-     return \@q;
- }
+#sub queue {
+#     my $pm = shift;
+#     my $m = $meta->($pm);
+#     my @q = keys %{$m->{deps}};
+#     return \@q;
+# }
 #print control(@ARGV);
 
 #print "Queueing library dependencies:\n".@{queue_control(@ARGV)};
