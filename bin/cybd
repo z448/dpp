@@ -15,7 +15,7 @@ use lib "$FindBin::Bin/../lib";
 use open qw< :encoding(UTF-8) >;
 use Cydia::Meta;
 
-my @directories = ( './');
+my @directories = ( "$ENV{HOME}/.cypm/pool/usr/local/lib/perl5" );
 my @packlist_orig;
 my $p5 = sub {
      my @v5 = qx|perl -v|;
@@ -26,14 +26,16 @@ my $p5 = sub {
      return $v5;
 };
 
-#my $p5v = &$p5_version;
 my $p5v = $p5->();
+
+
+unlink("usr/local/lib/perl5/lib/perl5/arm-iphoneos-2level/auto/ExtUtils/MakeMaker/.packlist");
 
 move( "usr/local/lib/perl5/man", "usr/local/man" );
 move( "usr/local/lib/perl5/bin", "usr/local/bin" );
 move( "usr/local/lib/perl5/lib/perl5", "usr/local/lib/perl5/lib/".$p5v );
 move( "usr/local/lib/perl5/lib", "usr/local/lib/perl5/site_perl" );
-unlink("usr/local/lib/perl5/lib/perl5/arm-iphoneos-2level/auto/ExtUtils/MakeMaker/.packlist");
+
 
 sub wanted { 
     if ( $_ eq '.packlist' ){
@@ -59,15 +61,15 @@ sub make_pack {
     echo 2.0 > debian-binary;
     arfp r $pm.deb debian-binary control.tar.gz data.tar.gz;
 _DEB
-    #/var/root/perlpowertools/bin/ar r $pm.deb debian-binary control.tar.gz data.tar.gz;
     #tar czf ../data.tar.gz [a-z]*;
-
     my $package = sub {
         my $packer = shift;
-        my $status  = system("$packer");
+        my $status  = system($packer);
+        say "make_pack: status-> $status";
         return $status;
     }; 
     my $s_pack = $package->($ar);
+    say "make_pack: \$s_pack $s_pack";
     return $s_pack;
 
     #my $clean = sub {
@@ -81,105 +83,83 @@ _DEB
 #    return $s_clean;
 }
 
-
 my $check_pack = sub {
     my $p = shift;
     my @m = @$p;
-
-    
 
     for my $pack( @m ){
             say "\ncheck_pack received packlist for $pack->{ pm_name }";
             say "\tpath: $pack->{ path }"; print "check_pack processing content: \n";
             say "\t".$_ for @{$pack->{ packlist }};
-            
     
             my $make_path = system("mkdir -p $pack->{ pkg }/DEBIAN");
             my $control = system("touch $pack->{ pkg }/DEBIAN/".'control');
             my $fh = undef;
-            say 'now processing control'."$pack->{ pkg }";
+            say 'check_pack: creating control file for '."$pack->{ pkg }";
             my $fn = "$ENV{HOME}/.cypm/pool/$pack->{ pkg }/DEBIAN/".'control';
             open( $fh, '>', $fn ) or die "can't open $fn: $!";
             print $fh control("$pack->{pm_name}") . "\n";
             close $fh;
-            print 'now printing to control file content'."\n\t". control("$pack->{pm_name}") . "\n";
+            print 'control file content:'."\n". control("$pack->{pm_name}") . "\n";
 
             my $packlist_fh = undef;
-            open( $packlist_fh, "> ./.pack.list" ) or die "cant open it $!";
+            open( $packlist_fh, "> $pack->{ path }" ) or die "cant open it $!";
+            #open( $packlist_fh, "> ./.pack.list" ) or die "cant open it $!";
             for(@{$pack->{ packlist }}){
                 print $packlist_fh $_."\n";
             }
             close $packlist_fh;
 
-            my $tar = system("tar cz -T '.pack.list' -f '$pack->{ pkg }/data.tar.gz'");
+            my $mv = system("mv $pack->{path} $pack->{pkg}/");
+            my $tar = system("tar cz -T '$pack->{pkg}/.packlist' -f '$pack->{pkg}/data.tar.gz'");
             my $status = make_pack($pack->{ pkg });
             say colored(['red'],"pm::ok > ")."$pack->{ pkg } ready (deb in stash)" unless $status;
             #my $cleanup = $clean->($pack->{ pkg });
             #say colored(['blue on_white'],"$pack->{ pkg } data pack moved to  stash") unless $cleanup;
-            say "check_pack received status $status";
+            say "check_pack: status \$status->$status";
     }
 };
-
 
 my $list_pack = sub {
     my $p = shift;
     my @meta = ();
-    say "list_pack received \$p \t-> $p\ncontent is:";
+
+    say "list_pack received \$p \t-> $p\ncontent is: ";
     for( @$p ){ say "\t$_" }
+
+    # if( /perl5\/lib\/perl5/ ){
+    #   pop @$p;
 
     for my $path( @$p ){
         my $pm_name = $path; $pm_name =~ s/(auto.*?\/)(.*?)(\/\.packlist)/$2/; $pm_name = $2;
         $pm_name =~ s/\//\:\:/g;
-
-
-        #    my $pkg_name = 'lib'.lc $pm_name.'-p5';
-        #$pkg_name =~ s/\//\-/g;
         open( my $fh, $path );
-
         my ( @pack ) = ();
         while(<$fh>){
-            chomp;
             my $base = qr/$ENV{HOME}/; 
-            unless( /\/.cypm/ ){
-                #unless( /$base\/.cypm/ ){
-                say "skiping $_"; next }
-            else  {
-                s/(.*?\.cypm\/.*?\/)(.*)/$2/; 
+            chomp;
+            say "list_pack: before skip \t$_";
+            if( /\.cypm/ ){
+                s/(.*?\.cypm\/.*?\/)(.*)/$2/;
                 s/(usr\/local\/lib\/perl5\/)(lib\/perl5)(.*)/$1site_perl\/$p5v$3/;
                 s/(usr\/local\/)(lib\/perl5\/bin)(.*)/$1bin$3/;
                 s/(usr\/local\/)(lib\/perl5\/man)(.*)/$1man$3/;
-                
-            push @pack, $_ unless /perllocal/ and say "adding into packlist $_" 
-        }
-                        
+                push @pack, $_ unless /perllocal/ and say "adding into packlist $_"
+            }
         }; say "packlist repath done:".@pack;
 
-    my $meta = meta($pm_name);
-    my $pkg = $meta->{pkg};
-
-    my $pack = {
-        pkg         =>  $pkg,
-        pm_name     =>  $pm_name,
-        path        =>  $path,
-        packlist    =>  \@pack,
-
-    };         
-
-            
+        my $meta = meta($pm_name);
+        my $pkg = $meta->{pkg};
+        my $pack = {
+            pkg         =>  $pkg,
+            pm_name     =>  $pm_name,
+            path        =>  $path,
+            packlist    =>  \@pack,
+        };         
     push @meta, $pack;
     close $fh;
-
     }
-
     $check_pack->( \@meta );
 };
 
-
-
-    
-
-
-#my $arch = $archive_pack_->( \@packlist2 );
 $list_pack->(\@packlist_orig);
-
-#print $path

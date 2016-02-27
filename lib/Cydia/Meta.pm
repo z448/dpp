@@ -1,17 +1,14 @@
 #!/usr/bin/env perl
 
 package Cydia::Meta;
+
 use 5.010;
 use warnings;
 use strict;
+
 use JSON;
 use File::Copy;
-use Filesys::Tree;
-use Data::Printer;
 use Encode;
-use FindBin;
-use lib "$FindBin::Bin/../lib";
-
 
 BEGIN {
     require Exporter;
@@ -41,7 +38,9 @@ my $deps = sub {
 
     my $deps = '';
     for ( @{$dep_pm->($pm)} ){
+        unless( m/^perl$/ ){
         $deps = $deps . 'lib'.lc $dep_dis->($_) .'-p5' . ', ';
+    }
     }
     $deps = $deps . 'perl';
     return $deps;
@@ -57,9 +56,6 @@ my $meta = sub {
     my $meta_p = decode_json( encode( 'utf8', $meta_j ) );
     my $m = $meta_p->{release}->{_source};
     my $prefix = 'lib';
-    #my( $remote ) = ();
-
-
      
     my $remote = {
         Name         => $m->{distribution},
@@ -70,8 +66,6 @@ my $meta = sub {
         #description  => $meta_p->{description},
         Homepage     => $metacpan.$meta_p->{module}[0]->{name},
         Maintainer   => 'zb (z8) <_p@module.pm>',
-        #Depends      => $deps->($m->{metadata}->{prereqs}->{runtime}->{requires}),
-        #deps         => $m->{metadata}->{prereqs}->{runtime}->{requires},
         module_name  => $meta_p->{module}[0]->{name},
         release_date => $meta_p->{date},
         Architecture => 'iphoneos-arm',
@@ -89,23 +83,8 @@ my $meta = sub {
     };
     return $remote;
 
-
 };
 
-    # PAR build
-    #    #my $dist = blib_to_par(); # make a PAR file using ./blib/
-    #    #install_par($dist);       # install it into the system
-    #    #uninstall_par($dist);     # uninstall it from the system
-    #    #sign_par($dist);          # sign it using Module::Signature
-    #    #verify_par($dist);        # verify it using Module::Signature
-    #
-    #    #install_par("http://foo.com/DBI-1.37-MSWin32-5.8.0.par"); # works too
-    #    #install_par("http://foo.com/DBI-1.37"); # auto-appends archname + perlver
-    #    #install_par("cpan://SMUELLER/PAR-Packer-0.975"); # uses CPAN author directory
-
-    # JSON defaults
-    #   add & rw defaults from json here;
-    #
     
 sub meta {
     my $pm = shift;

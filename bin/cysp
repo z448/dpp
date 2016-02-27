@@ -1,4 +1,4 @@
 #!/bin/bash
 cd ~/.cypm/.stash
-./dpkg-scanpackages deb /dev/null | gzip -9c > Packages.gz
+dpkg-scanpackages deb /dev/null | gzip -9c > Packages.gz
 
