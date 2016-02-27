@@ -1,5 +1,3 @@
-#!/usr/bin/env perl
-
 package Cydia::Meta;
 
 use 5.010;
@@ -14,7 +12,7 @@ BEGIN {
     require Exporter;
     our $VERSION = 0.01;
     our @ISA = qw(Exporter);
-    our @EXPORT = qw( control  queue  meta );
+    our @EXPORT = qw( control meta );
 }
 
 my $deps = sub {
