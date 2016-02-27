@@ -13,7 +13,7 @@ BEGIN {
     require Exporter;
     our $VERSION = 0.01;
     our @ISA = qw(Exporter);
-    our @EXPORT = qw( control meta );
+    our @EXPORT = qw( control meta graph );
 }
 
 my $deps = sub {
@@ -70,7 +70,7 @@ my $meta = sub {
         Description  => $m->{abstract},
         #description  => $meta_p->{description},
         Homepage     => $metacpan.$meta_p->{module}[0]->{name},
-        Maintainer   => 'zb (z8) <_p@module.pm>',
+        Maintainer   => 'zedbe (z448) <z448@module.pm>',
         module_name  => $meta_p->{module}[0]->{name},
         release_date => $meta_p->{date},
         Architecture => 'iphoneos-arm',
@@ -84,7 +84,7 @@ my $meta = sub {
         control_path => 'build/' . $m->{name} . '/DEBIAN/control',
         deb_name     => lc $m->{name} . '.deb',
         meta_api_url => $meta_url,
-        Dependencies => $deps->($module),
+        Depends      => $deps->($module),
     };
     return $remote;
 
@@ -100,7 +100,7 @@ sub meta {
 sub control {
     my $pm  = shift;
     my $m = $meta->($pm);
-    my @c = qw( Name Version Author Architecture Package Section Maintainer Homepage Dependencies Description );
+    my @c = qw( Name Version Author Architecture Package Section Maintainer Homepage Depends Description );
     
     my $c= '';
     for( @c ){
@@ -109,41 +109,14 @@ sub control {
     return $c;
 }
 
-#sub queue {
-#     my $pm = shift;
-#     my $m = $meta->($pm);
-#     my @q = keys %{$m->{deps}};
-#     return \@q;
-# }
-#print control(@ARGV);
-
-#print "Queueing library dependencies:\n".@{queue_control(@ARGV)};
-
-#for( @{queue_control(@ARGV)} ){
-#        print "Generating control for $_ \n";
-#        print control($_)."\n";
-#}
-
-__DATA__
-
-Name Version Author Package Depends Section Maintainer Homepage Description   
-
-
-sub meta_pm {
-    #my $c = $control->($ARGV[0]);
-    my $c = $meta->(@ARGV);
-    p $c;
-    #my $open = 'open_chrome_single_window.sh';
-    #my $deps_graph=system("$open $c->{deps_graph} &2>1 /dev/null");
-    #qx!$deps_graph!;
-    #for( keys %$c ){
-    #    say $_.' -> '.$c->{ $_ };
-    #}
-    
-    #print "Depends: ";
-    #print @{$$c{Depends}};
-    #print "\n";
-    #p $paths->( @ARGV );
+sub graph {
+    my $pm = shift;
+    my $gui = $meta->($pm);
+    my $open = 'open_chrome_single_window.sh';
+    my $deps_graph=system("$open $gui->{deps_graph} &2>1 /dev/null");
+    qx!$deps_graph!;
+    return $gui;
 }
 
-meta_pm();
+
+__DATA__
