@@ -7,6 +7,7 @@ use strict;
 use JSON;
 use File::Copy;
 use Encode;
+use List::MoreUtils qw(uniq);
 
 BEGIN {
     require Exporter;
@@ -35,10 +36,16 @@ my $deps = sub {
     };
 
     my $deps = '';
+    my @deps_repeat = ();
+
     for ( @{$dep_pm->($pm)} ){
-        unless( m/^perl$/ ){
-        $deps = $deps . 'lib'.lc $dep_dis->($_) .'-p5' . ', ';
+        push @deps_repeat, $dep_dis->($_);
     }
+
+    my @deps_uniq = uniq @deps_repeat;
+    
+    for( @deps_uniq ){
+        $deps = $deps . 'lib'.lc $_ .'-p5' . ', ' unless $_ eq 'perl'; 
     }
     $deps = $deps . 'perl';
     return $deps;
@@ -97,7 +104,7 @@ sub control {
     
     my $c= '';
     for( @c ){
-            $c = $c . $_.': '.$m->{$_}."\n";
+        $c = $c . $_.': '.$m->{$_}."\n";
     }
     return $c;
 }
