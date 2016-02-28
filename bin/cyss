@@ -8,7 +8,7 @@ my @hosts = qw( mobile@10.0.0.33 );
 my $pm = $ARGV[0];
 
 my $cypm_base = "~/.cypm/pool/usr/local/lib/perl5";
-my $cmd = "source ~/.cypm/.env && cpanm --reinstall -l $cypm_base $pm";
+my $cmd = "source ~/.cypm/.env && cpanm --force --reinstall -L $cypm_base $pm";
 
 # parallel test; uncoment below and tail /tmp/out-$host.txt on local host
 #my $cmd = 'for i in `seq 1 20`;do echo $i;sleep 3;done';
