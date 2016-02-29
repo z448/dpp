@@ -8,12 +8,13 @@ use JSON;
 use File::Copy;
 use Encode;
 use List::MoreUtils qw(uniq);
+use open qw<:encoding(UTF-8)>;
 
 BEGIN {
     require Exporter;
     our $VERSION = 0.01;
     our @ISA = qw(Exporter);
-    our @EXPORT = qw( control meta graph );
+    our @EXPORT = qw( control meta graph web );
 }
 
 my $deps = sub {
@@ -73,23 +74,66 @@ my $meta = sub {
         Maintainer   => 'zedbe (z448) <z448@module.pm>',
         module_name  => $meta_p->{module}[0]->{name},
         release_date => $meta_p->{date},
-        Architecture => 'iphoneos-arm',
+        Architecture => 'all',
         source_url   => $m->{download_url},
         deps_graph   => $graph.$m->{name}, #Moose-2.1205
         pod          => $meta_p->{pod},
         prefix       => 'lib',
         Package      => $prefix . lc $m->{distribution} . '-p5',
-        pkg =>       => $prefix . lc $m->{distribution} . '-p5',
+        pkg          => $prefix . lc $m->{distribution} . '-p5',
         build_path   => 'build/' . $m->{name} . '/usr/local/lib/perl5/lib',
         control_path => 'build/' . $m->{name} . '/DEBIAN/control',
         deb_name     => lc $m->{name} . '.deb',
         meta_api_url => $meta_url,
         Depends      => $deps->($module),
+        www          => 'load.sh/cydia',
+        div          => [ qq|\n\t<div class="module">$module</div>|, qq|\n\t<div class="description">$m->{abstract}</div></p>| ],
     };
     return $remote;
-
 };
 
+# website generator
+# after succesful build makes new <div> prepended to current html
+# will be changed to json
+#     <div class="style2">Pegex</div>
+#     <div class="style1">Perl6 parsing engine + Perl5 regexes</div></p>
+
+my $web = sub {
+    my $pm = shift;
+    my $m = $meta->( $pm );
+    my $html = '';
+    my @pipe;
+
+
+    open( my $fh, '<', '.www' ); 
+    {   local $/ = undef;
+        my $j = <$fh>; 
+        $html = decode_json $j  }
+    close $fh; $fh = undef;
+
+    open my $pipe, '-|', "curl -skL $m->{ www }"; 
+    my @body;
+    while(<$pipe>){
+            push @body, $_ if /module/ or /description/;
+    }; $html->{ body } = \@body;
+    
+    #open( $fh, '>', '.index' ) or die "can't open: $!";
+    #print $fh $html->{ head };
+    #say   $fh @{$m->{ div }};
+    #say   $fh @{$html->{ body }};
+    #print $fh $html->{ foot };
+    #close $fh; $fh = undef;
+
+    open( $fh, '>', '.index' ) or die "can't open: $!";
+    say   $fh @{$m->{ div }};
+    close $fh; $fh = undef;
+};
+
+sub web {
+    my $pm = shift;
+    my $m = $web->( $pm );
+    return $m;
+}
     
 sub meta {
     my $pm = shift;
@@ -120,3 +164,5 @@ sub graph {
 
 
 __DATA__
+
+

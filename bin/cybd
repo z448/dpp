@@ -117,6 +117,8 @@ my $check_pack = sub {
             #my $cleanup = $clean->($pack->{ pkg });
             #say colored(['blue on_white'],"$pack->{ pkg } data pack moved to  stash") unless $cleanup;
             say "check_pack: status \$status->$status";
+            my $div = web($pm_name);
+            say "html inject -> ok" unless $div;
     }
 };
 
