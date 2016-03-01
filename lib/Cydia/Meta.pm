@@ -8,6 +8,7 @@ use JSON;
 use File::Copy;
 use Encode;
 use List::MoreUtils qw(uniq);
+use Data::Dump::Streamer;
 use open qw<:encoding(UTF-8)>;
 
 BEGIN {
@@ -132,12 +133,17 @@ my $web = sub {
 sub web {
     my $pm = shift;
     my $m = $web->( $pm );
-    return $m;
+    
+    return Dump($m);
 }
     
 sub meta {
     my $pm = shift;
     my $m = $meta->( $pm );
+    #my $j = encode_json $j;
+    #open( my $fh, '>', 'cypm.json' );
+    #print $fh $j;
+
     return $m;
 }
 

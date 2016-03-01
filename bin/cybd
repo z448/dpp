@@ -29,8 +29,8 @@ my $p5 = sub {
 my $p5v = $p5->();
 
 
+# path for each arch needs to be resolved; see DATA section (1) and ExtUtils::MakeMaker docs
 unlink("usr/local/lib/perl5/lib/perl5/arm-iphoneos-2level/auto/ExtUtils/MakeMaker/.packlist");
-
 move( "usr/local/lib/perl5/man", "usr/local/man" );
 move( "usr/local/lib/perl5/bin", "usr/local/bin" );
 move( "usr/local/lib/perl5/lib/perl5", "usr/local/lib/perl5/lib/".$p5v );
@@ -117,7 +117,7 @@ my $check_pack = sub {
             #my $cleanup = $clean->($pack->{ pkg });
             #say colored(['blue on_white'],"$pack->{ pkg } data pack moved to  stash") unless $cleanup;
             say "check_pack: status \$status->$status";
-            my $div = web($pm_name);
+            my $div = web($pack->{ pm_name} );
             say "html inject -> ok" unless $div;
     }
 };
@@ -165,3 +165,51 @@ my $list_pack = sub {
 };
 
 $list_pack->(\@packlist_orig);
+
+
+
+__DATA__
+
+1.
+a)
+perl -V:install.* 
+installarchlib='/usr/local/lib/perl5/5.14.4/arm-iphoneos-2level';
+installbin='/usr/local/bin';
+installhtml1dir='';
+installhtml3dir='';
+installman1dir='';
+installman3dir='';
+installprefix='/usr/local';
+installprefixexp='/usr/local';
+installprivlib='/usr/local/lib/perl5/5.14.4';
+installscript='/usr/local/bin';
+installsitearch='/usr/local/lib/perl5/site_perl/5.14.4/arm-iphoneos-2level';
+installsitebin='/usr/local/bin';
+installsitehtml1dir='';
+installsitehtml3dir='';
+installsitelib='/usr/local/lib/perl5/site_perl/5.14.4';
+installsiteman1dir='';
+installsiteman3dir='';
+installsitescript='/usr/local/bin';
+installstyle='lib/perl5';
+installusrbinperl='define';
+installvendorarch='';
+installvendorbin='';
+installvendorhtml1dir='';
+installvendorhtml3dir='';
+installvendorlib='';
+installvendorman1dir='';
+installvendorman3dir='';
+installvendorscript='';
+
+2)
+perl -le print join $/, @INC
+/var/mobile/Documents/pm2deb/local/lib/perl5
+/var/mobile/Documents/pm2deb/lib
+/var/root/.cypm/.stash/tools/usr/share/perl5
+/usr/local/lib/perl5/site_perl/5.14.4/arm-iphoneos-2level
+/usr/local/lib/perl5/site_perl/5.14.4
+/usr/local/lib/perl5/5.14.4/arm-iphoneos-2level
+/usr/local/lib/perl5/5.14.4
+.
+
