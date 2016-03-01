@@ -1,0 +1,6 @@
+pod2html --norecurse --noheader --css http://10.0.0.36:8080/ir-black.css --outfile ioal.html ./ioall.pod
+pod2html --norecurse --noheader --css http://10.0.0.36:8080/ir-black.css --outfile ioal.html IO::All
+pod2html ./ioall.pod --norecurse --noheader --css http://10.0.0.36:8080/ir-black.css --outfile ioal.html
+curl -LO yandex.st/highlightjs/8.0/highlight.min.js
+
+
