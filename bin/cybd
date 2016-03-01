@@ -213,3 +213,12 @@ perl -le print join $/, @INC
 /usr/local/lib/perl5/5.14.4
 .
 
+3)
+From ExtUtils::MM doc
+DESTDIR
+This is the root directory into which the code will be installed. It prepends itself to the normal prefix. For example, if your code would normally go into /usr/local/lib/perl you could set DESTDIR=~/tmp/ and installation would go into ~/tmp/usr/local/lib/perl.
+This is primarily of use for people who repackage Perl modules.
+NOTE: Due to the nature of make, it is important that you put the trailing slash on your DESTDIR. ~/tmp/ not ~/tmp.
+
+
+
