@@ -1,0 +1,44 @@
+#!/usr/bin/env perl
+
+use 5.010;
+use Cydia::Meta;
+
+my $pm = "$ARGV[0]";
+my $m = meta($pm);
+my %uni;
+my @uni;
+
+
+say "All modules";
+for( @{$m->{Depends}{module}} ){
+    unless( $_ eq 'perl' ){
+        $uni{"$_"} = ' ';
+    }
+}
+
+
+for( keys %uni){
+    print "\nstarting build for $_\n";
+    open SPOOLER, "|-", "cyss $_" or die "can't run lpr: $!";
+}
+
+
+
+__DATA__
+    print "Starting build for:" . keys $_;
+    open SPOOLER, "|-", "cyss $_"    # requires 5.6.1
+        or die "can't run lpr: $!";
+}
+
+__DATA__
+
+for( @{$m->{Depends}{distribution}} ){
+    unless( $_ eq 'perl' ){
+        s/\-/\:\:/g;
+        qx|cyss $_|;
+        #print "$_\ ";
+    }
+}
+print "\n";
+
+

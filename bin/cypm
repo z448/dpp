@@ -1,0 +1,8 @@
+#!/usr/bin/env perl
+
+use 5.010;
+use Cydia::Meta;
+use Data::Printer;
+
+my $graph = graph($ARGV[0]);
+print $graph;

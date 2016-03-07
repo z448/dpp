@@ -1,0 +1,13 @@
+#!/bin/bash
+
+mysdk="/var/mobile/Documents/iPhoneOS5.1.sdk" && echo
+
+echo 'dpkg have:' && ls /var/lib/dpkg/info | grep $1
+echo "search results < /usr/lib | grep $1 >:" && ls /usr/lib | grep $1>~/.o && cat ~/.o
+while read o;do echo ln -s /usr/lib/$o $mysdk/usr/lib/$(basename $o);done<~/.o
+
+#ls /var/lib/dpkg/info | grep $1 && echo
+#ls /usr/lib | grep $1>~/.o && cat ~/.o
+#while read o;do echo ln -s /usr/lib/$o $mysdk/usr/lib/$(basename $o);done<~/.o
+
+echo -e "\n\t\e[7m export path to your SDK\e[0m \n\t\e[0m mysdk=/path/to/iPhoneOS5.1.sdk \n\t then use list above to create softlinks \e[0m\n"

@@ -1,0 +1,15 @@
+#!/usr/bin/env perl
+
+use 5.010;
+use open qw<:encoding(UTF-8)>;
+
+use Cydia::Meta qw( meta );
+use List::MoreUtils qw( uniq );
+use Data::Printer;
+
+my $pm = $ARGV[0];
+my $d = meta( $pm );
+p( $d );
+
+
+
