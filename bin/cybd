@@ -15,7 +15,7 @@ use lib "$FindBin::Bin/../lib";
 use open qw< :encoding(UTF-8) >;
 use Cydia::Meta;
 
-my @directories = ( "$ENV{HOME}/.cypm/pool/usr/local/lib/perl5" );
+my @directories = ( "$ENV{HOME}/.cypm/pool/usr" );
 my @packlist_orig;
 my $p5 = sub {
      my @v5 = qx|perl -v|;
@@ -28,9 +28,20 @@ my $p5 = sub {
 
 my $p5v = $p5->();
 
+my $repath = sub {
+    my $stage = shift;
+    my $p = path( $stage );
+    my $i = 0;
+    for( @{$p->{original}} ){
+        move( $_, $p->{build}->[$i] );
+        #print "move( $_, $p->{build}->[$i] )\n";
+        $i++;
+    }
+};
 
-# path for each arch needs to be resolved; see DATA section (1) and ExtUtils::MakeMaker docs
+
 unlink("usr/local/lib/perl5/lib/perl5/arm-iphoneos-2level/auto/ExtUtils/MakeMaker/.packlist");
+
 move( "usr/local/lib/perl5/man", "usr/local/man" );
 move( "usr/local/lib/perl5/bin", "usr/local/bin" );
 move( "usr/local/lib/perl5/lib/perl5", "usr/local/lib/perl5/lib/".$p5v );
@@ -49,7 +60,17 @@ find(\&wanted, @directories );
 say "original packlist";
 say @packlist_orig; 
 
-sub make_pack { 
+my $O_O = sub {
+    my $line = shift;
+    my $colo = 'black on_white';
+    my $name = ' cypm';
+    my $say = sub { say colored(['bright_white on_blue'], $name ).'->'.colored([$colo], $line) };
+    $say->();
+};
+
+# todo: add xz/lzma compression option (1)
+
+my $make_pack = sub { 
     my $pm = shift;
     my $ar = <<"_DEB";
     cd $pm; tar -xf data.tar.gz;
@@ -65,61 +86,56 @@ _DEB
     my $package = sub {
         my $packer = shift;
         my $status  = system($packer);
-        say "make_pack: status-> $status";
-        return $status;
     }; 
-    my $s_pack = $package->($ar);
-    say "make_pack: \$s_pack $s_pack";
-    return $s_pack;
-
-    #my $clean = sub {
-    #    my $mess = shift;
-    #    say 'now in make_pack->$clean';
-    #    my $s_clean = system("rm -rf $mess");
-    #    return $s_clean;
-    #};
-#    my $usr = 'usr';
-#    my $s_clean = $clean->($usr);
-#    return $s_clean;
-}
+    my $status = $package->($ar);
+};
 
 my $check_pack = sub {
     my $p = shift;
     my @m = @$p;
 
     for my $pack( @m ){
-            say "\ncheck_pack received packlist for $pack->{ pm_name }";
-            say "\tpath: $pack->{ path }"; print "check_pack processing content: \n";
-            say "\t".$_ for @{$pack->{ packlist }};
+            $O_O->( "check>pack> received packlist for $pack->{pm_name}" );
+            say "\tcheck>pack> path: $pack->{ path }"; print "check_pack processing content: \n";
+            say "\ \ ".$_ for @{$pack->{ packlist }};
     
-            my $make_path = system("mkdir -p $pack->{ pkg }/DEBIAN");
-            my $control = system("touch $pack->{ pkg }/DEBIAN/".'control');
+            my $make_path = system("mkdir -p $pack->{pkg}/DEBIAN");
+            my $control = system("touch $pack->{pkg}/DEBIAN/control");
             my $fh = undef;
-            say 'check_pack: creating control file for '."$pack->{ pkg }";
-            my $fn = "$ENV{HOME}/.cypm/pool/$pack->{ pkg }/DEBIAN/".'control';
+            $O_O->( "check>pack> creating control file for $pack->{pm_name}" );
+            my $fn = "$ENV{HOME}/.cypm/pool/$pack->{pkg}/DEBIAN/control";
             open( $fh, '>', $fn ) or die "can't open $fn: $!";
             print $fh control("$pack->{pm_name}") . "\n";
             close $fh;
-            print 'control file content:'."\n". control("$pack->{pm_name}") . "\n";
+            $O_O->( "check>pack> control file content:" ); say "\n\t" . control($pack->{pm_name});
 
             my $packlist_fh = undef;
-            open( $packlist_fh, "> $pack->{ path }" ) or die "cant open it $!";
-            #open( $packlist_fh, "> ./.pack.list" ) or die "cant open it $!";
-            for(@{$pack->{ packlist }}){
-                print $packlist_fh $_."\n";
-            }
-            close $packlist_fh;
+            open( $packlist_fh, "> $pack->{path}" ) or die "cant open it $!";
 
+        #rewrite original packlist
+            for(@{$pack->{ packlist }}){
+                say $packlist_fh $_;
+            }; close $packlist_fh;
+
+        #create new data.pack using new packlist
+            my $tar = system("tar cz -T $pack->{path} -f $pack->{pkg}/data.tar.gz");
             my $mv = system("mv $pack->{path} $pack->{pkg}/");
-            my $tar = system("tar cz -T '$pack->{pkg}/.packlist' -f '$pack->{pkg}/data.tar.gz'");
-            my $status = make_pack($pack->{ pkg });
-            say colored(['red'],"pm::ok > ")."$pack->{ pkg } ready (deb in stash)" unless $status;
-            #my $cleanup = $clean->($pack->{ pkg });
-            #say colored(['blue on_white'],"$pack->{ pkg } data pack moved to  stash") unless $cleanup;
-            say "check_pack: status \$status->$status";
-            my $div = web($pack->{ pm_name} );
-            say "html inject -> ok" unless $div;
+
+        #call makepack, build deb
+            my $status = $make_pack->( $pack->{ pkg } );
+            $O_O->( "make>pack>status->$status |$pack->{pkg} in stash|" ) unless $status;
+            
+        #move new packlist
+        #system("mv $pack->{path} $pack->{pkg}");
+
+        #web
+            my $div = web($pack->{pm_name});
+            $O_O->( "make>html>components->ok" ) unless $div;
     }
+
+    my $stage = 'post';
+    my $stage_S = $repath->( $stage );
+    $O_O->( "check>pack>cleanup->ok" ) unless $stage_S;
 };
 
 my $list_pack = sub {
@@ -137,10 +153,11 @@ my $list_pack = sub {
         $pm_name =~ s/\//\:\:/g;
         open( my $fh, $path );
         my ( @pack ) = ();
+        $O_O->( "list>pack> original packlist contents:" );
         while(<$fh>){
             my $base = qr/$ENV{HOME}/; 
             chomp;
-            say "list_pack: before skip \t$_";
+            say "\t$_";
             if( /\.cypm/ ){
                 s/(.*?\.cypm\/.*?\/)(.*)/$2/;
                 s/(usr\/local\/lib\/perl5\/)(lib\/perl5)(.*)/$1site_perl\/$p5v$3/;
@@ -166,59 +183,7 @@ my $list_pack = sub {
 
 $list_pack->(\@packlist_orig);
 
-
-
 __DATA__
-
-1.
-a)
-perl -V:install.* 
-installarchlib='/usr/local/lib/perl5/5.14.4/arm-iphoneos-2level';
-installbin='/usr/local/bin';
-installhtml1dir='';
-installhtml3dir='';
-installman1dir='';
-installman3dir='';
-installprefix='/usr/local';
-installprefixexp='/usr/local';
-installprivlib='/usr/local/lib/perl5/5.14.4';
-installscript='/usr/local/bin';
-installsitearch='/usr/local/lib/perl5/site_perl/5.14.4/arm-iphoneos-2level';
-installsitebin='/usr/local/bin';
-installsitehtml1dir='';
-installsitehtml3dir='';
-installsitelib='/usr/local/lib/perl5/site_perl/5.14.4';
-installsiteman1dir='';
-installsiteman3dir='';
-installsitescript='/usr/local/bin';
-installstyle='lib/perl5';
-installusrbinperl='define';
-installvendorarch='';
-installvendorbin='';
-installvendorhtml1dir='';
-installvendorhtml3dir='';
-installvendorlib='';
-installvendorman1dir='';
-installvendorman3dir='';
-installvendorscript='';
-
-2)
-perl -le print join $/, @INC
-/var/mobile/Documents/pm2deb/local/lib/perl5
-/var/mobile/Documents/pm2deb/lib
-/var/root/.cypm/.stash/tools/usr/share/perl5
-/usr/local/lib/perl5/site_perl/5.14.4/arm-iphoneos-2level
-/usr/local/lib/perl5/site_perl/5.14.4
-/usr/local/lib/perl5/5.14.4/arm-iphoneos-2level
-/usr/local/lib/perl5/5.14.4
-.
-
-3)
-From ExtUtils::MM doc
-DESTDIR
-This is the root directory into which the code will be installed. It prepends itself to the normal prefix. For example, if your code would normally go into /usr/local/lib/perl you could set DESTDIR=~/tmp/ and installation would go into ~/tmp/usr/local/lib/perl.
-This is primarily of use for people who repackage Perl modules.
-NOTE: Due to the nature of make, it is important that you put the trailing slash on your DESTDIR. ~/tmp/ not ~/tmp.
-
-
-
+1. xz/lmza on telesphoero needs fix4 
+tar -cf - usr | xz -9 -c - > ../data.tar.xz
+tar -cf - usr | lzma -9 -c - > ../data.tar.lmzm

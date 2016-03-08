@@ -8,15 +8,34 @@ use JSON;
 use File::Copy;
 use Encode;
 use List::MoreUtils qw(uniq);
-use Data::Dump::Streamer;
 use open qw<:encoding(UTF-8)>;
 
 BEGIN {
     require Exporter;
     our $VERSION = 0.01;
     our @ISA = qw(Exporter);
-    our @EXPORT = qw( control meta graph web );
+    our @EXPORT = qw( control meta graph web dep path );
 }
+
+
+my $path = sub {
+    my $q = shift;
+    my $post = {
+    original    =>  [ "./usr/local/lib/perl5/site_perl", "./usr/local/lib/perl5/lib/5.14.4" ],
+    build       =>  [ "./usr/local/lib/perl5/lib", "./usr/local/lib/perl5/lib/perl5" ],
+    }; 
+
+    my $pre = {
+    original    =>  [ "./usr/xxxxxxxxxxxerl5/site_perl", "./usr/xxxxxxxxxxperl5/lib/5.14.4" ],
+    build       =>  [ "./usr/xxxxxxxxxxperl5/lib", "./usr/xxxxxxxxxxxxxx5/lib/perl5" ],
+    }; 
+
+    return unless $q;
+    if( $q eq 'post' ){
+        return $post } 
+    elsif ( $q eq 'pre' ){ return $pre }
+
+};
 
 my $deps = sub {
     my $pm = shift;
@@ -37,20 +56,31 @@ my $deps = sub {
         return \@d;
     };
 
-    my $deps = '';
-    my @deps_repeat = ();
+    my %dep;
+    my @module_dep = ();
+    my @dist_dep = ();
+    $dep{control} = '';
 
     for ( @{$dep_pm->($pm)} ){
-        push @deps_repeat, $dep_dis->($_);
-    }
+        push @module_dep, $_ unless $_ eq 'perl';
+    }; $dep{module} = \@module_dep;
 
-    my @deps_uniq = uniq @deps_repeat;
-    
-    for( @deps_uniq ){
-        $deps = $deps . 'lib'.lc $_ .'-p5' . ', ' unless $_ eq 'perl'; 
+    for ( @{$dep_pm->($pm)} ){
+        push @dist_dep, $dep_dis->($_) unless $_ eq 'perl';
     }
-    $deps = $deps . 'perl';
-    return $deps;
+    $dep{distribution} = \@dist_dep;
+
+    my @deps_uniq = uniq @dist_dep;
+
+    for( @deps_uniq ){
+        unless( $_ eq 'perl' ){
+            $dep{control} = $dep{control} . 'lib' . lc "$_" . "-p5" . "\, ";
+        } else { 
+            next;
+        }
+    }
+    $dep{control} = $dep{control} . "perl";
+    return \%dep;
 };
 
 my $meta = sub {
@@ -70,7 +100,7 @@ my $meta = sub {
         Author       => $m->{author},
         Section      => 'Perl',
         Description  => $m->{abstract},
-        #description  => $meta_p->{description},
+        description  => $meta_p->{description},
         Homepage     => $metacpan.$meta_p->{module}[0]->{name},
         Maintainer   => 'zedbe (z448) <z448@module.pm>',
         module_name  => $meta_p->{module}[0]->{name},
@@ -88,7 +118,7 @@ my $meta = sub {
         meta_api_url => $meta_url,
         Depends      => $deps->($module),
         www          => 'load.sh/cydia',
-        div          => [ qq|\n\t<div class="module">$module</div>|, qq|\n\t<div class="description">$m->{abstract}</div></p>| ],
+        div          => [ qq|\n\t<div class="module">$module</div>|, qq|\t<div class="description">$m->{abstract}</br></br></div>| ],
     };
     return $remote;
 };
@@ -104,7 +134,6 @@ my $web = sub {
     my $m = $meta->( $pm );
     my $html = '';
     my @pipe;
-
 
     open( my $fh, '<', '.www' ); 
     {   local $/ = undef;
@@ -125,37 +154,36 @@ my $web = sub {
     #print $fh $html->{ foot };
     #close $fh; $fh = undef;
 
-    open( $fh, '>', '.index' ) or die "can't open: $!";
+    open( $fh, '>>', '.index' ) or die "can't open: $!";
     say   $fh @{$m->{ div }};
     close $fh; $fh = undef;
 };
 
 sub web {
     my $pm = shift;
-    my $m = $web->( $pm );
-    
-    return Dump($m);
+    my $m = $web->($pm);
+    return $m;
 }
     
 sub meta {
     my $pm = shift;
-    my $m = $meta->( $pm );
-    #my $j = encode_json $j;
-    #open( my $fh, '>', 'cypm.json' );
-    #print $fh $j;
-
+    my $m = $meta->($pm);
+    #my $dep = $m->{Depends};
     return $m;
 }
 
 sub control {
     my $pm  = shift;
     my $m = $meta->($pm);
-    my @c = qw( Name Version Author Architecture Package Section Maintainer Homepage Depends Description );
+    my $dep = $m->{Depends};
+    my @c = qw( Name Version Author Architecture Package Section Maintainer Homepage Description );
     
     my $c= '';
     for( @c ){
         $c = $c . $_.': '.$m->{$_}."\n";
     }
+    $c = $c . "\t" . $m->{description} . "\n";
+    $c = $c . 'Depends: ' . $dep->{control} . "\n";
     return $c;
 }
 
@@ -166,6 +194,12 @@ sub graph {
     my $deps_graph=system("$open $gui->{deps_graph} &2>1 /dev/null");
     qx!$deps_graph!;
     return $gui;
+}
+
+sub path {
+    my $stage = shift;
+    my $p = $path->( $stage );
+    return $p;
 }
 
 
