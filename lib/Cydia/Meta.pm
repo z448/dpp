@@ -8,6 +8,7 @@ use JSON;
 use File::Copy;
 use Encode;
 use List::MoreUtils qw(uniq);
+use Config;
 use open qw<:encoding(UTF-8)>;
 
 BEGIN {
@@ -83,6 +84,7 @@ my $deps = sub {
     return \%dep;
 };
 
+
 my $meta = sub {
     my $module = shift;
     my $metacpan = 'https://metacpan.org/pod/';
@@ -103,9 +105,10 @@ my $meta = sub {
         description  => $meta_p->{description},
         Homepage     => $metacpan.$meta_p->{module}[0]->{name},
         Maintainer   => 'zedbe (z448) <z448@module.pm>',
+        install_path => $Config{installprivlib},
         module_name  => $meta_p->{module}[0]->{name},
         release_date => $meta_p->{date},
-        Architecture => 'iphoneos-arm',
+        Architecture => $Config{archname},
         source_url   => $m->{download_url},
         deps_graph   => $graph.$m->{name}, #Moose-2.1205
         pod          => $meta_p->{pod},

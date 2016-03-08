@@ -13,6 +13,7 @@ use Term::ANSIColor;
 use FindBin;
 use lib "$FindBin::Bin/../lib";
 use open qw< :encoding(UTF-8) >;
+use Acme::ProgressBar;
 use Cydia::Meta;
 
 my @directories = ( "$ENV{HOME}/.cypm/pool/usr" );
@@ -118,12 +119,16 @@ my $check_pack = sub {
             }; close $packlist_fh;
 
         #create new data.pack using new packlist
-            my $tar = system("tar cz -T $pack->{path} -f $pack->{pkg}/data.tar.gz");
-            my $mv = system("mv $pack->{path} $pack->{pkg}/");
+            my $datapack = sub {
+                my $tar = system("tar cz -T $pack->{path} -f $pack->{pkg}/data.tar.gz");
+                my $mv = system("mv $pack->{path} $pack->{pkg}/");
+            };
+            progress{ $datapack->() };
+
 
         #call makepack, build deb
-            my $status = $make_pack->( $pack->{ pkg } );
-            $O_O->( "make>pack>status->$status |$pack->{pkg} in stash|" ) unless $status;
+            progress{$make_pack->( $pack->{ pkg } )};
+            #$O_O->( "make>pack>status->$status |$pack->{pkg} in stash|" ) unless $status;
             
         #move new packlist
         #system("mv $pack->{path} $pack->{pkg}");
