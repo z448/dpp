@@ -6,4 +6,4 @@ requires 'Data::Printer', '0.38';
 requires 'Net::OpenSSH', '0.70';
 requires 'App::cpanminus', '1.7040';
 requires 'List::MoreUtils', '0.413';
-requires 'YAML::XS', '0.62';
+requires 'Acme::ProgressBar', '0.1';

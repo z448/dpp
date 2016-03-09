@@ -63,9 +63,9 @@ say @packlist_orig;
 
 my $O_O = sub {
     my $line = shift;
-    my $colo = 'black on_white';
+    my $colo = 'white on_bright_black';
     my $name = ' cypm';
-    my $say = sub { say colored(['bright_white on_blue'], $name ).'->'.colored([$colo], $line) };
+    my $say = sub { say colored(['bright_black on_white'], $name ).'->'.colored([$colo], $line) };
     $say->();
 };
 
@@ -123,19 +123,19 @@ my $check_pack = sub {
                 my $tar = system("tar cz -T $pack->{path} -f $pack->{pkg}/data.tar.gz");
                 my $mv = system("mv $pack->{path} $pack->{pkg}/");
             };
-            progress{ $datapack->() };
+            print "\npulling datapack: "; progress{ $datapack->() };
 
 
         #call makepack, build deb
-            progress{$make_pack->( $pack->{ pkg } )};
+            print "\npackaging deb: "; progress{$make_pack->( $pack->{ pkg } )};
             #$O_O->( "make>pack>status->$status |$pack->{pkg} in stash|" ) unless $status;
             
         #move new packlist
         #system("mv $pack->{path} $pack->{pkg}");
 
         #web
-            my $div = web($pack->{pm_name});
-            $O_O->( "make>html>components->ok" ) unless $div;
+            print "\nhtml div:"; progress{ web($pack->{pm_name}) };
+            #$O_O->( "make>html>components->ok" ) unless $div;
     }
 
     my $stage = 'post';
