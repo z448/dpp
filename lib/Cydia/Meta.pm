@@ -9,6 +9,7 @@ use File::Copy;
 use Encode;
 use List::MoreUtils qw(uniq);
 use Config;
+use Config::Extensions qw( %Extensions );
 use open qw<:encoding(UTF-8)>;
 
 BEGIN {
@@ -17,6 +18,11 @@ BEGIN {
     our @ISA = qw(Exporter);
     our @EXPORT = qw( control meta graph web dep path );
 }
+
+
+#for( keys {grep( /Storable/, keys %Extensions)}){
+#print "$_"."\n";
+#}'
 
 
 my $path = sub {
@@ -40,6 +46,7 @@ my $path = sub {
 
 my $deps = sub {
     my $pm = shift;
+    my $core_pm = 
 
     my $dep_dis = sub {
         my $m = shift;
@@ -53,7 +60,10 @@ my $deps = sub {
         my $m = shift;
         my $j = qx|curl -skL http://api.metacpan.org/v0/module/$m?join=release|;
         my $p  = decode_json( encode( 'utf8', $j )); 
-        my @d = keys %{$p->{release}->{_source}->{metadata}->{prereqs}->{runtime}->{requires}};
+        my @d;
+        for( keys %{$p->{release}->{_source}->{metadata}->{prereqs}->{runtime}->{requires}} ){
+            push @d, $_ unless $Extensions{$_};
+        }
         return \@d;
     };
 
