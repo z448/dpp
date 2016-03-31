@@ -1,4 +1,8 @@
-#### wip
+#### work in progress ( works on iOS with perl v5.14.4 )
+
+
+formerly 'pm2deb, cyp';
+
 
 Readme outdated...
 
