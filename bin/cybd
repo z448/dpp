@@ -8,11 +8,12 @@ use strict;
 use JSON::PP;
 use File::Find;
 use File::Copy;
-use Data::Printer;
 use Term::ANSIColor;
+use Config;
 use FindBin;
 use lib "$FindBin::Bin/../lib";
 use open qw< :encoding(UTF-8) >;
+#use Term::ProgressBar;
 use Acme::ProgressBar;
 use Cydia::Meta;
 
@@ -40,14 +41,26 @@ my $repath = sub {
     }
 };
 
+#unlink("usr/local/lib/perl5/lib/perl5/arm-iphoneos-2level/auto/ExtUtils/MakeMaker/.packlist");
+###! change to perl internal vars "perl -V...
 
-unlink("usr/local/lib/perl5/lib/perl5/arm-iphoneos-2level/auto/ExtUtils/MakeMaker/.packlist");
+my $cybase = {};
+my $base_path = "usr/local/lib/perl5";
+my @base = qw( /man /bin /lib/perl5 /lib );
+my $sitelib =  $Config{sitelib};
+$sitelib =~ s/site_perl/lib/; $sitelib =~ s/^\///;
+my $sitelib_stem = $Config{sitelib_stem}; $sitelib_stem = s/^\///;
 
-move( "usr/local/lib/perl5/man", "usr/local/man" );
-move( "usr/local/lib/perl5/bin", "usr/local/bin" );
-move( "usr/local/lib/perl5/lib/perl5", "usr/local/lib/perl5/lib/".$p5v );
-move( "usr/local/lib/perl5/lib", "usr/local/lib/perl5/site_perl" );
+for my $fix (@base){
+    my $key = $fix; $key =~ s/\///g;
+    $cybase->{$key} = $base_path . $fix;
+    #   say $key . ' -> ' .  $cybase->{$key};
+}; 
 
+move($cybase->{man}, "usr/local/man");
+move($cybase->{bin}, "usr/local/bin");
+move($cybase->{libperl5}, "$sitelib");
+move($cybase->{lib}, "$sitelib_stem");
 
 sub wanted { 
     if ( $_ eq '.packlist' ){
@@ -88,7 +101,7 @@ _DEB
         my $packer = shift;
         my $status  = system($packer);
     }; 
-    my $status = $package->($ar);
+    my $status = progress { $package->($ar) };
 };
 
 my $check_pack = sub {
@@ -123,18 +136,18 @@ my $check_pack = sub {
                 my $tar = system("tar cz -T $pack->{path} -f $pack->{pkg}/data.tar.gz");
                 my $mv = system("mv $pack->{path} $pack->{pkg}/");
             };
-            print "\npulling datapack: "; progress{ $datapack->() };
+            print "\npulling datapack: ";  $datapack->();
 
 
         #call makepack, build deb
-            print "\npackaging deb: "; progress{$make_pack->( $pack->{ pkg } )};
+            print "\npackaging deb: "; $make_pack->( $pack->{ pkg } );
             #$O_O->( "make>pack>status->$status |$pack->{pkg} in stash|" ) unless $status;
             
         #move new packlist
         #system("mv $pack->{path} $pack->{pkg}");
 
         #web
-            print "\nhtml div:"; progress{ web($pack->{pm_name}) };
+            print "\nhtml div:"; web($pack->{pm_name});
             #$O_O->( "make>html>components->ok" ) unless $div;
     }
 

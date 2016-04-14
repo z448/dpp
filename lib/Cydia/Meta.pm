@@ -24,12 +24,14 @@ BEGIN {
 #print "$_"."\n";
 #}'
 
+### !!! finish orig; find right paths for each platform
+### perl -V + ExtUtils::MakeMaker to find out; 
 
 my $path = sub {
     my $q = shift;
     my $post = {
-    original    =>  [ "./usr/local/lib/perl5/site_perl", "./usr/local/lib/perl5/lib/5.14.4" ],
-    build       =>  [ "./usr/local/lib/perl5/lib", "./usr/local/lib/perl5/lib/perl5" ],
+    original    =>  [ "./usr/local/lib/perl5/site_perl", "./usr/local/lib/perl5/lib/5.14.4", "./usr/local/bin" ],
+    build       =>  [ "./usr/local/lib/perl5/lib", "./usr/local/lib/perl5/lib/perl5", "./usr/local/lib/perl5/bin" ],
     }; 
 
     my $pre = {
@@ -90,7 +92,7 @@ my $deps = sub {
             next;
         }
     }
-    $dep{control} = $dep{control} . "perl";
+    $dep{control} = $dep{control} . "perl (= 5.14.4)";
     return \%dep;
 };
 
@@ -104,6 +106,7 @@ my $meta = sub {
 #    print $meta_j;
     my $meta_p = decode_json( encode( 'utf8', $meta_j ) );
     my $m = $meta_p->{release}->{_source};
+    my $stratopan = $graph.$m->{name};
     my $prefix = 'lib';
      
     my $remote = {
@@ -112,13 +115,14 @@ my $meta = sub {
         Author       => $m->{author},
         Section      => 'Perl',
         Description  => $m->{abstract},
+        Depiction    => $graph.$m->{name},
         description  => $meta_p->{description},
         Homepage     => $metacpan.$meta_p->{module}[0]->{name},
         Maintainer   => 'zedbe (z448) <z448@module.pm>',
         install_path => $Config{installprivlib},
         module_name  => $meta_p->{module}[0]->{name},
         release_date => $meta_p->{date},
-        Architecture => $Config{archname},
+        Architecture => 'iphoneos-arm', #$Config{archname}
         source_url   => $m->{download_url},
         deps_graph   => $graph.$m->{name}, #Moose-2.1205
         pod          => $meta_p->{pod},
@@ -131,7 +135,7 @@ my $meta = sub {
         meta_api_url => $meta_url,
         Depends      => $deps->($module),
         www          => 'load.sh/cydia',
-        div          => [ qq|\n\t<div class="module">$module</div>|, qq|\t<div class="description">$m->{abstract}</br></br></div>| ],
+        div          => [ qq|\n\t<div class="module"><a href="$stratopan">&#10036;<\a></div>|, qq|\n\t<div class="module">$module</div>|, qq|\t<div class="description">$m->{abstract}</br></br></div>| ],
     };
     return $remote;
 };
@@ -189,13 +193,13 @@ sub control {
     my $pm  = shift;
     my $m = $meta->($pm);
     my $dep = $m->{Depends};
-    my @c = qw( Name Version Author Architecture Package Section Maintainer Homepage Description );
+    my @c = qw( Name Version Author Architecture Package Section Maintainer Homepage Depiction Description );
     
     my $c= '';
     for( @c ){
         $c = $c . $_.': '.$m->{$_}."\n";
     }
-    $c = $c . "\t" . $m->{description} . "\n";
+    #$c = $c . "\t" . $m->{description} . "\n";
     $c = $c . 'Depends: ' . $dep->{control} . "\n";
     return $c;
 }
@@ -205,8 +209,7 @@ sub graph {
     my $gui = $meta->($pm);
     my $open = 'open_chrome_single_window.sh';
     my $deps_graph=system("$open $gui->{deps_graph} &2>1 /dev/null");
-    qx!$deps_graph!;
-    return $gui;
+    return $deps_graph;
 }
 
 sub path {
