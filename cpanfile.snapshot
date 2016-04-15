@@ -1,5 +1,16 @@
 # carton snapshot format: version 1.0
 DISTRIBUTIONS
+  Acme-ProgressBar-1.128
+    pathname: R/RJ/RJBS/Acme-ProgressBar-1.128.tar.gz
+    provides:
+      Acme::ProgressBar 1.128
+    requirements:
+      Exporter 0
+      ExtUtils::MakeMaker 0
+      Time::HiRes 0
+      base 0
+      strict 0
+      warnings 0
   App-cpanminus-1.7040
     pathname: M/MI/MIYAGAWA/App-cpanminus-1.7040.tar.gz
     provides:
@@ -308,12 +319,3 @@ DISTRIBUTIONS
       perl 5.006
       strict 0
       warnings 0
-  YAML-LibYAML-0.62
-    pathname: T/TI/TINITA/YAML-LibYAML-0.62.tar.gz
-    provides:
-      YAML::LibYAML 0.62
-      YAML::XS 0.62
-      YAML::XS::LibYAML undef
-    requirements:
-      ExtUtils::MakeMaker 0
-      perl 5.008001

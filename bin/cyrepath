@@ -1,0 +1,17 @@
+#!/usr/bin/env perl
+
+use 5.010;
+use Encode;
+use Data::Dumper;
+use File::Path;
+use File::Copy;
+use Archive::Tar;
+
+system("rm -rf usr") and say "removed usr";
+mkpath( "./usr/local/lib/perl5" ) and say "created path usr/local/lib/perl5";
+
+system("tar -xvf perl-tidy.tgz");
+#my $tar = Archive::Tar->new;
+#$tar->read('perl-tidy.tgz');
+#$tar->extract() and say "extracted perl-tidy";
+system("tree usr") and say "done";
