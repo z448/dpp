@@ -5,13 +5,52 @@ use Encode;
 use Data::Dumper;
 use File::Path;
 use File::Copy;
-use Archive::Tar;
+use Getopt::Std;
+
+my $module = {};
+getopts('i:p:', $module);
 
 system("rm -rf usr") and say "removed usr";
 mkpath( "./usr/local/lib/perl5" ) and say "created path usr/local/lib/perl5";
 
-system("tar -xvf perl-tidy.tgz");
+my $install = sub {
+    my $pm = shift;
+
+    my $dist = $pm;
+    $dist = $dist . '.tar.gz'; $dist =~ s/::/-/; $dist = lc $dist;
+    
+    #say "dist is: $dist\npm is $pm"; 
+
+    system("cpanm --reinstall -l usr/local/lib/perl5 $pm");
+    system("tar -zcvf $ENV{CYSTASH}/$dist usr") and say "saved $dist to $ENV{CYSTASH}";
+
+    say "installed to $ENV{PWD}";
+    system("ls -la $ENV{CYSTASH}/$dist");
+};
+
+my $unpack = sub {
+    my $pm = shift;
+
+    my $dist = $pm;
+    $dist = $dist . '.tar.gz'; $dist =~ s/::/-/; $dist = lc $dist;
+    $dist = "$ENV{CYSTASH}/$dist";
+
+    if( -f $dist ){
+        system("tar -xvf $dist");
+    } else {
+        say "no dist with name $dist in $ENV{CYSTASH}";
+    }
+};
+
+for(keys %$module) {
+    when (/p/) { $unpack->($module->{p}) }
+    when (/i/) { $install->($module->{i}) }
+    default    { $install->($ARGV[0]) }
+}
+
+system("tree usr") and say "done";
+
+__DATA__
 #my $tar = Archive::Tar->new;
 #$tar->read('perl-tidy.tgz');
 #$tar->extract() and say "extracted perl-tidy";
-system("tree usr") and say "done";
