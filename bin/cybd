@@ -49,7 +49,7 @@ my $base_path = "usr/local/lib/perl5";
 my @base = qw( /man /bin /lib/perl5 /lib );
 my $sitelib =  $Config{sitelib};
 $sitelib =~ s/site_perl/lib/; $sitelib =~ s/^\///;
-my $sitelib_stem = $Config{sitelib_stem}; $sitelib_stem = s/^\///;
+my $sitelib_stem = $Config{sitelib_stem}; $sitelib_stem =~ s/^\///;
 
 for my $fix (@base){
     my $key = $fix; $key =~ s/\///g;
@@ -60,8 +60,8 @@ for my $fix (@base){
 move($cybase->{man}, "usr/local/man") and say "1. moved" . "$cybase->{man} to usr/local/man";
 move($cybase->{bin}, "usr/local/bin")  and say "2. moved" . "$cybase->{bin} to usr/local/bin";
 move($cybase->{libperl5}, $sitelib)  and say "3. moved" . "$cybase->{libperl5} to $sitelib";
-move("usr/local/lib/perl5/lib", "usr/local/lib/perl5/site_perl")  and say "4. moved" . "$cybase->{man} to $sitelib_stem";
-#move("usr/local/lib/perl5/lib", $sitelib_stem)  and say "4. moved" . "$cybase->{man} to $sitelib_stem";
+#move("usr/local/lib/perl5/lib", "usr/local/lib/perl5/site_perl")  and say "4. moved" . "$cybase->{man} to $sitelib_stem";
+move("usr/local/lib/perl5/lib", $sitelib_stem)  and say "4. moved" . "$cybase->{man} to $sitelib_stem";
 
 
 #move($cybase->{man}, "usr/local/man");
@@ -96,6 +96,20 @@ my $O_O = sub {
 };
 
 # todo: add xz/lzma compression option (1)
+my $move_pack = sub {
+    my $repo = shift;
+    my $cargo = <<"_CYDIA";
+    cat .www >> ../.stash/cydia/.www
+    mv *.deb ~/.cypm/.stash/cydia/deb
+    cd $ENV{CYSTASH}/cydia
+    cysp
+    tar -zcvf cydia.tgz Packages.gz deb .www
+    scp cydia.tgz $repo:~/www/cydia
+_CYDIA
+    my $transfer = sub {
+        system("$cargo");
+    }; $transfer->();
+};
 
 my $make_pack = sub { 
     my $pm = shift;
@@ -213,6 +227,8 @@ my $list_pack = sub {
 };
 
 $list_pack->(\@packlist_orig);
+my $repo = 'load.sh';
+$move_pack->($repo);
 
 __DATA__
 1. xz/lmza on telesphoero needs fix4 

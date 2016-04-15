@@ -7,3 +7,5 @@ requires 'Net::OpenSSH', '0.70';
 requires 'App::cpanminus', '1.7040';
 requires 'List::MoreUtils', '0.413';
 requires 'Acme::ProgressBar', '0.1';
+requires 'Filesys::Notify::Simple', '0.12';
+
