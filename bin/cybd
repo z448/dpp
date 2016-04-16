@@ -17,7 +17,7 @@ use open qw< :encoding(UTF-8) >;
 use Acme::ProgressBar;
 use Cydia::Meta;
 
-my @directories = ( "$ENV{HOME}/.cypm/pool/lib", "$ENV{HOME}/.cypm/pool/bin", "$ENV{HOME}/.cypm/pool/man");
+my @directories = ( "$ENV{HOME}/.cypm/pool/cy");
 my @packlist_orig;
 my $p5 = sub {
      my @v5 = qx|perl -v|;
@@ -45,19 +45,25 @@ my $repath = sub {
 ###! change to perl internal vars "perl -V...
 
 my $cybase = {};
-my $base_path = "usr/lib/perl5";
+#my $base_path = "usr/lib/perl5";
 my @base = qw( /man /bin /lib/perl5 /lib );
-my $sitelib =  $Config{sitelib};
-$sitelib =~ s/site_perl/lib/; $sitelib =~ s/^\///;
+#my $sitelib =  $Config{sitelib};
+#$sitelib =~ s/site_perl/lib/; $sitelib =~ s/^\///;
 my $installsitelib = $Config{installsitelib}; $installsitelib =~ s/^\///;
 
 for my $fix (@base){
     my $key = $fix; $key =~ s/\///g;
+    $fix =~ s/^\///;
+
     $cybase->{$key} = $fix;
     #   say $key . ' -> ' .  $cybase->{$key};
 }; 
 
-system("$cybase->{libperl5}/* $installsitelib");
+system("cy/* $installsitelib");
+#system("$cybase->{libperl5}/* $installsitelib");
+
+
+
 # ---same on osx + ios---
 # installsitescript -> /usr/local/bin
 # installstyle -> lib/perl5

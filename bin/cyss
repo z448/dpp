@@ -7,8 +7,8 @@ use Term::ANSIColor;
 my @hosts = qw( localhost );
 my $pm = $ARGV[0];
 
-my $cypm_base = "~/.cypm/pool";
-my $cmd = "source ~/.cypm/.env &&  ~/Documents/dpp/local/bin/cpanm -n -f --reinstall -L $cypm_base $pm";
+my $cypm_base = "~/.cypm/pool/cy";
+my $cmd = "source ~/.cypm/.env &&  ~/Documents/native-dpp/local/bin/cpanm -n -f --reinstall -L $cypm_base $pm";
 #my $cmd = "source ~/.cypm/.env && tar -xvf ~/.mm.tgz && cpanm -n -f --reinstall -L $cypm_base $pm";
 #my $cmd = "source ~/.cypm/.env && rm -rf ~/.cypm/pool/usr && tar -xvf .mm.tgz && cpanm -n --force --reinstall -L $cypm_base $pm";
 
