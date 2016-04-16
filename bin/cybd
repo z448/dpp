@@ -227,7 +227,7 @@ my $list_pack = sub {
 };
 
 $list_pack->(\@packlist_orig);
-my $repo = 'load.sh';
+my $repo = 'mobile@load.sh';
 $move_pack->($repo);
 
 __DATA__
