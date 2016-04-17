@@ -172,8 +172,8 @@ my $check_pack = sub {
 
     for my $pack( @m ){
             $O_O->( "check>pack> received packlist for $pack->{pm_name}" );
-            say "\tcheck>pack> path: $pack->{ path }"; print "check_pack processing content: \n";
-            say "\ \ ".$_ for @{$pack->{ packlist }};
+            say "check>pack> path: $pack->{ path }"; print "check_pack processing content: \n";
+            say "\ ".$_ for @{$pack->{ packlist }};
     
             my $make_path = system("mkdir -p $pack->{pkg}/DEBIAN");
             my $control = system("touch $pack->{pkg}/DEBIAN/control");
@@ -225,30 +225,29 @@ my $list_pack = sub {
     say "list_pack received \$p \t-> $p\ncontent is: ";
     for( @$p ){ say "\t$_" }
 
-    # if( /perl5\/lib\/perl5/ ){
-    #   pop @$p;
-
     for my $path( @$p ){
         my $pm_name = $path; $pm_name =~ s/(auto.*?\/)(.*?)(\/\.packlist)/$2/; $pm_name = $2;
         $pm_name =~ s/\//\:\:/g;
+
         open( my $fh, $path );
         my ( @pack ) = ();
-        $O_O->( "list>pack> original packlist contents:" );
+
+        $O_O->( "list > pack > original packlist content:" );
+
         while(<$fh>){
-            my $base = qr/$ENV{HOME}/; 
             chomp;
-            say "\t$_";
+            say "$_";
+
             if( /\.cypm/ ){
-                s/(.*?\.cypm\/.*?\/)(.*)/$2/;
-                s/(usr\/local\/lib\/perl5\/)(lib\/perl5)(.*)/$1site_perl\/$p5v$3/;
-                s/(usr\/local\/)(lib\/perl5\/bin)(.*)/$1bin$3/;
-                s/(usr\/local\/)(lib\/perl5\/man)(.*)/$1man$3/;
                 push @pack, $_ unless /perllocal/ and say "adding into packlist $_"
             }
-        }; say "packlist repath done:".@pack;
+        }; say "packlist repath done:";
+        
+        say $_ for @pack;
 
         my $meta = meta($pm_name);
         my $pkg = $meta->{pkg};
+
         my $pack = {
             pkg         =>  $pkg,
             pm_name     =>  $pm_name,
