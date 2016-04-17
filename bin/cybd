@@ -18,7 +18,7 @@ use open qw< :encoding(UTF-8) >;
 use Acme::ProgressBar;
 use Cydia::Meta;
 
-my @directories = ( "$ENV{HOME}/.cypm/pool/cy");
+my @directories = ( "$ENV{HOME}/.cypm/pool/cy" );
 my @packlist_orig;
 my $p5 = sub {
      my @v5 = qx|perl -v|;
@@ -55,19 +55,22 @@ $installbin =~ s/^\///;
 mkpath("./$installbin");
 
 my $cytar_lib = $installsitelib;
-$cytar_lib = s/(.*?)(\/.*)/$1/;
+$cytar_lib =~ s/(.*?)(\/.*)/$1/;
+
+find( sub { move("$File::Find::dir/$_", $installbin) }, qw< ./cy/usr > );
+
+#say "$cytar_lib";
 #say $cytar_lib and die;
 
 my $cytar_bin = $installbin;
-$cytar_bin = s/(.*?)(\/.*)/$1/;
-#say $cytar_bin and die;
+$cytar_bin =~ s/(.*?)(\/.*)/$1/;
+#say $cytar_bin;
 
 #say "cy is: $cy";
 #say "installbin is: $installbin";
 #say "installsitelib is: $installsitelib"; 
 
-move( $cybase . '/lib', $installsitelib);
-move( $cybase . '/bin', $installbin);
+system("mv $cybase/lib/* $installsitelib/");
 
 #move( $cybase . '/man', $installsitelib);
 
@@ -149,9 +152,9 @@ _CYDIA
 my $make_pack = sub { 
     my $pm = shift;
     my $ar = <<"_DEB";
-    cd $pm; tar -xf data.tar.gz;
+    cd $pm; tar -xvf data.tar.gz;
     rm data.tar.gz;
-    tar czf ../data.tar.gz $cytar_bin $cytar_lib;
+    tar czf ../data.tar.gz $installsitelib $installbin;
     cd DEBIAN/;
     tar czf ../../control.tar.gz *;
     cd ../..;
@@ -238,7 +241,7 @@ my $list_pack = sub {
             chomp;
             say "$_";
 
-            if( /\.cypm/ ){
+            if( /\.cy\// ){
                 push @pack, $_ unless /perllocal/ and say "adding into packlist $_"
             }
         }; say "packlist repath done:";
@@ -262,7 +265,7 @@ my $list_pack = sub {
 
 $list_pack->(\@packlist_orig);
 my $repo = 'mobile@load.sh';
-$move_pack->($repo);
+#$move_pack->($repo);
 
 __DATA__
 1. xz/lmza on telesphoero needs fix4 
