@@ -3,5 +3,4 @@
 #rm -rf $CYPOOL/usr
 cyss $1
 cybd $1
-rm -rf usr
 
