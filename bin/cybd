@@ -7,6 +7,7 @@ use strict;
 
 use JSON::PP;
 use File::Find;
+use File::Path;
 use File::Copy;
 use Term::ANSIColor;
 use Config;
@@ -41,26 +42,39 @@ my $repath = sub {
     }
 };
 
-#unlink("usr/local/lib/perl5/lib/perl5/arm-iphoneos-2level/auto/ExtUtils/MakeMaker/.packlist");
-###! change to perl internal vars "perl -V...
+my $cybase = "cy";
+mkpath("./$cybase");
 
-my $cybase = {};
-#my $base_path = "usr/lib/perl5";
-my @base = qw( /man /bin /lib/perl5 /lib );
-#my $sitelib =  $Config{sitelib};
-#$sitelib =~ s/site_perl/lib/; $sitelib =~ s/^\///;
-my $installsitelib = $Config{installsitelib}; $installsitelib =~ s/^\///;
+my $installsitelib = $Config{installsitelib};
+$installsitelib =~ s/^\///;
+mkpath("./$installsitelib");
 
-for my $fix (@base){
-    my $key = $fix; $key =~ s/\///g;
-    $fix =~ s/^\///;
+my $installbin = $Config{installbin};
+$installbin =~ s/^\///;
+mkpath("./$installbin");
 
-    $cybase->{$key} = $fix;
-    #   say $key . ' -> ' .  $cybase->{$key};
-}; 
+my $cytar_lib = $installsitelib;
+$cytar_lib = s/(.*?)(\/.*)/$1/;
+#say $cytar_lib and die;
 
-system("cy/* $installsitelib");
-#system("$cybase->{libperl5}/* $installsitelib");
+my $cytar_bin = $installbin;
+$cytar_bin = s/(.*?)(\/.*)/$1/;
+#say $cytar_bin and die;
+
+#say "cy is: $cy";
+#say "installbin is: $installbin";
+#say "installsitelib is: $installsitelib"; 
+
+move( $cybase . '/lib', $installsitelib);
+move( $cybase . '/bin', $installbin);
+
+#move( $cybase . '/man', $installsitelib);
+
+
+#my $native_path = \%Config;
+#for( keys $native_path ){
+#    say $_ . ' --> ' . $native_path->{$_};
+#};
 
 
 
@@ -136,7 +150,7 @@ my $make_pack = sub {
     my $ar = <<"_DEB";
     cd $pm; tar -xf data.tar.gz;
     rm data.tar.gz;
-    tar czf ../data.tar.gz *;
+    tar czf ../data.tar.gz $cytar_bin $cytar_lib;
     cd DEBIAN/;
     tar czf ../../control.tar.gz *;
     cd ../..;

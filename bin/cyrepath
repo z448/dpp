@@ -10,18 +10,20 @@ use Getopt::Std;
 my $module = {};
 getopts('i:p:', $module);
 
-system("rm -rf usr") and say "removed usr";
-mkpath( "./usr/local/lib/perl5" ) and say "created path usr/local/lib/perl5";
+system("rm -rf cy") and say "removed usr";
+mkpath( "./cy" ) and say "created path cy";
 
 my $install = sub {
     my $pm = shift;
 
     my $dist = $pm;
-    $dist = $dist . '.tar.gz'; $dist =~ s/::/-/; $dist = lc $dist;
+    $dist = $dist . '.tar.gz'; 
+    $dist =~ s/\:\:/\-/;
+    $dist = lc $dist;
     
     #say "dist is: $dist\npm is $pm"; 
 
-    system("cpanm --reinstall -l usr/local/lib/perl5 $pm");
+    system("cpanm --reinstall -l cy $pm");
     system("tar -zcvf $ENV{CYSTASH}/$dist usr") and say "saved $dist to $ENV{CYSTASH}";
 
     say "installed to $ENV{PWD}";
@@ -32,11 +34,13 @@ my $unpack = sub {
     my $pm = shift;
 
     my $dist = $pm;
-    $dist = $dist . '.tar.gz'; $dist =~ s/::/-/; $dist = lc $dist;
-    $dist = "$ENV{CYSTASH}/$dist";
+    $dist = "$dist" . ".tar.gz"; 
+    $dist =~ s/\:\:/\-/g;
+    $dist = lc "$dist";
+    $dist = "$ENV{CYSTASH}" . "/" . "$dist";
 
     if( -f $dist ){
-        system("tar -xvf $dist");
+        system("cd $ENV{CYSTASH} && tar -xvf $dist");
     } else {
         say "no dist with name $dist in $ENV{CYSTASH}";
     }
