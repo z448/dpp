@@ -15,7 +15,7 @@ use FindBin;
 use lib "$FindBin::Bin/../lib";
 use open qw< :encoding(UTF-8) >;
 #use Term::ProgressBar;
-use Acme::ProgressBar;
+#use Acme::ProgressBar;
 use Cydia::Meta;
 
 my @directories = ( "$ENV{HOME}/.cypm/pool/cy" );
@@ -44,7 +44,7 @@ my $repath = sub {
 
 
 my $cybase = "cy";
-mkpath("./$cybase");
+#mkpath("./$cybase");
 
 my $installsitelib = $Config{installsitelib};
 $installsitelib =~ s/^\///;
@@ -166,7 +166,7 @@ _DEB
         my $packer = shift;
         my $status  = system($packer);
     }; 
-    my $status = progress { $package->($ar) };
+    my $status = $package->($ar);
 };
 
 my $check_pack = sub {
@@ -175,7 +175,7 @@ my $check_pack = sub {
 
     for my $pack( @m ){
             $O_O->( "check>pack> received packlist for $pack->{pm_name}" );
-            say "check>pack> path: $pack->{ path }"; print "check_pack processing content: \n";
+            say "check>pack> path: $pack->{path}"; print "check_pack processing content: \n";
             say "\ ".$_ for @{$pack->{ packlist }};
     
             my $make_path = system("mkdir -p $pack->{pkg}/DEBIAN");
@@ -225,17 +225,21 @@ my $list_pack = sub {
     my $p = shift;
     my @meta = ();
 
-    say "list_pack received \$p \t-> $p\ncontent is: ";
-    for( @$p ){ say "\t$_" }
+    say "--list_pack: received packlists:";
+    for( @$p ){ say $_ }
+    say "--";
 
     for my $path( @$p ){
-        my $pm_name = $path; $pm_name =~ s/(auto.*?\/)(.*?)(\/\.packlist)/$2/; $pm_name = $2;
+        # make module($pm) name from packlist($path)
+        my $pm_name = $path;
+        $pm_name =~ s/(auto.*?\/)(.*?)(\/\.packlist)/$2/;
+        $pm_name = $2;
         $pm_name =~ s/\//\:\:/g;
 
-        open( my $fh, $path );
+        open( my $fh, "<", $path );
         my ( @pack ) = ();
 
-        $O_O->( "list > pack > original packlist content:" );
+        $O_O->( "--list_pack: original packlist content:" );
 
         while(<$fh>){
             chomp;
