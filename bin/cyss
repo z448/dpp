@@ -5,6 +5,7 @@ use Net::OpenSSH;
 use Term::ANSIColor;
 use File::Path;
 
+say "### cyss STARTING";
 my @hosts = qw( localhost );
 my $pm = $ARGV[0];
 

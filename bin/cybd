@@ -16,6 +16,7 @@ use lib "$FindBin::Bin/../lib";
 use open qw< :encoding(UTF-8) >;
 use Cydia::Meta;
 
+say "### cybd STARTING";
 my @directories = ( "$ENV{HOME}/.cypm/pool/cy" );
 my @packlist_orig;
 my $p5 = sub {
@@ -28,17 +29,6 @@ my $p5 = sub {
 };
 
 my $p5v = $p5->();
-
-my $repath = sub {
-    my $stage = shift;
-    my $p = path( $stage );
-    my $i = 0;
-    for( @{$p->{original}} ){
-        move( $_, $p->{build}->[$i] );
-        #print "move( $_, $p->{build}->[$i] )\n";
-        $i++;
-    }
-};
 
 
 # --define dir paths
@@ -80,8 +70,8 @@ say @packlist_orig;
 my $O_O = sub {
     my $line = shift;
     my $colo = 'white on_bright_black';
-    my $name = ' cypm';
-    my $say = sub { say colored(['bright_black on_white'], $name ).'->'.colored([$colo], $line) };
+    my $name = 'log:';
+    my $say = sub { say colored([$colo], $name ).'->'.colored([$colo], $line) };
     $say->();
 };
 
@@ -123,22 +113,30 @@ _DEB
 
 my $check_pack = sub {
     my $p = shift;
-    my @m = @$p;
 
-    for my $pack( @m ){
-            $O_O->( "check>pack> received packlist for $pack->{pm_name}" );
-            say "check>pack> path: $pack->{path}"; print "check_pack processing content: \n";
-            say "\ ".$_ for @{$pack->{ packlist }};
+    for my $pack( @$p ){
+            $O_O->( "STARTING check_pack" );
+            say "- module: $pack->{path}";
+            say "- pkg: $pack->{pkg}";
+
+            # -- list content of received packlist
+            say "- packlist content:";
+            for(@{$pack->{ packlist }}){ say $_ }
+            # --
     
             my $make_path = system("mkdir -p $pack->{pkg}/DEBIAN");
             my $control = system("touch $pack->{pkg}/DEBIAN/control");
             my $fh = undef;
-            $O_O->( "check>pack> creating control file for $pack->{pm_name}" );
+
+            say "- creating control file for $pack->{module}";
+
             my $fn = "$ENV{HOME}/.cypm/pool/$pack->{pkg}/DEBIAN/control";
             open( $fh, '>', $fn ) or die "can't open $fn: $!";
-            print $fh control("$pack->{pm_name}") . "\n";
+            print $fh control("$pack->{module}") . "\n";
             close $fh;
-            $O_O->( "check_pack > control file content:" ); say "\n" . control($pack->{pm_name});
+
+            say "- control content:"; 
+            say control($pack->{module});
 
             my $packlist_fh = undef;
             open( $packlist_fh, "> $pack->{path}" ) or die "cant open it $!";
@@ -164,52 +162,57 @@ my $check_pack = sub {
         #system("mv $pack->{path} $pack->{pkg}");
 
         #web
-            print "\nhtml div:"; web($pack->{pm_name});
+            print "\nhtml div:"; web($pack->{module});
             #$O_O->( "make>html>components->ok" ) unless $div;
     }
 
-    my $stage = 'post';
-    my $stage_S = $repath->( $stage );
-    $O_O->( "check>pack>cleanup->ok" ) unless $stage_S;
 };
 
 my $list_pack = sub {
     my $p = shift;
+    my @pack = ();
     my @meta = ();
 
-    say "--list_pack: received packlists:";
+    say $O_O->( "### list_pack ### -> received packlists:" );
     for( @$p ){ say $_ }
-    say "--";
+    say "###";
 
     for my $path( @$p ){
         # make module($pm) name from packlist($path)
-        my $pm_name = $path;
-        $pm_name =~ s/(auto.*?\/)(.*?)(\/\.packlist)/$2/;
-        $pm_name = $2;
-        $pm_name =~ s/\//\:\:/g;
+        my $module = $path;
+        $module =~ s/(auto.*?\/)(.*?)(\/\.packlist)/$2/;
+        $module = $2;
+        $module =~ s/\//\:\:/g;
 
+        #read content(file paths) of current packlist
         open( my $fh, "<", $path );
-        my ( @pack ) = ();
-
-        $O_O->( "--list_pack: original packlist content:" );
+        # --
 
         while(<$fh>){
             chomp;
-            say "$_";
 
-            if( /\.cy\// ){
-                push @pack, $_ unless /perllocal/ and say "adding into packlist $_"
+            #content(file paths) of current packlist
+            say $O_O->( "### list_pack ### -> received packlists:" );
+            while(<$fh>){ say $_ }
+            # --
+
+            if( /\cy\// ){
+                if(/^perllocal/){
+                    say "### list_pack ### -> skipped: $_";
+                } else {
+                    push @pack, $_;
+                    say "### list_pack ### -> added: $_";
+                }
+                
             }
-        }; say "packlist repath done:";
+        };
         
-        say $_ for @pack;
-
-        my $meta = meta($pm_name);
+        my $meta = meta($module);
         my $pkg = $meta->{pkg};
 
         my $pack = {
             pkg         =>  $pkg,
-            pm_name     =>  $pm_name,
+            module     =>  $module,
             path        =>  $path,
             packlist    =>  \@pack,
         };         
