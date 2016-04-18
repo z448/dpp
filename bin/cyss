@@ -25,7 +25,7 @@ $cytar_lib =~ s/(.*?)(\/.*)/$1/;
 mkpath("$cypm/$cytar_lib");
 
 
-my $cmd = "source ~/.cypm/.env &&  ~/Documents/native-dpp/local/bin/cpanm -n -f --reinstall -l $cypm $pm";
+my $cmd = "source ~/.cypm/.env &&  cpanm -n -f --reinstall -l $cypm $pm";
 
 # parallel test; uncoment below and tail /tmp/out-$host.txt on local host
 #my $cmd = 'for i in `seq 1 20`;do echo $i;sleep 3;done';
