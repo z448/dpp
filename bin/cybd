@@ -19,17 +19,6 @@ use Cydia::Meta;
 say "### cybd STARTING";
 my @directories = ( "$ENV{HOME}/.cypm/pool/cy" );
 my @packlist_orig;
-my $p5 = sub {
-     my @v5 = qx|perl -v|;
-     my $v5 = '';
-     for( @v5 ){
-         if( /\(v5/ ){ s/(.*?\(v)(5.*?)\)(.*)/$1$2/; $v5 = $2 and last; }
-     }
-     return $v5;
-};
-
-my $p5v = $p5->();
-
 
 # --define dir paths
 my $base = "cy";
@@ -47,8 +36,7 @@ $cytar_bin =~ s/(.*?)(\/.*)/$1/;
 
 # --
 
-system("mv $base/lib/* $installsitelib/");
-
+move("$base", "$installsitelib");
 
 sub wanted { 
     if ( $_ eq '.packlist' ){
