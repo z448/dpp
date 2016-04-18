@@ -3,21 +3,36 @@
 use 5.010;
 use Net::OpenSSH;
 use Term::ANSIColor;
+use File::Path;
 
 my @hosts = qw( localhost );
 my $pm = $ARGV[0];
 
-my $cypm_base = "~/.cypm/pool/cy";
-my $cmd = "source ~/.cypm/.env &&  ~/Documents/native-dpp/local/bin/cpanm -n -f --reinstall -L $cypm_base $pm";
-#my $cmd = "source ~/.cypm/.env && tar -xvf ~/.mm.tgz && cpanm -n -f --reinstall -L $cypm_base $pm";
-#my $cmd = "source ~/.cypm/.env && rm -rf ~/.cypm/pool/usr && tar -xvf .mm.tgz && cpanm -n --force --reinstall -L $cypm_base $pm";
+my $base = "$ENV{HOME}/.cypm/pool";
+my $cypm = $base . '/cy';
+
+my $installsitelib = $Config{installsitelib};
+$installsitelib =~ s/^\///;
+mkpath("$cypm/$installsitelib");
+
+my $installbin = $Config{installbin};
+$installbin =~ s/^\///;
+mkpath("$cypm/$installbin");
+
+my $cytar_lib = $installsitelib;
+$cytar_lib =~ s/(.*?)(\/.*)/$1/;
+mkpath("$cypm/$cytar_lib");
+
+
+my $cmd = "source ~/.cypm/.env &&  ~/Documents/native-dpp/local/bin/cpanm -n -f --reinstall -l $cypm $pm";
 
 # parallel test; uncoment below and tail /tmp/out-$host.txt on local host
 #my $cmd = 'for i in `seq 1 20`;do echo $i;sleep 3;done';
 
-# say info where is command running; put command string into separate line
+# say info where is command running;
 say "\nrunning:"; print colored( "$cmd\n", 'blue' ); say "on: @hosts ";
 
+# ssh
 my %conn = map { $_ => Net::OpenSSH->new($_, async => 1) } @hosts;
 my @pid;
 for my $host (@hosts) {

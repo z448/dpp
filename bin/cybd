@@ -14,8 +14,6 @@ use Config;
 use FindBin;
 use lib "$FindBin::Bin/../lib";
 use open qw< :encoding(UTF-8) >;
-#use Term::ProgressBar;
-#use Acme::ProgressBar;
 use Cydia::Meta;
 
 my @directories = ( "$ENV{HOME}/.cypm/pool/cy" );
@@ -43,75 +41,24 @@ my $repath = sub {
 };
 
 
-my $cybase = "cy";
-#mkpath("./$cybase");
-
-my $installsitelib = $Config{installsitelib};
+# --define dir paths
+my $base = "cy";
+my $installsitelib = $base . $Config{installsitelib};
 $installsitelib =~ s/^\///;
-mkpath("./$installsitelib");
 
-my $installbin = $Config{installbin};
+my $installbin = $base . $Config{installbin};
 $installbin =~ s/^\///;
-mkpath("./$installbin");
 
-my $cytar_lib = $installsitelib;
+my $cytar_lib = $base . $installsitelib;
 $cytar_lib =~ s/(.*?)(\/.*)/$1/;
 
-find( sub { move("$File::Find::dir/$_", $installbin) }, qw< ./cy/usr > );
-
-#say "$cytar_lib";
-#say $cytar_lib and die;
-
-my $cytar_bin = $installbin;
+my $cytar_bin = $base . $installbin;
 $cytar_bin =~ s/(.*?)(\/.*)/$1/;
-#say $cytar_bin;
 
-#say "cy is: $cy";
-#say "installbin is: $installbin";
-#say "installsitelib is: $installsitelib"; 
+# --
 
-system("mv $cybase/lib/* $installsitelib/");
+system("mv $base/lib/* $installsitelib/");
 
-#move( $cybase . '/man', $installsitelib);
-
-
-#my $native_path = \%Config;
-#for( keys $native_path ){
-#    say $_ . ' --> ' . $native_path->{$_};
-#};
-
-
-
-# ---same on osx + ios---
-# installsitescript -> /usr/local/bin
-# installstyle -> lib/perl5
-# installsitebin -> /usr/local/bin
-#
-# ---unique sitelib osx----
-# installsitelib -> /Library/Perl/5.18
-#
-# ---unique sitelib ios----
-# installprivlib -> /usr/local/lib/perl5/5.14.4
-#
-#
-
-#move($cybase->{man}, "usr/local/man") and say "1. moved" . "$cybase->{man} to usr/local/man";
-#move($cybase->{bin}, "usr/local/bin")  and say "2. moved" . "$cybase->{bin} to usr/local/bin";
-#move($cybase->{libperl5}, $sitelib)  and say "3. moved" . "$cybase->{libperl5} to $sitelib";
-#move("usr/local/lib/perl5/lib", "usr/local/lib/perl5/site_perl")  and say "4. moved" . "$cybase->{man} to $sitelib_stem";
-#move("usr/local/lib/perl5/lib", $sitelib_stem)  and say "4. moved" . "$cybase->{man} to $sitelib_stem";
-
-
-#move($cybase->{man}, "usr/local/man");
-#move($cybase->{bin}, "usr/local/bin");
-#move($cybase->{libperl5} , "usr/local/lib/perl5/lib/".$p5v);
-###### move($cybase->{libperl5}, "$sitelib");
-#move($cybase->{lib}, "$sitelib_stem");
-
-#move( "usr/local/lib/perl5/man", "usr/local/man" );
-#move( "usr/local/lib/perl5/bin", "usr/local/bin" );
-#move( "usr/local/lib/perl5/lib/perl5", "usr/local/lib/perl5/lib/".$p5v );
-#move( "usr/local/lib/perl5/lib", "usr/local/lib/perl5/site_perl" );
 
 sub wanted { 
     if ( $_ eq '.packlist' ){
@@ -124,6 +71,11 @@ find(\&wanted, @directories );
 
 say "original packlist";
 say @packlist_orig; 
+
+
+#find( sub { move("$File::Find::dir/$_", $installbin) }, qw< cy > );
+#say "find: moving $File::Find::dir/$_ -> $installbin";
+
 
 my $O_O = sub {
     my $line = shift;
@@ -186,7 +138,7 @@ my $check_pack = sub {
             open( $fh, '>', $fn ) or die "can't open $fn: $!";
             print $fh control("$pack->{pm_name}") . "\n";
             close $fh;
-            $O_O->( "check>pack> control file content:" ); say "\n\t" . control($pack->{pm_name});
+            $O_O->( "check_pack > control file content:" ); say "\n" . control($pack->{pm_name});
 
             my $packlist_fh = undef;
             open( $packlist_fh, "> $pack->{path}" ) or die "cant open it $!";
