@@ -141,7 +141,7 @@ my $check_pack = sub {
 
             my $fh = undef;
             my $fn = "$ENV{HOME}/.cypm/pool/$pack->{pkg}/DEBIAN/control";
-            open( $fh, '>', $fn ) or die "can't open $fn: $!";
+            open( $fh, ">", $fn );
             print $fh control("$pack->{module}") . "\n";
             close $fh;
             print colored(['yellow'],"created control file for: ") . $pack->{module} . "\n";
@@ -154,12 +154,11 @@ my $check_pack = sub {
 
             find( sub{ if( /\.packlist/ ){ 
                         $cypm_packlist = "$File::Find::dir/$_";
-                        #move($cypm_packlist, $pack->{pkg});
-                        print colored(['white on_red'],"moving") . "(\$cypm_packlist) $cypm_packlist to \$pack->{pkg} $pack->{pkg}";
-                        open( $fh, ">", "$pack->{pkg}/.packlist" ) || die "$!: cant open $pack->{pkg}/.packlist";
-                        say $fh $_;
+                        system("mv $cypm_packlist $pack->{pkg}/");
+                        print colored(['white on_red'],"system mv ") . "(\$cypm_packlist) $cypm_packlist to \$pack->{pkg} $pack->{pkg}/";
+                        open( my $findh, ">", "$pack->{pkg}/.packlist" );
+                        say $findh $_;
             }}, $installsitelib_dir );
-            close $fh;
 
             #rewrite original packlist
             for(@{$pack->{packlist}}){ say $fh $_ }; close $fh;
