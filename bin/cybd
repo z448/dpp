@@ -21,7 +21,7 @@ print colored(['black on_white'],"### cybd ###") .  "\n\n";
 my( $base )= qw< ./cy >;
 my @packlist_orig = ();
 
-print "\n\n" . colored(['black on_yellow'],"STARTING") . " find" . "\n";
+print "\n\n" . colored(['black on_yellow'],"STARTING find ") . "\n";
 sub wanted {
     if(/\.packlist/){
         push @packlist_orig, "$File::Find::dir/$_";
@@ -31,7 +31,7 @@ sub wanted {
 }
 find(\&wanted, $base);
 
-print colored(['black on_yellow'],"found packlists: ") . "\n";
+print colored(['yellow'],"found packlists: ") . "\n";
 say @packlist_orig; 
 
 # --define dir paths
@@ -117,17 +117,17 @@ my $check_pack = sub {
     system("mv $cpanm->{lib}/* $installsitelib");
     system("mv $cpanm->{bin}/* $installbin");
     system("mv $cpanm->{man}/* $installman");
-    system("rm -rf cy");
+    #system("rm -rf cy");
     print "\n";
     print colored(['magenta'],"system ") . "$cpanm->{lib}/* $installsitelib";
     print colored(['magenta'],"system ") . "$cpanm->{bin}/* $installbin";
     print colored(['magenta'],"system ") . "$cpanm->{man}/* $installman";
-    print colored(['magenta'],"rmdir ") . "$base";
+    #print colored(['magenta'],"rm -rf cy ") . "$base";
 
     #print colored(["cyan"],"$installsitelib\n$installbin\n\n$cytar_lib\n$cytar_bin") . "\n";
 
     for my $pack( @$p ){
-            print "\n\n" . colored(['black on_yellow'],"STARTING") . " check_pack" . "\n";
+            print "\n\n" . colored(['black on_yellow'],"STARTING check_pack ") . "\n";
 
             # -- list content of received packlist
             print colored(['magenta'],"packlist path: ") . $pack->{path} . "\n";
@@ -135,29 +135,36 @@ my $check_pack = sub {
             print colored(['yellow'],"packlist content: ") . "\n";
             for(@{$pack->{packlist}}){ say $_ }
     
-            my $make_path = system("mkdir -p $pack->{pkg}/DEBIAN");
-            my $control = system("touch $pack->{pkg}/DEBIAN/control");
+            my $make_path = mkpath("$pack->{pkg}/DEBIAN");
+            #my $make_path = system("mkdir -p $pack->{pkg}/DEBIAN");
+            #my $control = system("touch $pack->{pkg}/DEBIAN/control");
+
             my $fh = undef;
-
-            
-
             my $fn = "$ENV{HOME}/.cypm/pool/$pack->{pkg}/DEBIAN/control";
             open( $fh, '>', $fn ) or die "can't open $fn: $!";
             print $fh control("$pack->{module}") . "\n";
             close $fh;
-
             print colored(['yellow'],"created control file for: ") . $pack->{module} . "\n";
             say control($pack->{module});
 
-            my $packlist_fh = undef;
-            open( $packlist_fh, "> $pack->{path}" ) or die "cant open it $!";
 
-        #rewrite original packlist
-            for(@{$pack->{ packlist }}){
-                say $packlist_fh $_;
-            }; close $packlist_fh;
+            my $installsitelib_dir = $installsitelib;
+            $installsitelib_dir =~ s/(.*?)(\/.*)/$1/;
+            my( $cypm_packlist ) = ();
 
-        #create new data.pack using new packlist
+            find( sub{ if( /\.packlist/ ){ 
+                        $cypm_packlist = "$File::Find::dir/$_";
+                        #move($cypm_packlist, $pack->{pkg});
+                        print colored(['white on_red'],"moving") . "(\$cypm_packlist) $cypm_packlist to \$pack->{pkg} $pack->{pkg}";
+                        open( $fh, ">", "$pack->{pkg}/.packlist" ) || die "$!: cant open $pack->{pkg}/.packlist";
+                        say $fh $_;
+            }}, $installsitelib_dir );
+            close $fh;
+
+            #rewrite original packlist
+            for(@{$pack->{packlist}}){ say $fh $_ }; close $fh;
+
+            #create new data.pack using new packlist
             my $datapack = sub {
                 my $tar = system("tar cz -T $pack->{path} -f $pack->{pkg}/data.tar.gz");
                 my $mv = system("mv $pack->{path} $pack->{pkg}/");
@@ -184,7 +191,7 @@ my $list_pack = sub {
     my @pack = ();
     my( @meta )= ();
 
-    print "\n\n" . colored(['black on_yellow'],"STARTING") . " list_pack" . "\n";
+    print "\n\n" . colored(['black on_yellow'],"STARTING list_pack ") . "\n";
     print colored(['yellow'],"received packlists: ") . "\n";
     print $_ . "\n" for (@$p);
 
