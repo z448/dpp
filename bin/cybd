@@ -17,11 +17,26 @@ use open qw< :encoding(UTF-8) >;
 use Cydia::Meta;
 
 say "### cybd STARTING";
-my @directories = ( "$ENV{HOME}/.cypm/pool" );
-my @packlist_orig;
+#my @base = "$ENV{HOME}/.cypm/pool";
+my( $base )= qw< ./cy >;
+my @packlist_orig = ();
+
+say colored(['black on_yellow'],"new find: ");
+sub wanted {
+    if(/\.packlist/){
+        say 'packlist ' . $_;
+        push @packlist_orig, "$File::Find::dir/$_";
+    } else {
+        #say "no packlist " . $_;
+    }
+}
+find(\&wanted, $base);
+
+say "original packlist";
+say @packlist_orig; 
+
 
 # --define dir paths
-my $base = "cy";
 my $installsitelib = $Config{installsitelib};
 $installsitelib =~ s/^\///;
 say "installsitelib: " . $installsitelib;
@@ -42,17 +57,6 @@ say "cytar_bin: " . $cytar_bin;
 
 #system("mv $base/* $installsitelib/");
 
-sub wanted { 
-    if ( $_ eq '.packlist' ){
-        chomp;
-        push @packlist_orig, "$File::Find::dir/$_";
-    }
-    return \@packlist_orig 
-}
-find(\&wanted, @directories );
-
-say "original packlist";
-say @packlist_orig; 
 
 #find( sub { move("$File::Find::dir/$_", $installbin) }, qw< cy > );
 #say "find: moving $File::Find::dir/$_ -> $installbin";
@@ -107,10 +111,13 @@ my $check_pack = sub {
 
     for my $pack( @$p ){
             $O_O->( "STARTING check_pack" );
+
             # -- list content of received packlist
             say "- module: $pack->{path}";
             say "- pkg: $pack->{pkg}";
-            say "- packlist content:";
+
+            print colored(['yellow'],"packlist content: ") . "\n"; ###log
+
             for(@{$pack->{packlist}}){ say $_ }
             # --
     
@@ -163,44 +170,50 @@ my $list_pack = sub {
     my @pack = ();
     my( @meta )= ();
 
-    $O_O->( "STARTING check_pack" );
-    print "received packlists: ";
-    print $_ for (@$p);
+    $O_O->( "STARTING list_pack" );
+    print colored(['yellow'],"received packlists: ") . "\n"; ###log
+    print $_ . "\n" for (@$p);
 
     for my $path( @$p ){
         chomp(my $module = $path);
 
-
         # make module($pm) name from packlist($path)
-        say "path is $path";
+
         $module =~ s/(auto.*?\/)(.*?)(\/\.packlist)/$2/;
         $module = $2;
         $module =~ s/\//\:\:/g;
+        print colored(['yellow'],"module is: ") . $module . "\n"; ###log
 
         #read content(file paths) of current packlist
         open( my $fh, "<", $path );
-        while(<$fh>){ say $_ }
-        # --
 
-        say "received packlists:";
+        print colored(['yellow'],"packlist content is: ") . "\n"; ###log
+        while(<$fh>){
+            chomp;
+            say $_;
+        }
 
+        print colored(['yellow'],"while loop: ") . "\n"; ###log
+        open( my $fh, "<", $path );
         while( <$fh>){
-            chomp $_;
+            chomp;
+            say $_;
             #content(file paths) of current packlist
             # --
+            my $home = qr/$ENV{HOME}/;
             if( /\/cy\// ){
-                if(/perllocal/){
-                    say "skipped: $_" and next;
-                } 
-                if($_ eq "$ENV{HOME}"){
-                        s/(.*?)(\/cy\/)(.*)/$3/;
-                        push @pack, $_;
-                        say "added: $_";
-                    } else { 
-                        say "skipping: $_";
-                    }
+                if(/$home/){
+
+                    s/(.*?)(\/cy\/)(.*)/$2$3/;
+                    push @pack, $_;
+
+                    print colored(['magenta'],"adding: ") . "$_ didnt matched $home" . "\n"; ###log
+
+                }
+            } else {
+                print colored(['red'],"skipping: ") . "$_ matched $home" . "\n"; ###log
             }
-        };
+        }
         
         my $meta = meta($module);
         my $pkg = $meta->{pkg};
