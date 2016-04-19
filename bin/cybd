@@ -16,6 +16,7 @@ use lib "$FindBin::Bin/../lib";
 use open qw< :encoding(UTF-8) >;
 use Cydia::Meta;
 
+my $cybase = "$ENV{HOME}/.cypm/pool";
 print colored(['black on_white'],"### cybd ###") .  "\n\n";
 
 my( $base )= qw< ./cy >;
@@ -141,7 +142,7 @@ my $check_pack = sub {
 
             my $fh = undef;
             my $fn = "$ENV{HOME}/.cypm/pool/$pack->{pkg}/DEBIAN/control";
-            open( $fh, ">", $fn );
+            open( $fh, ">", $fn ) || die "cant open $fn";
             print $fh control("$pack->{module}") . "\n";
             close $fh;
             print colored(['yellow'],"created control file for: ") . $pack->{module} . "\n";
@@ -154,35 +155,35 @@ my $check_pack = sub {
 
             find( sub{ if( /\.packlist/ ){ 
                         $cypm_packlist = "$File::Find::dir/$_";
-                        system("mv $cypm_packlist $pack->{pkg}/");
-                        print colored(['white on_red'],"system mv ") . "(\$cypm_packlist) $cypm_packlist to \$pack->{pkg} $pack->{pkg}/";
-                        open( my $findh, ">", "$pack->{pkg}/.packlist" );
-                        say $findh $_;
+                        print colored(['white on_red'],"unlink ") . $pack->{path} . "\n";
+                        unlink($pack->{path});
             }}, $installsitelib_dir );
-
-            #rewrite original packlist
-            for(@{$pack->{packlist}}){ say $fh $_ }; close $fh;
+                
+            
+            print colored(['yellow'], "writing files to $pack->{pkg}/.packlist") . "$File::Find::dir/$_" . "\n";
+            find( sub{ unless(/perllocal\.pod/){
+                        if( -f $_ ){ 
+                            open( my $findh, ">>", "$cybase/$pack->{pkg}/.packlist" ) || die "$!: cant open $pack->{pkg}/.packlist";
+                            print colored(['magenta'], "writing file: ") . "$File::Find::dir/$_" . "\n";
+                            say $findh "$File::Find::dir/$_";
+                        } else {
+                        print colored(['yellow'], "skipping dir: ") . "$File::Find::dir/$_" . "\n";
+                    }}}, ($installsitelib, $installbin, $installman ));
 
             #create new data.pack using new packlist
             my $datapack = sub {
-                my $tar = system("tar cz -T $pack->{path} -f $pack->{pkg}/data.tar.gz");
-                my $mv = system("mv $pack->{path} $pack->{pkg}/");
-            };
-            print "\npulling datapack: ";  $datapack->();
+                my $tar = system("tar cz -T $pack->{pkg}/.packlist -f $pack->{pkg}/data.tar.gz");
+            }; $datapack->();
+            print colored(['yellow'], "using: ") . "$pack->{pkg}/.packlist for data.tar.gz" . "\n";
 
-
-        #call makepack, build deb
-            print "\npackaging deb: "; $make_pack->( $pack->{ pkg } );
-            #$O_O->( "make>pack>status->$status |$pack->{pkg} in stash|" ) unless $status;
+            #call make_pack, build deb
+            $make_pack->( $pack->{pkg} );
             
-        #move new packlist
-        system("mv $pack->{path} $pack->{pkg}");
-
-        #web
-            print "\nhtml div:"; web($pack->{module});
-            #$O_O->( "make>html>components->ok" ) unless $div;
+            #web
+            web($pack->{module});
+            print colored(['yellow'], "writing: ") . " <div> " . "\n";
+            web($pack->{module});
     }
-
 };
 
 my $list_pack = sub {
