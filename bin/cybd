@@ -37,19 +37,36 @@ say @packlist_orig;
 # --define dir paths
 my $installsitelib = $Config{installsitelib};
 $installsitelib =~ s/^\///;
+mkpath($installsitelib);
 print colored(['magenta'], "installsitelib: ") . $installsitelib . "\n";
 
 my $installbin = $Config{installbin};
 $installbin =~ s/^\///;
+mkpath($installbin);
 print colored(['magenta'], "installbin: ") . $installbin . "\n";
+
+my $installsiteman1dir = $Config{installsiteman1dir};
+$installsiteman1dir =~ s/^\///;
+mkpath($installsiteman1dir);
+my $installman = $installsiteman1dir;
+$installman =~ s/(.*\/)(man1)/$1/;
+print colored(['magenta'], "installsiteman1dir: ") . $installsiteman1dir . "\n";
+
+my $installsiteman3dir = $Config{installsiteman3dir};
+$installsiteman3dir =~ s/^\///;
+#$installsiteman3dir =~ s/(.*\/)(man3)/$1/;
+mkpath($installsiteman3dir);
+print colored(['magenta'], "installsiteman3dir: ") . $installsiteman3dir . "\n";
+
 
 my $cytar_lib = $installsitelib;
 $cytar_lib =~ s/(.*?)(\/.*)/$1/;
-print colored(['magenta'], "cytar_lib: ") . $cytar_lib. "\n";
+#print colored(['magenta'], "cytar_lib: ") . $cytar_lib. "\n";
 
 my $cytar_bin = $installbin;
 $cytar_bin =~ s/(.*?)(\/.*)/$1/;
-print colored(['magenta'], "cytar_bin: ") . $cytar_bin . "\n";
+#print colored(['magenta'], "cytar_bin: ") . $cytar_bin . "\n";
+
 
 # todo: add xz/lzma compression option (1)
 my $move_pack = sub {
@@ -89,12 +106,31 @@ _DEB
 
 my $check_pack = sub {
     my $p = shift;
+    my $cpanm = {};
+
+    $cpanm->{lib} = "$base/lib/perl5";
+    $cpanm->{bin} = "$base/bin";
+    $cpanm->{man} = "$base/man";
+
+    print colored(["white on_red"], $cpanm->{lib}) . "\n";
+    print colored(["white on_red"], $cpanm->{bin}) . "\n";
+    system("mv $cpanm->{lib}/* $installsitelib");
+    system("mv $cpanm->{bin}/* $installbin");
+    system("mv $cpanm->{man}/* $installman");
+    system("rm -rf cy");
+    print "\n";
+    print colored(['magenta'],"system ") . "$cpanm->{lib}/* $installsitelib";
+    print colored(['magenta'],"system ") . "$cpanm->{bin}/* $installbin";
+    print colored(['magenta'],"system ") . "$cpanm->{man}/* $installman";
+    print colored(['magenta'],"rmdir ") . "$base";
+
+    #print colored(["cyan"],"$installsitelib\n$installbin\n\n$cytar_lib\n$cytar_bin") . "\n";
 
     for my $pack( @$p ){
             print "\n\n" . colored(['black on_yellow'],"STARTING") . " check_pack" . "\n";
 
             # -- list content of received packlist
-            print colored(['magenta'],"module: ") . $pack->{path} . "\n";
+            print colored(['magenta'],"packlist path: ") . $pack->{path} . "\n";
             print colored(['magenta'],"pkg: ") . $pack->{pkg} . "\n";
             print colored(['yellow'],"packlist content: ") . "\n";
             for(@{$pack->{packlist}}){ say $_ }
@@ -103,6 +139,7 @@ my $check_pack = sub {
             my $control = system("touch $pack->{pkg}/DEBIAN/control");
             my $fh = undef;
 
+            
 
             my $fn = "$ENV{HOME}/.cypm/pool/$pack->{pkg}/DEBIAN/control";
             open( $fh, '>', $fn ) or die "can't open $fn: $!";
@@ -173,7 +210,7 @@ my $list_pack = sub {
             if( /\/cy\// ){
                 if(/$home/){
 
-                    s/(.*?)(\/cy\/)(.*)/$2$3/;
+                    s/(.*?)(\/cy\/)(.*)/$3/;
                     push @pack, $_;
 
                     print colored(['magenta'],"adding: ") . "$_ ";
