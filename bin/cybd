@@ -17,7 +17,7 @@ use open qw< :encoding(UTF-8) >;
 use Cydia::Meta;
 
 my $cybase = "$ENV{HOME}/.cypm/pool";
-print colored(['black on_white'],"### cybd ###") .  "\n\n";
+print colored(['black on_white'],"cybd: staring build") .  "\n\n";
 
 my( $base )= qw< ./cy >;
 my @packlist_orig = ();
