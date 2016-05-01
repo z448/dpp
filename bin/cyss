@@ -4,11 +4,12 @@ use 5.010;
 use Net::OpenSSH;
 use Term::ANSIColor;
 use File::Path;
+use Getopt::Std;
 
+getopts('c:', \%option);
 say "### cyss STARTING";
 my @hosts = qw( localhost );
 my $pm = $ARGV[0];
-
 my $base = "$ENV{HOME}/.cypm/pool";
 my $cypm = $base . '/cy';
 
@@ -24,8 +25,8 @@ my $cytar_lib = $installsitelib;
 $cytar_lib =~ s/(.*?)(\/.*)/$1/;
 mkpath("$cypm/$cytar_lib");
 
-
-my $cmd = "source ~/.cypm/.env &&  cpanm -n -f --reinstall -l $cypm $pm";
+my $mode = $option->{c} || 'l';
+my $cmd = "source ~/.cypm/.env &&  cpanm -n -f --reinstall -$mode $cypm $pm";
 
 # parallel test; uncoment below and tail /tmp/out-$host.txt on local host
 #my $cmd = 'for i in `seq 1 20`;do echo $i;sleep 3;done';
