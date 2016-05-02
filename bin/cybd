@@ -179,7 +179,8 @@ my $check_pack = sub {
             print colored(['yellow'], "using: ") . "$pack->{pkg}/.packlist for data.tar.gz" . "\n";
 
             #call make_pack, build deb
-            say $make_pack->( $pack->{pkg} );
+            my $make_pack_s = $make_pack->( $pack->{pkg} );
+            say $make_pack_s;
             
             #web
             web($pack->{module});
