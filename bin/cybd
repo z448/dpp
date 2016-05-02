@@ -6,7 +6,6 @@ use warnings;
 use strict;
 
 use JSON::PP;
-use Term::Pulse;
 use File::Find;
 use File::Path;
 use File::Copy;
@@ -171,6 +170,8 @@ my $check_pack = sub {
                             say $findh "$File::Find::dir/$_";
                         } else {
                         print colored(['yellow'], "skipping dir: ") . "$File::Find::dir/$_" . "\n";
+                        open(my $fh,">>", "$cybase/.remove") || die "cant open $!";
+                        close $fh;
                     }}}, ($installsitelib, $installbin, $installman ));
 
             #create new data.pack using new packlist
@@ -183,6 +184,20 @@ my $check_pack = sub {
             unless( $make_pack->($pack->{pkg}) ){
                 say $pack->{pkg} . ': ok';
             }
+
+            my $cleanup = sub {
+                open(my $fh, "<", "$cybase/$pack->{pkg}/.packlist");
+                while(<$fh>){
+                    unlink $_;
+                }; close $fh;
+                open($fh,"<", "$cybase/.remove") || die "cant open $!";
+                while(<$fh>){
+                    unlink $_;
+                }; close $fh;
+                unlink "$cybase/.remove";
+            }; $cleanup->();
+
+            
             
             #web
             #web($pack->{module});
@@ -250,6 +265,7 @@ my $list_pack = sub {
 };
 
 $list_pack->(\@packlist_orig);
+rmdir "$cybase/cy";
 #my $repo = 'mobile@load.sh';
 #$move_pack->($repo);
 

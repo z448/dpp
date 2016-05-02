@@ -1,13 +1,10 @@
 #!/usr/bin/env perl
 # build in parallel remotely
 use 5.010;
-use Term::Pulse;
 use Net::OpenSSH;
 use Term::ANSIColor;
 use File::Path;
-use Getopt::Std;
 
-getopts('c:', \%option);
 say "### cyss STARTING";
 my @hosts = qw( localhost );
 my $pm = $ARGV[0];
@@ -25,8 +22,6 @@ mkpath("$cypm/$installbin");
 my $cytar_lib = $installsitelib;
 $cytar_lib =~ s/(.*?)(\/.*)/$1/;
 mkpath("$cypm/$cytar_lib");
-
-my $mode = $option->{c} || 'l';
 
 my $cmd = "source ~/.cypm/.env &&  cpanm -n -f --reinstall -L $cypm $pm";
 #my $cmd = "source ~/.cypm/.env &&  cpanm -n -f --reinstall -$mode $cypm $pm";

@@ -149,14 +149,14 @@ my $meta = sub {
 my $web = sub {
     my $pm = shift;
     my $m = $meta->( $pm );
-    my $html = '';
+    my $html = {};
     my @pipe;
 
-    open( my $fh, '<', '.www' ); 
-    {   local $/ = undef;
-        my $j = <$fh>; 
-        $html = decode_json $j  }
-    close $fh; $fh = undef;
+    #open( my $fh, '<', '.www' ); 
+    #{   local $/ = undef;
+    #    my $j = <$fh>; 
+    #    $html = decode_json $j  }
+    #close $fh; $fh = undef;
 
     open my $pipe, '-|', "curl -skL $m->{ www }"; 
     my @body;
@@ -171,7 +171,7 @@ my $web = sub {
     #print $fh $html->{ foot };
     #close $fh; $fh = undef;
 
-    open( $fh, '>>', '.index' ) or die "can't open: $!";
+    open( my $fh, '>>', '.index' ) or die "can't open: $!";
     say   $fh @{$m->{ div }};
     close $fh; $fh = undef;
 };
