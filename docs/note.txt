@@ -1,41 +1,22 @@
-
-#move( $cybase . '/man', $installsitelib);
-
-
-#my $native_path = \%Config;
-#for( keys $native_path ){
-#    say $_ . ' --> ' . $native_path->{$_};
-#};
-
-
-
-# ---same on osx + ios---
-# installsitescript -> /usr/local/bin
-# installstyle -> lib/perl5
-# installsitebin -> /usr/local/bin
-#
-# ---unique sitelib osx----
-# installsitelib -> /Library/Perl/5.18
-#
-# ---unique sitelib ios----
-# installprivlib -> /usr/local/lib/perl5/5.14.4
-#
-#
-
-#move($cybase->{man}, "usr/local/man") and say "1. moved" . "$cybase->{man} to usr/local/man";
-#move($cybase->{bin}, "usr/local/bin")  and say "2. moved" . "$cybase->{bin} to usr/local/bin";
-#move($cybase->{libperl5}, $sitelib)  and say "3. moved" . "$cybase->{libperl5} to $sitelib";
-#move("usr/local/lib/perl5/lib", "usr/local/lib/perl5/site_perl")  and say "4. moved" . "$cybase->{man} to $sitelib_stem";
-#move("usr/local/lib/perl5/lib", $sitelib_stem)  and say "4. moved" . "$cybase->{man} to $sitelib_stem";
-
-
-#move($cybase->{man}, "usr/local/man");
-#move($cybase->{bin}, "usr/local/bin");
-#move($cybase->{libperl5} , "usr/local/lib/perl5/lib/".$p5v);
-###### move($cybase->{libperl5}, "$sitelib");
-#move($cybase->{lib}, "$sitelib_stem");
-
-#move( "usr/local/lib/perl5/man", "usr/local/man" );
-#move( "usr/local/lib/perl5/bin", "usr/local/bin" );
-#move( "usr/local/lib/perl5/lib/perl5", "usr/local/lib/perl5/lib/".$p5v );
-#move( "usr/local/lib/perl5/lib", "usr/local/lib/perl5/site_perl" );
+i_sysmman  ->  define
+installman1dir  ->  /usr/share/man/man1
+installman3dir  ->  /usr/share/man/man3
+installsiteman1dir  ->  /usr/local/share/man/man1
+installsiteman3dir  ->  /usr/local/share/man/man3
+installvendorman1dir  ->  /usr/local/share/man/man1
+installvendorman3dir  ->  /usr/local/share/man/man3
+man1dir  ->  /usr/share/man/man1
+man1direxp  ->  /usr/share/man/man1
+man1ext  ->  1
+man3dir  ->  /usr/share/man/man3
+man3direxp  ->  /usr/share/man/man3
+man3ext  ->  3pm
+siteman1dir  ->  /usr/local/share/man/man1
+siteman1direxp  ->  /usr/local/share/man/man1
+siteman3dir  ->  /usr/local/share/man/man3
+siteman3direxp  ->  /usr/local/share/man/man3
+sysman  ->  /usr/share/man/man1
+vendorman1dir  ->  /usr/local/share/man/man1
+vendorman1direxp  ->  /usr/local/share/man/man1
+vendorman3dir  ->  /usr/local/share/man/man3
+vendorman3direxp  ->  /usr/local/share/man/man3
