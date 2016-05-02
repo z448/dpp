@@ -92,7 +92,7 @@ my $deps = sub {
             next;
         }
     }
-    $dep{control} = $dep{control} . "perl (= 5.14.4)";
+    $dep{control} = $dep{control} . "perl (>= 5.14.4)";
     return \%dep;
 };
 
@@ -122,7 +122,7 @@ my $meta = sub {
         install_path => $Config{installprivlib},
         module_name  => $meta_p->{module}[0]->{name},
         release_date => $meta_p->{date},
-        Architecture => 'iphoneos-arm', #$Config{archname}
+        Architecture => 'all', #'iphoneos-arm', #$Config{archname}
         source_url   => $m->{download_url},
         deps_graph   => $graph.$m->{name}, #Moose-2.1205
         pod          => $meta_p->{pod},

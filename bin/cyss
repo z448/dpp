@@ -1,6 +1,7 @@
 #!/usr/bin/env perl
 # build in parallel remotely
 use 5.010;
+use Term::Pulse;
 use Net::OpenSSH;
 use Term::ANSIColor;
 use File::Path;
@@ -26,6 +27,7 @@ $cytar_lib =~ s/(.*?)(\/.*)/$1/;
 mkpath("$cypm/$cytar_lib");
 
 my $mode = $option->{c} || 'l';
+
 my $cmd = "source ~/.cypm/.env &&  cpanm -n -f --reinstall -$mode $cypm $pm";
 
 # parallel test; uncoment below and tail /tmp/out-$host.txt on local host
@@ -40,7 +42,7 @@ my @pid;
 for my $host (@hosts) {
     open my($fh), '>', "/tmp/out-$host.txt"
       or die "unable to create file: $!";
-    push @pid, $conn{$host}->spawn({stdout_fh => $fh}, $cmd);
+    push @pid,  $conn{$host}->spawn({stdout_fh => $fh}, $cmd);
 }
 
 waitpid($_, 0) for @pid;

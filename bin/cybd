@@ -6,6 +6,7 @@ use warnings;
 use strict;
 
 use JSON::PP;
+use Term::Pulse;
 use File::Find;
 use File::Path;
 use File::Copy;
@@ -179,8 +180,11 @@ my $check_pack = sub {
             print colored(['yellow'], "using: ") . "$pack->{pkg}/.packlist for data.tar.gz" . "\n";
 
             #call make_pack, build deb
-            my $make_pack_s = $make_pack->( $pack->{pkg} );
-            say $make_pack_s;
+            pulse_start( name => 'Checking', rotate => 0, time => 3 );
+            unless( $make_pack->($pack->{pkg}) ){
+                say $pack->{pkg} . ': ok';
+            }
+            pulse_stop();
             
             #web
             web($pack->{module});
