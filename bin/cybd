@@ -96,6 +96,8 @@ my $make_pack = sub {
     cd ../..;
     echo 2.0 > debian-binary;
     arfp r $pm.deb debian-binary control.tar.gz data.tar.gz;
+    mv $pm.deb ~/.cypm/.stash/deb;
+    rm -rf ~/.cypm/pool/*;
 _DEB
     #tar czf ../data.tar.gz [a-z]*;
     my $package = sub {
@@ -177,7 +179,7 @@ my $check_pack = sub {
             print colored(['yellow'], "using: ") . "$pack->{pkg}/.packlist for data.tar.gz" . "\n";
 
             #call make_pack, build deb
-            $make_pack->( $pack->{pkg} );
+            say $make_pack->( $pack->{pkg} );
             
             #web
             web($pack->{module});
