@@ -82,7 +82,12 @@ my $deps = sub {
         push @dist_dep, $dep_dis->($_) unless $_ eq 'perl';
     }
     $dep{distribution} = \@dist_dep;
-
+=head1 uniq
+# uniq
+“%seen = ( );
+@dpeps_uniq = grep { ! $seen{$_} ++ } @dist_dep;”
+# /uniq
+=cut
     my @deps_uniq = uniq @dist_dep;
 
     for( @deps_uniq ){
