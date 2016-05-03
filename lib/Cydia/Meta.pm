@@ -84,7 +84,7 @@ my $deps = sub {
     $dep{distribution} = \@dist_dep;
 
 %seen = ( );
-@deps_uniq = grep { ! $seen{$_} ++ } @dist_dep;”
+@deps_uniq = grep { ! $seen{$_} ++ } @dist_dep;
 
    # my @deps_uniq = uniq @dist_dep;
 
