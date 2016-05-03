@@ -168,7 +168,7 @@ my $web = sub {
             push @body, $_ if /module/ or /description/;
     }; $html->{ body } = \@body;
     
-    open( $fh, '>', "$ENV{HOME}/.cypm/.stash/.index") or die "can't open: $!";
+    open( $fh, '>', "$ENV{HOME}/.cypm/.stash/.index") || die "cant open: $!";
     print $fh $html->{ head };
     say   $fh @{$m->{ div }};
     say   $fh @{$html->{ body }};
@@ -176,7 +176,7 @@ my $web = sub {
     close $fh; $fh = undef;
     
     
-    open( my $fh, '>>', "$ENV{HOME ) or die "can't open: $!";
+    open( my $fh, '>>', "$ENV{HOME}/.stash/.index" ) || die "cant open: $!";
     say   $fh @{$m->{ div }};
     close $fh; $fh = undef;
 };
