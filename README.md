@@ -1,12 +1,12 @@
-# NAME
+### NAME
 
 - dpp - debian perl packager
 
-# SYNOPISIS
+### SYNOPISIS
 
 - Packs perl modules + dependencies into debian packages (.deb)
 
-# INSTALLATION
+### INSTALLATION
 
 - Clone repository
 
@@ -20,12 +20,12 @@
 
     `. setup`
 
-# USAGE
+### USAGE
 
 - Pack module and it's dependencies 
 
     `dpp Perl::Module`
 
-- - packaged modules directory $HOME/.cypm/.stash/deb
-- - pool (build) directory $HOME/.cypm/.pool
-- - use [CTRL-P](https://metacpan.org/pod/CTRL-P) & [CTRL-G](https://metacpan.org/pod/CTRL-G)to switch between pool & deb directories
+- packaged modules directory $HOME/.cypm/.stash/deb
+- pool (build) directory $HOME/.cypm/.pool
+- use [CTRL-P] & [CTRL-G] to switch between pool & deb directories
