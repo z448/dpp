@@ -76,10 +76,10 @@ C<git clone https://github.com/z448/dpp>
 
 C<carton install>
 
-=item - source enviroment
+=item - setup enviroment
 
 
-C<. ./set.env>
+C<. setup>
 
 =back
 
