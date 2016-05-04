@@ -58,7 +58,7 @@ system("cd ~/.cypm/pool && ~/.cypm/.bin/dbd $pm");
 
 =over 12
 
-=item Packs perl modules with dependencies into debian packages (.deb)
+=item Packs perl modules + dependencies into debian packages (.deb)
 
 =back
 
@@ -66,17 +66,17 @@ system("cd ~/.cypm/pool && ~/.cypm/.bin/dbd $pm");
 
 =over 12
 
-=item - clone repository
+=item Clone repository
 
 
 C<git clone https://github.com/z448/dpp>
 
-=item - install dependencies with L<Carton>
+=item Install dependencies with L<Carton>
 
 
 C<carton install>
 
-=item - setup enviroment
+=item Setup enviroment (this will switch you into build directory $HOME/.cypm/pool)
 
 
 C<. setup>
@@ -87,7 +87,15 @@ C<. setup>
 
 =over 12
 
-=item use CTRL-P & CTRL-G to switch between pool & deb directories
+=item Pack module and it's dependencies 
+
+C<dpp Perl::Module>
+
+=item - packaged modules directory $HOME/.cypm/.stash/deb
+
+=item - pool (build) directory $HOME/.cypm/.pool
+
+=item - use L<CTRL-P> & L<CTRL-G>to switch between pool & deb directories
 
 =back
 
