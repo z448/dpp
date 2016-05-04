@@ -177,7 +177,7 @@ my $web = sub {
     close $fh; #$fh = undef;
     
     
-    open( my $fh, '>>', "$ENV{HOME}/.stash/.index" ) || die "cant open: $!";
+    open( my $fh, '>>', "$ENV{HOME}/.cypm/.stash/.index" ) || die "cant open: $!";
     say   $fh @{$m->{ div }};
     close $fh; $fh = undef;
 };
