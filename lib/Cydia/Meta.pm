@@ -83,8 +83,8 @@ my $deps = sub {
     }
     $dep{distribution} = \@dist_dep;
 
-%seen = ( );
-@deps_uniq = grep { ! $seen{$_} ++ } @dist_dep;
+my %seen = ( );
+my @deps_uniq = grep { ! $seen{$_} ++ } @dist_dep;
 
    # my @deps_uniq = uniq @dist_dep;
 
@@ -95,7 +95,8 @@ my $deps = sub {
             next;
         }
     }
-    $dep{control} = $dep{control} . "perl (>= 5.14.4)";
+    $dep{control} = $dep{control} . "perl";
+    # (>= 5.14.4)";
     return \%dep;
 };
 
