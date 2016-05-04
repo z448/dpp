@@ -83,7 +83,10 @@ my $deps = sub {
     }
     $dep{distribution} = \@dist_dep;
 
-    my @deps_uniq = uniq @dist_dep;
+my %seen = ( );
+my @deps_uniq = grep { ! $seen{$_} ++ } @dist_dep;
+
+   # my @deps_uniq = uniq @dist_dep;
 
     for( @deps_uniq ){
         unless( $_ eq 'perl' ){
@@ -92,7 +95,8 @@ my $deps = sub {
             next;
         }
     }
-    $dep{control} = $dep{control} . "perl (= 5.14.4)";
+    $dep{control} = $dep{control} . "perl";
+    # (>= 5.14.4)";
     return \%dep;
 };
 
@@ -110,6 +114,7 @@ my $meta = sub {
     my $prefix = 'lib';
      
     my $remote = {
+        cystash      => "$ENV{HOME}/.cypm/.stash",
         Name         => $m->{distribution},
         Version      => $m->{version},
         Author       => $m->{author},
@@ -122,7 +127,7 @@ my $meta = sub {
         install_path => $Config{installprivlib},
         module_name  => $meta_p->{module}[0]->{name},
         release_date => $meta_p->{date},
-        Architecture => 'iphoneos-arm', #$Config{archname}
+        Architecture => 'all', #'iphoneos-arm', #$Config{archname}
         source_url   => $m->{download_url},
         deps_graph   => $graph.$m->{name}, #Moose-2.1205
         pod          => $meta_p->{pod},
@@ -149,14 +154,14 @@ my $meta = sub {
 my $web = sub {
     my $pm = shift;
     my $m = $meta->( $pm );
-    my $html = '';
+    my $html = {};
     my @pipe;
 
-    open( my $fh, '<', '.www' ); 
-    {   local $/ = undef;
-        my $j = <$fh>; 
-        $html = decode_json $j  }
-    close $fh; $fh = undef;
+    #open( my $fh, '<', '.www' ); 
+    #{   local $/ = undef;
+    #    my $j = <$fh>; 
+    #    $html = decode_json $j  }
+    #close $fh; $fh = undef;
 
     open my $pipe, '-|', "curl -skL $m->{ www }"; 
     my @body;
@@ -164,14 +169,15 @@ my $web = sub {
             push @body, $_ if /module/ or /description/;
     }; $html->{ body } = \@body;
     
-    #open( $fh, '>', '.index' ) or die "can't open: $!";
-    #print $fh $html->{ head };
-    #say   $fh @{$m->{ div }};
-    #say   $fh @{$html->{ body }};
-    #print $fh $html->{ foot };
-    #close $fh; $fh = undef;
-
-    open( $fh, '>>', '.index' ) or die "can't open: $!";
+    open( my $fh, '>', "$ENV{HOME}/.cypm/.stash/.index") || die "cant open: $!";
+    print $fh $html->{ head };
+    say   $fh @{$m->{ div }};
+    say   $fh @{$html->{ body }};
+    print $fh $html->{ foot };
+    close $fh; #$fh = undef;
+    
+    
+    open( $fh, '>>', "$ENV{HOME}/.cypm/.stash/.index" ) || die "cant open: $!";
     say   $fh @{$m->{ div }};
     close $fh; $fh = undef;
 };
@@ -207,9 +213,9 @@ sub control {
 sub graph {
     my $pm = shift;
     my $gui = $meta->($pm);
-    my $open = 'open_chrome_single_window.sh';
-    my $deps_graph=system("$open $gui->{deps_graph} &2>1 /dev/null");
-    return $deps_graph;
+    #my $open = 'osx_open_chome_sw.sh';
+    my $deps_graph=qq|'/Applications/Google Chrome.app/Contents/MacOS/Google Chrome' --app="$gui->{deps_graph}" &2>1 /dev/null|;
+    system("$deps_graph");
 }
 
 sub path {

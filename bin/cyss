@@ -3,27 +3,42 @@
 use 5.010;
 use Net::OpenSSH;
 use Term::ANSIColor;
+use File::Path;
 
+say "### cyss STARTING";
 my @hosts = qw( localhost );
 my $pm = $ARGV[0];
+my $base = "$ENV{HOME}/.cypm/pool";
+my $cypm = $base . '/cy';
 
-my $cypm_base = "~/.cypm/pool/usr/local/lib/perl5";
-my $cmd = "source ~/.cypm/.env &&  ~/Documents/dpp/local/bin/cpanm -n -f --reinstall -L $cypm_base $pm";
-#my $cmd = "source ~/.cypm/.env && tar -xvf ~/.mm.tgz && cpanm -n -f --reinstall -L $cypm_base $pm";
-#my $cmd = "source ~/.cypm/.env && rm -rf ~/.cypm/pool/usr && tar -xvf .mm.tgz && cpanm -n --force --reinstall -L $cypm_base $pm";
+my $installsitelib = $Config{installsitelib};
+$installsitelib =~ s/^\///;
+mkpath("$cypm/$installsitelib");
+
+my $installbin = $Config{installbin};
+$installbin =~ s/^\///;
+mkpath("$cypm/$installbin");
+
+my $cytar_lib = $installsitelib;
+$cytar_lib =~ s/(.*?)(\/.*)/$1/;
+mkpath("$cypm/$cytar_lib");
+
+my $cmd = "source ~/.cypm/.env &&  cpanm -n -f --reinstall -L $cypm $pm";
+#my $cmd = "source ~/.cypm/.env &&  cpanm -n -f --reinstall -$mode $cypm $pm";
 
 # parallel test; uncoment below and tail /tmp/out-$host.txt on local host
 #my $cmd = 'for i in `seq 1 20`;do echo $i;sleep 3;done';
 
-# say info where is command running; put command string into separate line
+# say info where is command running;
 say "\nrunning:"; print colored( "$cmd\n", 'blue' ); say "on: @hosts ";
 
+# ssh
 my %conn = map { $_ => Net::OpenSSH->new($_, async => 1) } @hosts;
 my @pid;
 for my $host (@hosts) {
     open my($fh), '>', "/tmp/out-$host.txt"
       or die "unable to create file: $!";
-    push @pid, $conn{$host}->spawn({stdout_fh => $fh}, $cmd);
+    push @pid,  $conn{$host}->spawn({stdout_fh => $fh}, $cmd);
 }
 
 waitpid($_, 0) for @pid;
