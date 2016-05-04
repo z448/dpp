@@ -177,7 +177,7 @@ my $web = sub {
     close $fh; #$fh = undef;
     
     
-    open( my $fh, '>>', "$ENV{HOME}/.cypm/.stash/.index" ) || die "cant open: $!";
+    open( $fh, '>>', "$ENV{HOME}/.cypm/.stash/.index" ) || die "cant open: $!";
     say   $fh @{$m->{ div }};
     close $fh; $fh = undef;
 };
@@ -213,9 +213,9 @@ sub control {
 sub graph {
     my $pm = shift;
     my $gui = $meta->($pm);
-    my $open = 'open_chrome_single_window.sh';
-    my $deps_graph=system("$open $gui->{deps_graph} &2>1 /dev/null");
-    return $deps_graph;
+    #my $open = 'osx_open_chome_sw.sh';
+    my $deps_graph=qq|'/Applications/Google Chrome.app/Contents/MacOS/Google Chrome' --app="$gui->{deps_graph}" &2>1 /dev/null|;
+    system("$deps_graph");
 }
 
 sub path {
