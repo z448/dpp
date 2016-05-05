@@ -24,8 +24,11 @@
 
 - Pack module and it's dependencies 
 
-    `dpp Perl::Module`
+    `dpp -m Perl::Module`
 
 - packaged modules directory $HOME/.cypm/.stash/deb
 - pool (build) directory $HOME/.cypm/.pool
 - use [CTRL-P] & [CTRL-G] to switch between pool & deb directories
+
+
+

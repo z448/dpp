@@ -9,7 +9,7 @@ alias pm2="cd $PWD";
 
 bind '"\C-p":"cd $CYPOOL && clear && pwd\n"';
 
-bind '"\C-g":"cd ~/.cypm/.stash/cydia/deb && pwd;\n"';
+bind '"\C-g":"cd ~/.cypm/.stash/deb && clear && pwd;\n"';
 
 
 alias stash="cd $CYPM/.stash"
@@ -61,10 +61,12 @@ echo -e "\e[33m::ok\e[0m\t\$PERL5LIB is: $PERL5LIB"
 #PERL_MB_OPT="--install_base "$CYPOOL/usr/local/lib/perl5"
 #PERL_MM_OPT="INSTALL_BASE="$CYPOOL/usr/local/lib/perl5"
 
-#export PATH=/usr/local/bin:$PATH
+export PATH=$PWD/local/bin:$PWD/bin:$PATH
+#export PATH=/usr/local/bin:$PWD/bin:$PATH
 
 export PS_PATH=/usr/bin/ps
 
-cd $CYSTASH && tar -xvf $CYGIT/bin/tools/tools.tgz && cd $CYPOOL
-export PATH=$CYBIN:$CYPM/.stash/tools:$PATH
+
+#cd $CYSTASH && tar -xvf $CYGIT/bin/tools/tools.tgz && cd $CYPOOL
+#export PATH=$CYBIN:$CYPM/.stash/tools:$PATH
 
