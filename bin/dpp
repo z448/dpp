@@ -51,7 +51,7 @@ sub install {
     }
 }
 
-install($option{h});
+say install($option{h});
 
 system("cd ~/.cypm/pool && ~/.cypm/.bin/dbd $pm");
 
