@@ -12,7 +12,7 @@ use Config;
 use Getopt::Std;
 
 my %option = ();
-getopts('h:m:c:':, \%option);
+getopts('h:m:c:', \%option);
 
 #say $option{h} and die;
 my $pm = $option{m};
