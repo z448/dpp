@@ -1,8 +1,0 @@
-#!/usr/bin/env perl
-
-use 5.010;
-use FindBin;
-use lib "$FindBin::Bin/../lib";
-use Cydia::Meta;
-
-say control($ARGV[0]);
