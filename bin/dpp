@@ -1,13 +1,21 @@
 #!/usr/bin/env perl
 # build in parallel remotely
+#
 use 5.010;
+use warnings;
+use strict;
+
 use Net::OpenSSH;
 use Term::ANSIColor;
 use File::Path;
+use Config;
+use Getopt::Std;
 
-say "### cyss STARTING";
-my @hosts = qw( localhost );
-my $pm = $ARGV[0];
+my %option = ();
+getopts('h:m:', \%option);
+
+#say $option{h} and die;
+my $pm = $option{m};
 my $base = "$ENV{HOME}/.cypm/pool";
 my $cypm = $base . '/cy';
 
@@ -24,32 +32,33 @@ $cytar_lib =~ s/(.*?)(\/.*)/$1/;
 mkpath("$cypm/$cytar_lib");
 
 my $cmd = "source ~/.cypm/.env &&  cpanm -n -f --reinstall -L $cypm $pm";
-#my $cmd = "source ~/.cypm/.env &&  cpanm -n -f --reinstall -$mode $cypm $pm";
 
-# parallel test; uncoment below and tail /tmp/out-$host.txt on local host
-#my $cmd = 'for i in `seq 1 20`;do echo $i;sleep 3;done';
-
-# say info where is command running;
-say "\nrunning:"; print colored( "$cmd\n", 'blue' ); say "on: @hosts ";
-
-# ssh
-my %conn = map { $_ => Net::OpenSSH->new($_, async => 1) } @hosts;
-my @pid;
-for my $host (@hosts) {
-    open my($fh), '>', "/tmp/out-$host.txt"
-      or die "unable to create file: $!";
-    push @pid,  $conn{$host}->spawn({stdout_fh => $fh}, $cmd);
+sub install {
+    my @hosts = shift;
+    unless(defined $option{h}){
+        my $install = sub { system("$cmd") };
+        return $install->();
+    } else {
+        say "\nrunning:"; print colored( "$cmd\n", 'blue' ); say "on: @hosts ";
+        my %conn = map { $_ => Net::OpenSSH->new($_, async => 1) } @hosts;
+        my @pid;
+        for my $host (@hosts) {
+            open my($fh), '>', "/tmp/out-$host.txt"
+              or die "unable to create file: $!";
+            push @pid,  $conn{$host}->spawn({stdout_fh => $fh}, $cmd);
+        }
+    waitpid($_, 0) for @pid;
+    }
 }
 
-waitpid($_, 0) for @pid;
+install($option{h});
 
 system("cd ~/.cypm/pool && ~/.cypm/.bin/dbd $pm");
 
 
 =head1 NAME
 
-=over 12
-
+over 12
 =item dpp - debian perl packager
 
 =back
@@ -73,11 +82,9 @@ C<git clone https://github.com/z448/dpp>
 
 =item Install dependencies with L<Carton>
 
-
 C<carton install>
 
 =item Setup enviroment (this will switch you into build directory $HOME/.cypm/pool)
-
 
 C<. setup>
 
@@ -89,7 +96,7 @@ C<. setup>
 
 =item Pack module and it's dependencies 
 
-C<dpp Perl::Module>
+C<dpp -m Perl::Module>
 
 =item - packaged modules directory $HOME/.cypm/.stash/deb
 
