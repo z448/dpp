@@ -31,21 +31,21 @@ my $cytar_lib = $installsitelib;
 $cytar_lib =~ s/(.*?)(\/.*)/$1/;
 mkpath("$cypm/$cytar_lib");
 
-my $cmd = "source ~/.cypm/.env &&  cpanm -n -f $option{c} --reinstall -L $cypm $pm";
+my  = "source ~/.cypm/.env &&  cpanm -n -f $option{c} --reinstall -L $cypm $pm";
 
 sub install {
     my @hosts = shift;
     unless(defined $option{h}){
-        my $install = sub { system("$cmd") };
+        my $install = sub { system("$build") };
         return $install->();
     } else {
-        say "\nrunning:"; print colored( "$cmd\n", 'blue' ); say "on: @hosts ";
+        say "\nrunning:"; print colored( "$build\n", 'blue' ); say "on: @hosts ";
         my %conn = map { $_ => Net::OpenSSH->new($_, async => 1) } @hosts;
         my @pid;
         for my $host (@hosts) {
             open my($fh), '>', "/tmp/out-$host.txt"
               or die "unable to create file: $!";
-            push @pid,  $conn{$host}->spawn({stdout_fh => $fh}, $cmd);
+            push @pid,  $conn{$host}->spawn({stdout_fh => $fh}, $build);
         }
     waitpid($_, 0) for @pid;
     }
