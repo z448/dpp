@@ -1,4 +1,4 @@
-![dpp logo](/assets/dpp3.png)
+![dpp logo](assets/logo.png)
 
 - dpp - debian perl packager
 
