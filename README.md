@@ -26,8 +26,8 @@
 
     `dpp -m Perl::Module`
 
-- packaged modules directory ~/.cypm/.stash/deb
-- pool (build) directory ~/.cypm/.pool
+- deb directory ~/.cypm/.stash/deb
+- pool (build) directory ~/.cypm/pool
 - use [CTRL-P] & [CTRL-G] to switch between pool & deb directories
 
 
