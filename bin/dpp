@@ -12,10 +12,11 @@ use Config;
 use Getopt::Std;
 
 my %option = ();
+# -h list of hosts
+# -c pass option to cpanm
+# -m perl::module
 getopts('h:m:c:', \%option);
 
-#say $option{h} and die;
-my $pm = $option{m};
 my $base = "$ENV{HOME}/.cypm/pool";
 my $cypm = $base . '/cy';
 
@@ -31,14 +32,16 @@ my $cytar_lib = $installsitelib;
 $cytar_lib =~ s/(.*?)(\/.*)/$1/;
 mkpath("$cypm/$cytar_lib");
 
-my  = "source ~/.cypm/.env &&  cpanm -n -f $option{c} --reinstall -L $cypm $pm";
+my  = "source ~/.cypm/.env &&  cpanm -n -f $option{c} --reinstall -L $cypm $option{m}";
 
 sub install {
-    my @hosts = shift;
     unless(defined $option{h}){
+    # no option installs on local hosts
         my $install = sub { system("$build") };
         return $install->();
     } else {
+        # -h 'list of hosts' ;todo:split list of hosts into @hosts
+        my @hosts = split(" ", $option{h});
         say "\nrunning:"; print colored( "$build\n", 'blue' ); say "on: @hosts ";
         my %conn = map { $_ => Net::OpenSSH->new($_, async => 1) } @hosts;
         my @pid;
@@ -51,7 +54,8 @@ sub install {
     }
 }
 
-say install($option{h});
+#say install($option{h});
+say install();
 
 system("cd ~/.cypm/pool && ~/.cypm/.bin/dbd $pm");
 
