@@ -19,7 +19,7 @@ getopts('hm:c:', \%option);
 
 my $base = "$ENV{HOME}/.cypm/pool";
 my $cypm = $base . '/cy';
-my $pm = $option{m} || system("perldoc abs_path($!)");
+my $pm = $option{m} || system("perldoc 'abs_path($!)'");
 my $cpanm_option = $option{c} || " ";
 my $installsitelib = $Config{installsitelib};
 $installsitelib =~ s/^\///;
