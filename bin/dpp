@@ -1,5 +1,4 @@
 #!/usr/bin/env perl
-# build in parallel remotely
 #
 use 5.010;
 use warnings;
@@ -55,15 +54,8 @@ sub install {
     }
 }
 
-#say install($option{h});
 say ${install()};
 system("cd $base && dbd $pm");
-
-
-
-#system("cd ~/.cypm/pool && install()");
-# system("cd ~/.cypm/pool && ~/.cypm/.bin/dbd $pm");
-
 
 =head1 NAME
 
