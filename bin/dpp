@@ -61,7 +61,7 @@ system("cd $base && dbd $pm");
 
 =head1 NAME
 
-over 12
+=over 12
 =item dpp - debian perl packager
 
 =back
@@ -78,8 +78,7 @@ over 12
 
 =over 12
 
-=iten;nm Cmlone repository
-
+=itenm Clone repository
 
 C<git clone https://github.com/z448/dpp>
 
