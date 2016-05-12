@@ -19,6 +19,7 @@ getopts('h:m:c:', \%option);
 
 my $base = "$ENV{HOME}/.cypm/pool";
 my $cypm = $base . '/cy';
+my $pm = $option{m} || die "use -m Module::Name";
 
 my $installsitelib = $Config{installsitelib};
 $installsitelib =~ s/^\///;
@@ -32,7 +33,7 @@ my $cytar_lib = $installsitelib;
 $cytar_lib =~ s/(.*?)(\/.*)/$1/;
 mkpath("$cypm/$cytar_lib");
 
-my $build = "source ~/.cypm/.env &&  cpanm -n -f $option{c} --reinstall -L $cypm $option{m}";
+my $build = "source ~/.cypm/.env &&  cpanm -n -f $option{c} --reinstall -L $cypm $pm";
 
 sub install {
     unless(defined $option{h}){
