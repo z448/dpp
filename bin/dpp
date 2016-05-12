@@ -9,6 +9,7 @@ use Term::ANSIColor;
 use File::Path;
 use Config;
 use Getopt::Std;
+use Cwd 'abs_path';
 
 my %option = ();
 # -h list of hosts
@@ -51,7 +52,7 @@ sub install {
             push @pid,  $conn{$host}->spawn({stdout_fh => $fh}, $build);
         } 
     waitpid($_, 0) for @pid;
-    } else { system("perldoc $!") }
+    } else { system("perldoc abs_path($!)") }
 }
 
 say ${install()};
