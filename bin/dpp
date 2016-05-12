@@ -14,7 +14,7 @@ my %option = ();
 # -h list of hosts
 # -c pass option to cpanm
 # -m perl::module
-getopts('h:m:c:', \%option);
+getopts('hm:c:', \%option);
 
 my $base = "$ENV{HOME}/.cypm/pool";
 my $cypm = $base . '/cy';
@@ -35,11 +35,11 @@ mkpath("$cypm/$cytar_lib");
 my $build = ". ~/.cypm/.env &&  cpanm -n -f $cpanm_option --reinstall -L $cypm $pm";
 
 sub install {
-    unless(defined $option{h}){
+    if(defined $option{m}){
     # no option installs on local hosts
         my $install = sub { system("$build") };
         return \$install->();
-    } else {
+    } elsif(defined $option{h}){
         # -h 'list of hosts' ;todo:split list of hosts into @hosts
         my @hosts = split(" ", $option{h});
         say "\nrunning:"; print colored( "$build\n", 'blue' ); say "on: @hosts ";
@@ -49,9 +49,9 @@ sub install {
             open my($fh), '>', "/tmp/out-$host.txt"
               or die "unable to create file: $!";
             push @pid,  $conn{$host}->spawn({stdout_fh => $fh}, $build);
-        }
+        } 
     waitpid($_, 0) for @pid;
-    }
+    } else { system("perldoc $!") }
 }
 
 say ${install()};
