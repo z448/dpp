@@ -57,6 +57,10 @@ sub install {
 
 #say install($option{h});
 say ${install()};
+system("cd $base && dbd $pm")
+
+
+
 #system("cd ~/.cypm/pool && install()");
 # system("cd ~/.cypm/pool && ~/.cypm/.bin/dbd $pm");
 
