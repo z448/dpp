@@ -33,7 +33,7 @@ my $cytar_lib = $installsitelib;
 $cytar_lib =~ s/(.*?)(\/.*)/$1/;
 mkpath("$cypm/$cytar_lib");
 
-my $build = "source ~/.cypm/.env &&  cpanm -n -f $cpanm_option --reinstall -L $cypm $pm";
+my $build = ". ~/.cypm/.env &&  cpanm -n -f $cpanm_option --reinstall -L $cypm $pm";
 
 sub install {
     unless(defined $option{h}){
