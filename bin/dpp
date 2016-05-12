@@ -39,7 +39,7 @@ sub install {
     unless(defined $option{h}){
     # no option installs on local hosts
         my $install = sub { system("$build") };
-        return $install->();
+        say $install->();
     } else {
         # -h 'list of hosts' ;todo:split list of hosts into @hosts
         my @hosts = split(" ", $option{h});
@@ -56,7 +56,7 @@ sub install {
 }
 
 #say install($option{h});
-say install();
+install();
 system("cd ~/.cypm/pool && install()");
 # system("cd ~/.cypm/pool && ~/.cypm/.bin/dbd $pm");
 
