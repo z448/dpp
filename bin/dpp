@@ -55,7 +55,7 @@ sub install {
     } 
 }
 
-unless($option{m}){ system("perldoc $!")};
+unless($option{m}){ system("perldoc $0")};
 say ${install()};
 system("cd $base && dbd $pm");
 
