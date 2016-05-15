@@ -17,7 +17,7 @@ my %option = ();
 # -m perl::module
 getopts('hm:c:', \%option);
 
-my $base = "$ENV{HOME}/.cypm/pool";
+my $base = "$ENV{HOME}/.cypm/build";
 my $cypm = $base . '/cy';
 my $pm = $option{m} || " ";
 my $cpanm_option = $option{c} || " ";
@@ -72,7 +72,7 @@ debian perl packager
 
 =over 12
 
-=item Packs perl modules + dependencies into debian packages (.deb)
+=item create debian binary packages from Perl modules
 
 =back
 
@@ -80,7 +80,7 @@ debian perl packager
 
 =over 12
 
-=itenm Clone repository
+=item Clone repository
 
 C<git clone https://github.com/z448/dpp>
 
@@ -88,7 +88,7 @@ C<git clone https://github.com/z448/dpp>
 
 C<carton install>
 
-=item Setup enviroment (this will switch you into build directory $HOME/.cypm/pool)
+=item Setup environment (this will switch you into build directory $HOME/.cypm/build)
 
 C<. setup>
 
@@ -98,15 +98,15 @@ C<. setup>
 
 =over 12
 
-=item Pack module and it's dependencies 
+=item create package 
 
 C<dpp -m Perl::Module>
 
-=item - packaged modules directory $HOME/.cypm/.stash/deb
+=item - package directory $HOME/.cypm/.stash/deb
 
-=item - pool (build) directory $HOME/.cypm/.pool
+=item - build directory $HOME/.cypm/build
 
-=item - use L<CTRL-P> & L<CTRL-G>to switch between pool & deb directories
+=item - use L<CTRL-P> & L<CTRL-G>to switch between build & deb directories
 
 =back
 
