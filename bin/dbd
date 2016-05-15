@@ -16,7 +16,7 @@ use lib "$FindBin::Bin/../lib";
 use open qw< :encoding(UTF-8) >;
 use Cydia::Meta;
 
-my $cybase = "$ENV{HOME}/.cypm/pool";
+my $cybase = "$ENV{HOME}/.cypm/build";
 print colored(['black on_white'],"cybd: staring build") .  "\n\n";
 
 my( $base )= qw< ./cy >;
@@ -143,7 +143,7 @@ my $check_pack = sub {
             #my $control = system("touch $pack->{pkg}/DEBIAN/control");
 
             my $fh = undef;
-            my $fn = "$ENV{HOME}/.cypm/pool/$pack->{pkg}/DEBIAN/control";
+            my $fn = "$ENV{HOME}/.cypm/build/$pack->{pkg}/DEBIAN/control";
             open( $fh, ">", $fn ) || die "cant open $fn";
             print $fh control("$pack->{module}") . "\n";
             close $fh;
