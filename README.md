@@ -1,10 +1,12 @@
 ![dpp logo](assets/logo50x50.jpg)
 
-- dpp - debian perl packager
+### NAME
+
+- create debian binary packages from Perl modules
 
 ### SYNOPISIS
 
-- Packs perl modules + dependencies into debian packages (.deb)
+- create debian binary packages from Perl module
 
 ### INSTALLATION
 
