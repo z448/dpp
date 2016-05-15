@@ -88,7 +88,7 @@ C<git clone https://github.com/z448/dpp>
 
 C<carton install>
 
-=item Setup environment (this will switch you into build directory $HOME/.cypm/build)
+=item Setup environment
 
 C<. setup>
 
