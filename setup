@@ -1,10 +1,10 @@
 export CYPM=~/.cypm
-export CYPOOL=$CYPM/pool
+export CYPOOL=$CYPM/build
 export CYBIN=$CYPM/.bin
 export CYSTASH=$CYPM/.stash
 export CURL_CA_BUNDLE="/usr/local/lib/perl5/site_perl/5.14.4/Mozilla/CA/cacert.pem"
 export CYGIT=$PWD
-alias pool="cd $CYPM/pool"
+alias build="cd $CYPM/build"
 alias pm2="cd $PWD";
 
 bind '"\C-p":"cd $CYPOOL && clear && pwd\n"';
@@ -28,10 +28,10 @@ echo -e "\e[33m::ok \e[0m\tchecking dependencies"
 if [ -d "$CYPM" ]; then
     echo -e "\e[33m::ok \e[0m\t $HOME/.cypm dir already exist"
 else
-    mkdir -p ~/.cypm/pool/DEBIAN
+    mkdir -p ~/.cypm/build/DEBIAN
     mkdir -p $CYSTASH/deb
     mkdir -p $CYSTASH/tools
-    touch ~/.cypm/pool/DEBIAN/control
+    touch ~/.cypm/build/DEBIAN/control
     echo -e "\e[33m::ok\e[0m created $HOME/.cypm dir"
 fi
 
