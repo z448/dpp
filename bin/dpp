@@ -18,22 +18,22 @@ my %option = ();
 getopts('hm:c:', \%option);
 
 my $base = "$ENV{HOME}/.dpp/build";
-my $cypm = $base . '/cy';
+my $dpp = $base . '/cy';
 my $pm = $option{m} || " ";
 my $cpanm_option = $option{c} || " ";
 my $installsitelib = $Config{installsitelib};
 $installsitelib =~ s/^\///;
-mkpath("$cypm/$installsitelib");
+mkpath("$dpp/$installsitelib");
 
 my $installbin = $Config{installbin};
 $installbin =~ s/^\///;
-mkpath("$cypm/$installbin");
+mkpath("$dpp/$installbin");
 
 my $cytar_lib = $installsitelib;
 $cytar_lib =~ s/(.*?)(\/.*)/$1/;
-mkpath("$cypm/$cytar_lib");
+mkpath("$dpp/$cytar_lib");
 
-my $build = ". ~/.dpp/.env &&  cpanm -n -f $cpanm_option --reinstall -L $cypm $pm";
+my $build = ". ~/.dpp/.env &&  cpanm -n -f $cpanm_option --reinstall -L $dpp $pm";
 
 sub install {
     if(defined $option{m}){

@@ -1,10 +1,10 @@
-export CYPM=~/.dpp
-export CYPOOL=$CYPM/build
-export CYBIN=$CYPM/.bin
-export CYSTASH=$CYPM/.stash
+export DPP=~/.dpp
+export CYPOOL=$DPP/build
+export CYBIN=$DPP/.bin
+export CYSTASH=$DPP/.stash
 export CURL_CA_BUNDLE="/usr/local/lib/perl5/site_perl/5.14.4/Mozilla/CA/cacert.pem"
 export CYGIT=$PWD
-alias build="cd $CYPM/build"
+alias build="cd $DPP/build"
 alias pm2="cd $PWD";
 
 bind '"\C-p":"cd $CYPOOL && clear && pwd\n"';
@@ -12,7 +12,7 @@ bind '"\C-p":"cd $CYPOOL && clear && pwd\n"';
 bind '"\C-g":"cd ~/.dpp/.stash/deb && clear && pwd;\n"';
 
 
-alias stash="cd $CYPM/.stash"
+alias stash="cd $DPP/.stash"
 alias cybin="cd $CYSTASH"
 alias ckpk='apt-cache search "\-p5" && dpkg -l | grep lib | grep "\-p5"'
 
@@ -25,10 +25,10 @@ alias ckpk='apt-cache search "\-p5" && dpkg -l | grep lib | grep "\-p5"'
 echo -e "\e[33m::ok \e[0m\tchecking dependencies"
 #carton install
 
-mkdir -p "$CYPM/build/DEBIAN";
+mkdir -p "$DPP/build/DEBIAN";
 mkdir -p "$CYSTASH/deb";
 mkdir -p "$CYSTASH/tools";
-touch "$CYPM/build/DEBIAN/control";
+touch "$DPP/build/DEBIAN/control";
 
 if [ ! -f "$CYPOOL/.www" ];then
     echo '{}' > $CYPOOL/.www
@@ -41,10 +41,10 @@ ln -sf $PWD/lib ~/.dpp/.lib
 ln -sf $PWD/local ~/.dpp/.local
 ln -sf $PWD/bin/.env ~/.dpp/.env
 
-if [[ -z "$CYPM" ]];then 
-    echo -e "\e[33m::ok\e[0m\t\$CYPM is in your env"
+if [[ -z "$DPP" ]];then 
+    echo -e "\e[33m::ok\e[0m\t\$DPP is in your env"
 else
-    export PERL5LIB=$PWD/local/lib/perl5:$PWD/lib:$CYPM/.stash/tools/usr/share/perl5:$PERL5LIB
+    export PERL5LIB=$PWD/local/lib/perl5:$PWD/lib:$DPP/.stash/tools/usr/share/perl5:$PERL5LIB
 fi
 
 echo -e "\e[33m::ok\e[0m\t\$PERL5LIB is: $PERL5LIB"
@@ -63,5 +63,5 @@ export PS_PATH=/usr/bin/ps
 
 
 #cd $CYSTASH && tar -xvf $CYGIT/bin/tools/tools.tgz && cd $CYPOOL
-#export PATH=$CYBIN:$CYPM/.stash/tools:$PATH
+#export PATH=$CYBIN:$DPP/.stash/tools:$PATH
 

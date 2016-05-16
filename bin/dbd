@@ -153,10 +153,10 @@ my $check_pack = sub {
 
             my $installsitelib_dir = $installsitelib;
             $installsitelib_dir =~ s/(.*?)(\/.*)/$1/;
-            my( $cypm_packlist ) = ();
+            my( $dpp_packlist ) = ();
 
             find( sub{ if( /\.packlist/ ){ 
-                        $cypm_packlist = "$File::Find::dir/$_";
+                        $dpp_packlist = "$File::Find::dir/$_";
                         print colored(['white on_red'],"unlink ") . $pack->{path} . "\n";
                         unlink($pack->{path});
             }}, $installsitelib_dir );
