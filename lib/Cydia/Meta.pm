@@ -170,19 +170,21 @@ my $web = sub {
             push @body, $_ if /module/ or /description/;
     }; $html->{ body } = \@body;
 
-    my %html = ();
+    my %html_hash = ();
     {
     open(my $fh,"<","$ENV{DPP}/assets/html/html.json") || die "$ENV{DPP}/assets/html/html.json $!";
     my $html_json = <$fh>;
     my $html_hash = decode_json $html_json;
-    print '$html_head{hash}' . $$html_hash{head};
-    #print Dumper($html_hash);
-#print $html{head};
+    #print '$html_head{hash}' . $$html_hash{head};
+    $html->{head} = $html_hash->{head};
+    $html->{foot} = $html_hash->{foot};
+    # print Dumper($html_hash);
+    #print $html_hash->{head};
     close $fh;
-    die;
+    #die;
     }
 
-    open( my $fh, '>', "$ENV{HOME}/.dpp/.stash/.index") || die "cant open: $!";
+    open( my $fh, '>', "$ENV{DPP}/assets/html/www.json") || die "cant open: $!";
     print $fh $html->{ head };
     say   $fh @{$m->{ div }};
     say   $fh @{$html->{ body }};
@@ -190,9 +192,9 @@ my $web = sub {
     close $fh; #$fh = undef;
     
     
-    open( $fh, '>>', "$ENV{HOME}/.dpp/.stash/.index" ) || die "cant open: $!";
-    say   $fh @{$m->{ div }};
-    close $fh; $fh = undef;
+    #open( $fh, '>>', "$ENV{DPP}/assets/html/www.json" ) || die "cant open: $!";
+    #say   $fh @{$m->{ div }};
+    #close $fh; $fh = undef;
 };
 
 sub web {
@@ -202,10 +204,7 @@ sub web {
 }
     
 sub meta {
-    my $pm = shift;
-    my $m = $meta->($pm);
-    #my $dep = $m->{Depends};
-    return $m;
+    my $pm = shift; my $m = $meta->($pm); #my $dep = $m->{Depends}; return $m;
 }
 
 sub control {
