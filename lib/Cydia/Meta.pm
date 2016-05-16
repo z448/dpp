@@ -7,6 +7,7 @@ use strict;
 use JSON;
 use File::Copy;
 use Encode;
+use Data::Dumper;
 use List::MoreUtils qw(uniq);
 use Config;
 use Config::Extensions qw( %Extensions );
@@ -169,16 +170,17 @@ my $web = sub {
             push @body, $_ if /module/ or /description/;
     }; $html->{ body } = \@body;
 
-    #my %html = ();
-    #{
-    #open(my $fh,"<","$ENV{DPP}/assets/html/html.json") || die "$ENV{DPP}/assets/html/html.json $!";
-    #my $html_json = <$fh>;
-    #my $html_hash = decode_json $html_json;
+    my %html = ();
+    {
+    open(my $fh,"<","$ENV{DPP}/assets/html/html.json") || die "$ENV{DPP}/assets/html/html.json $!";
+    my $html_json = <$fh>;
+    my $html_hash = decode_json $html_json;
+    print '$html_head{hash}' . $$html_hash{head};
     #print Dumper($html_hash);
-    #print $html{head};
-    #close $fh;
-    #die;
-    #}
+#print $html{head};
+    close $fh;
+    die;
+    }
 
     open( my $fh, '>', "$ENV{HOME}/.dpp/.stash/.index") || die "cant open: $!";
     print $fh $html->{ head };
