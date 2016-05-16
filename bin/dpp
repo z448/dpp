@@ -17,7 +17,7 @@ my %option = ();
 # -m perl::module
 getopts('hm:c:', \%option);
 
-my $base = "$ENV{HOME}/.cypm/build";
+my $base = "$ENV{HOME}/.dpp/build";
 my $cypm = $base . '/cy';
 my $pm = $option{m} || " ";
 my $cpanm_option = $option{c} || " ";
@@ -33,7 +33,7 @@ my $cytar_lib = $installsitelib;
 $cytar_lib =~ s/(.*?)(\/.*)/$1/;
 mkpath("$cypm/$cytar_lib");
 
-my $build = ". ~/.cypm/.env &&  cpanm -n -f $cpanm_option --reinstall -L $cypm $pm";
+my $build = ". ~/.dpp/.env &&  cpanm -n -f $cpanm_option --reinstall -L $cypm $pm";
 
 sub install {
     if(defined $option{m}){
@@ -102,9 +102,9 @@ C<. setup>
 
 C<dpp -m Perl::Module>
 
-=item - package directory $HOME/.cypm/.stash/deb
+=item - package directory $HOME/.dpp/.stash/deb
 
-=item - build directory $HOME/.cypm/build
+=item - build directory $HOME/.dpp/build
 
 =item - use L<CTRL-P> & L<CTRL-G>to switch between build & deb directories
 
