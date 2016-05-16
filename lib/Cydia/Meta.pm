@@ -114,7 +114,7 @@ my $meta = sub {
     my $prefix = 'lib';
      
     my $remote = {
-        cystash      => "$ENV{HOME}/.cypm/.stash",
+        cystash      => "$ENV{HOME}/.dpp/.stash",
         Name         => $m->{distribution},
         Version      => $m->{version},
         Author       => $m->{author},
@@ -169,7 +169,7 @@ my $web = sub {
             push @body, $_ if /module/ or /description/;
     }; $html->{ body } = \@body;
     
-    open( my $fh, '>', "$ENV{HOME}/.cypm/.stash/.index") || die "cant open: $!";
+    open( my $fh, '>', "$ENV{HOME}/.dpp/.stash/.index") || die "cant open: $!";
     print $fh $html->{ head };
     say   $fh @{$m->{ div }};
     say   $fh @{$html->{ body }};
@@ -177,7 +177,7 @@ my $web = sub {
     close $fh; #$fh = undef;
     
     
-    open( $fh, '>>', "$ENV{HOME}/.cypm/.stash/.index" ) || die "cant open: $!";
+    open( $fh, '>>', "$ENV{HOME}/.dpp/.stash/.index" ) || die "cant open: $!";
     say   $fh @{$m->{ div }};
     close $fh; $fh = undef;
 };
