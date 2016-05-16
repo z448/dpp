@@ -1,5 +1,5 @@
 export DPP=~/.dpp
-export CYPOOL=$DPP/build
+export DPP_BUILD=$DPP/build
 export CYBIN=$DPP/.bin
 export CYSTASH=$DPP/.stash
 export CURL_CA_BUNDLE="/usr/local/lib/perl5/site_perl/5.14.4/Mozilla/CA/cacert.pem"
@@ -7,7 +7,7 @@ export CYGIT=$PWD
 alias build="cd $DPP/build"
 alias pm2="cd $PWD";
 
-bind '"\C-p":"cd $CYPOOL && clear && pwd\n"';
+bind '"\C-p":"cd $DPP_BUILD && clear && pwd\n"';
 
 bind '"\C-g":"cd ~/.dpp/.stash/deb && clear && pwd;\n"';
 
@@ -30,8 +30,8 @@ mkdir -p "$CYSTASH/deb";
 mkdir -p "$CYSTASH/tools";
 touch "$DPP/build/DEBIAN/control";
 
-if [ ! -f "$CYPOOL/.www" ];then
-    echo '{}' > $CYPOOL/.www
+if [ ! -f "$DPP_BUILD/.www" ];then
+    echo '{}' > $DPP_BUILD/.www
 fi
 
 
@@ -53,8 +53,8 @@ echo -e "\e[33m::ok\e[0m\t\$PERL5LIB is: $PERL5LIB"
 
 #PERL5LIB=$PWD/local/lib/perl5:$PWD/lib:$PERL5LIB
 #PERL_LOCAL_LIB_ROOT="/var/mobile/perl5:/var/mobile/perl5"
-#PERL_MB_OPT="--install_base "$CYPOOL/usr/local/lib/perl5"
-#PERL_MM_OPT="INSTALL_BASE="$CYPOOL/usr/local/lib/perl5"
+#PERL_MB_OPT="--install_base "$DPP_BUILD/usr/local/lib/perl5"
+#PERL_MM_OPT="INSTALL_BASE="$DPP_BUILD/usr/local/lib/perl5"
 
 export PATH=$PWD/local/bin:$PWD/bin:$PATH
 #export PATH=/usr/local/bin:$PWD/bin:$PATH
@@ -62,6 +62,6 @@ export PATH=$PWD/local/bin:$PWD/bin:$PATH
 export PS_PATH=/usr/bin/ps
 
 
-#cd $CYSTASH && tar -xvf $CYGIT/bin/tools/tools.tgz && cd $CYPOOL
+#cd $CYSTASH && tar -xvf $CYGIT/bin/tools/tools.tgz && cd $DPP_BUILD
 #export PATH=$CYBIN:$DPP/.stash/tools:$PATH
 
