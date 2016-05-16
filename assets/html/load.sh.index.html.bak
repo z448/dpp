@@ -1,0 +1,440 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"> 
+<html xmlns="http://www.w3.org/1999/xhtml"> 
+<head> 
+<title>cydia</title> 
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" /> 
+<meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;"/>
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<script src="jq"></script>
+<link rel="stylesheet" href="mono-blue.min.css">
+<link rel="stylesheet" href="//code.cdn.mozilla.net/fonts/fira.css">
+<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootswatch/3.3.0/paper/bootstrap.min.css" />
+<link href='https://fonts.googleapis.com/css?family=Share+Tech+Mono' rel='stylesheet' type='text/css'>
+<link href='https://fonts.googleapis.com/css?family=Open+Sans:600' rel='stylesheet' type='text/css'>
+<link href='https://fonts.googleapis.com/css?family=Open+Sans:400' rel='stylesheet' type='text/css'>
+<link href='https://fonts.googleapis.com/css?family=Open+Sans:300' rel='stylesheet' type='text/css'>
+<link rel="stylesheet" type="text/css" href="cydia.css">
+</head> 
+ 
+<body bgcolor="#090311">
+<div align="center" >
+<div class="headtext"><br><br><sub>This is a Cydia/APT repository for jailbroken iOS devices.</sub><br><br></div>
+    <div class="module">
+            <div class="module">Starman</div>   <div class="description">High-performance preforking PSGI/Plack web server</br></div>
+
+        <div class="module"><a href="https://widgets.stratopan.com/wheel?q=Perl-Tidy-20160302"></a></div><div class="module">Perl::Tidy</div>    <div class="description">indent and reformat perl scripts</br></br></div>
+
+
+	<div class="module">Capture::Tiny</div>	<div class="description">Capture STDOUT and STDERR from Perl, XS or external programs</div>
+
+	<div class="module">Carp</div>	<div class="description">alternative warn and die for modules</div>
+
+	<div class="module">Class::Data::Inheritable</div>	<div class="description">Inheritable, overridable class data</div>
+
+	<div class="module">Class::Inspector</div>	<div class="description">Get information about a class and its structure</div>
+
+	<div class="module">Class::Load</div>	<div class="description">A working (require "Class::Name") and more</div>
+
+	<div class="module">Class::Method::Modifiers</div>	<div class="description">Provides Moose-like method modifiers</div>
+
+	<div class="module">Clone</div>	<div class="description">recursively copy Perl datatypes</div>
+
+	<div class="module">Config::Any</div>	<div class="description">Load configuration from different file formats, transparently</div>
+
+	<div class="module">Cookie::Baker</div>	<div class="description">Cookie string generator / parser</div>
+
+	<div class="module">Dancer2</div>	<div class="description">Lightweight yet powerful web application framework</div>
+
+	<div class="module">Data::Munge</div>	<div class="description">various utility functions</div>
+
+	<div class="module">Data::OptList</div>	<div class="description">parse and validate simple name/value option pairs</div>
+
+	<div class="module">Devel::GlobalDestruction</div>	<div class="description">Provides function returning the equivalent of ${^GLOBAL_PHASE} eq 'DESTRUCT' for older perls.</div>
+
+	<div class="module">Devel::StackTrace</div>	<div class="description">An object representing a stack trace</div>
+
+	<div class="module">Devel::StackTrace::AsHTML</div>	<div class="description">Displays stack trace in HTML</div>
+
+	<div class="module">Dist::CheckConflicts</div>	<div class="description">declare version conflicts for your dist</div>
+
+	<div class="module">Encode::Locale</div>	<div class="description">Determine the locale encoding</div>
+
+	<div class="module">Exception::Class</div>	<div class="description">A module that allows you to declare real exception classes in Perl</div>
+
+	<div class="module">File::ShareDir</div>	<div class="description">Locate per-dist and per-module shared files</div>
+
+	<div class="module">File::ShareDir::Install</div>	<div class="description">Install shared files</div>
+
+	<div class="module">Filesys::Notify::Simple</div>	<div class="description">Simple and dumb file system watcher</div>
+
+	<div class="module">Getopt::Long</div>	<div class="description">Extended processing of command line options</div>
+
+	<div class="module">Getopt::Long::Descriptive</div>	<div class="description">Getopt::Long, but simpler and more powerful</div>
+
+	<div class="module">HTML::Parser</div>	<div class="description">HTML parser class</div>
+
+	<div class="module">HTML::Tagset</div>	<div class="description">data tables useful in parsing HTML</div>
+
+	<div class="module">HTTP::Body</div>	<div class="description">HTTP Body Parser</div>
+
+	<div class="module">HTTP::Date</div>	<div class="description">date conversion routines</div>
+
+	<div class="module">HTTP::Headers::Fast</div>	<div class="description">faster implementation of HTTP::Headers</div>
+
+	<div class="module">HTTP::Message</div>	<div class="description">HTTP style messages</div>
+
+	<div class="module">HTTP::Tiny</div>	<div class="description">A small, simple, correct HTTP/1.1 client</div>
+
+	<div class="module">Hash::Merge::Simple</div>	<div class="description">Recursively merge two or more hashes, simply</div>
+
+	<div class="module">Hash::MultiValue</div>	<div class="description">Store multiple values per key</div>
+
+	<div class="module">IO::HTML</div>	<div class="description">Open an HTML file with automatic charset detection</div>
+
+	<div class="module">IO::Socket::IP</div>	<div class="description">Family-neutral IP socket supporting both IPv4 and IPv6</div>
+
+	<div class="module">IO::TieCombine</div>	<div class="description">produce tied (and other) separate but combined variables</div>
+
+	<div class="module">Import::Into</div>	<div class="description">Import packages into other packages</div>
+
+	<div class="module">JSON</div>	<div class="description">JSON (JavaScript Object Notation) encoder/decoder</div>
+
+	<div class="module">LWP::MediaTypes</div>	<div class="description">guess media type for a file or a URL</div>
+
+	<div class="module">Module::Implementation</div>	<div class="description">Loads one of several alternate underlying implementations for a module</div>
+
+	<div class="module">Module::Runtime</div>	<div class="description">runtime module handling</div>
+
+	<div class="module">Moo</div>	<div class="description">Minimalist Object Orientation (with Moose compatibility)</div>
+
+	<div class="module">MooX::Types::MooseLike</div>	<div class="description">some Moosish types and a type builder</div>
+
+	<div class="module">POSIX::strftime::Compiler</div>	<div class="description">GNU C library compatible strftime for loggers and servers</div>
+
+	<div class="module">Package::Stash</div>	<div class="description">routines for manipulating stashes</div>
+
+	<div class="module">Package::Stash::XS</div>	<div class="description">faster and more correct implementation of the Package::Stash API</div>
+
+	<div class="module">Params::Util</div>	<div class="description">Simple, compact and correct param-checking functions</div>
+
+	<div class="module">Params::Validate</div>	<div class="description">Validate method/function parameters</div>
+
+	<div class="module">Plack</div>	<div class="description">Perl Superglue for Web frameworks and Web Servers (PSGI toolkit)</div>
+
+	<div class="module">Plack::Middleware::FixMissingBodyInRedirect</div>	<div class="description">Plack::Middleware which sets body for redirect response, if it's not already set</div>
+
+	<div class="module">Plack::Middleware::RemoveRedundantBody</div>	<div class="description">Plack::Middleware which sets removes body for HTTP response if it's not required</div>
+
+	<div class="module">Pod</div>	<div class="description"></div>
+
+	<div class="module">Pod::Usage</div>	<div class="description">Pod::Usage extracts POD documentation and shows usage information</div>
+
+	<div class="module">Return::MultiLevel</div>	<div class="description">return across multiple call levels</div>
+
+	<div class="module">Role::Tiny</div>	<div class="description">Roles. Like a nouvelle cuisine portion size slice of Moose.</div>
+
+	<div class="module">Safe::Isa</div>	<div class="description">Call isa, can, does and DOES safely on things that may not be objects</div>
+
+	<div class="module">Socket</div>	<div class="description">networking constants and support functions</div>
+
+	<div class="module">Stream::Buffered</div>	<div class="description">temporary buffer to save bytes</div>
+
+	<div class="module">String::RewritePrefix</div>	<div class="description">rewrite strings based on a set of known prefixes</div>
+
+	<div class="module">Sub::Exporter</div>	<div class="description">a sophisticated exporter for custom-built routines</div>
+
+	<div class="module">Sub::Exporter::Progressive</div>	<div class="description">Only use Sub::Exporter if you need it</div>
+
+	<div class="module">Sub::Install</div>	<div class="description">install subroutines into packages easily</div>
+
+	<div class="module">Sub::Uplevel</div>	<div class="description">apparently run a function in a higher stack frame</div>
+
+	<div class="module">Template::Tiny</div>	<div class="description">Template Toolkit reimplemented in as little code as possible</div>
+
+	<div class="module">Test::Deep</div>	<div class="description">Extremely flexible deep comparison</div>
+
+	<div class="module">Test::Differences</div>	<div class="description">Test strings and data structures and show differences if not ok</div>
+
+	<div class="module">Test::Exception</div>	<div class="description">Test exception-based code</div>
+
+	<div class="module">Test::Fatal</div>	<div class="description">incredibly simple helpers for testing code with exceptions</div>
+
+	<div class="module">Test::Most</div>	<div class="description">Most commonly needed test functions and features.</div>
+
+	<div class="module">Test::Requires</div>	<div class="description">Checks to see if the module can be loaded</div>
+
+	<div class="module">Test::SharedFork</div>	<div class="description">fork test</div>
+
+	<div class="module">Test::TCP</div>	<div class="description">testing TCP program</div>
+
+	<div class="module">Test::Warn</div>	<div class="description">Perl extension to test methods for warnings</div>
+
+	<div class="module">Text::Diff</div>	<div class="description">Perform diffs on files and record sets</div>
+
+	<div class="module">Try::Tiny</div>	<div class="description">minimal try/catch with proper preservation of $@</div>
+
+	<div class="module">URI</div>	<div class="description">Uniform Resource Identifiers (absolute and relative)</div>
+
+	<div class="module">Plack</div>	<div class="description">Perl Superglue for Web frameworks and Web Servers (PSGI toolkit)</div>
+
+	<div class="module">Class::Accessor</div>	<div class="description">Automated accessor generation</div>
+
+	<div class="module">Digest::HMAC</div>	<div class="description">Keyed-Hashing for Message Authentication</div>
+
+	<div class="module">Digest::SHA1</div>	<div class="description">Perl interface to the SHA-1 algorithm</div>
+
+	<div class="module">File::Listing</div>	<div class="description">parse directory listing</div>
+
+	<div class="module">HTTP::Cookies</div>	<div class="description">HTTP cookie jars</div>
+
+	<div class="module">HTTP::Daemon</div>	<div class="description">a simple http server class</div>
+
+	<div class="module">HTTP::Negotiate</div>	<div class="description">choose a variant to serve</div>
+
+	<div class="module">IO::Socket::SSL</div>	<div class="description">Nearly transparent SSL encapsulation for IO::Socket::INET.</div>
+
+	<div class="module">LWP</div>	<div class="description">The World-Wide Web library for Perl</div>
+
+	<div class="module">LWP::Protocol::https</div>	<div class="description">Provide https support for LWP::UserAgent</div>
+
+	<div class="module">Mozilla::CA</div>	<div class="description">Mozilla's CA cert bundle in PEM format</div>
+
+	<div class="module">Net::HTTP</div>	<div class="description">Low-level HTTP connection (client)</div>
+
+	<div class="module">Net::OAuth</div>	<div class="description">An implementation of the OAuth protocol</div>
+
+	<div class="module">Net::SSLeay</div>	<div class="description">Perl extension for using OpenSSL</div>
+
+	<div class="module">WWW::RobotRules</div>	<div class="description">database of robots.txt-derived permissions</div>
+
+	<div class="module">WebService::Dropbox</div>	<div class="description">Perl interface to Dropbox API</div>
+
+	<div class="module">Cpanel::JSON::XS</div>	<div class="description">cPanel fork of JSON::XS, fast and correct serializing</div>
+
+	<div class="module">JSON::MaybeXS</div>	<div class="description">Use Cpanel::JSON::XS with a fallback to JSON::XS and JSON::PP</div>
+
+	<div class="module">WWW::Telegram::BotAPI</div>	<div class="description">Perl implementation of the Telegram Bot API</div>
+
+	<div class="module">Net</div>	<div class="description"></div>
+
+	<div class="module">LWP</div>	<div class="description">The World-Wide Web library for Perl</div>
+    <div class="module"></div>
+
+    <div class="module">IO::Socket::SSL </div> <div class="description">Nearly transparent SSL encapsulation for IO::Socket::INET.<p></div>
+
+	<div class="module">Mozilla::CA</div>
+	<div class="description">Mozilla's CA cert bundle in PEM format</div>
+
+	<div class="module">Net::SSLeay</div>
+	<div class="description">Perl extension for using OpenSSL</div>
+
+	<div class="module">Data::OptList</div>
+	<div class="description">parse and validate simple name/value option pairs</div>
+
+	<div class="module">Devel::Symdump</div>
+	<div class="description">dump symbol names or the symbol table</div>
+
+	<div class="module">ExtUtils::Config</div>
+	<div class="description">A wrapper for perl's configuration</div>
+
+	<div class="module">ExtUtils::Helpers</div>
+	<div class="description">Various portability utilities for module builders</div>
+
+	<div class="module">ExtUtils::InstallPaths</div>
+	<div class="description">Build.PL install path logic made easy</div>
+
+	<div class="module">IO::Socket::IP</div>
+	<div class="description">Family-neutral IP socket supporting both IPv4 and IPv6</div>
+
+	<div class="module">IO::Socket::Timeout</div>
+	<div class="description">IO::Socket with read/write timeout</div>
+
+	<div class="module">IO::String</div>
+	<div class="description">Emulate file interface for in-core strings</div>
+
+	<div class="module">Mixin::Linewise</div>
+	<div class="description">write your linewise code for handles; this does the rest</div>
+
+	<div class="module">Module::Build::Tiny</div>
+	<div class="description">A tiny replacement for Module::Build</div>
+
+	<div class="module">Params::Util</div>
+	<div class="description">Simple, compact and correct param-checking functions</div>
+
+	<div class="module">PerlIO::utf8_strict</div>
+	<div class="description">Fast and correct UTF-8 IO</div>
+
+	<div class="module">PerlIO::via::Timeout</div>
+	<div class="description">a PerlIO layer that adds read & write timeout to a handle</div>
+
+	<div class="module">Pod::Coverage</div>
+	<div class="description">Checks if the documentation of a module is comprehensive</div>
+
+	<div class="module">Pod::Coverage::TrustPod</div>
+	<div class="description">allow a module's pod to contain Pod::Coverage hints</div>
+
+	<div class="module">Pod::Eventual</div>
+	<div class="description">read a POD document as a series of trivial events</div>
+
+	<div class="module">Redis</div>
+	<div class="description">Perl binding for Redis database</div>
+
+	<div class="module">Socket</div>
+	<div class="description">networking constants and support functions</div>
+
+	<div class="module">Sub::Exporter</div>
+	<div class="description">a sophisticated exporter for custom-built routines</div>
+
+	<div class="module">Sub::Install</div>
+	<div class="description">install subroutines into packages easily</div>
+
+	<div class="module">Sub::Uplevel</div>
+	<div class="description">apparently run a function in a higher stack frame</div>
+
+	<div class="module">Test::CPAN::Meta</div>
+	<div class="description">Validate your CPAN META.json files</div>
+
+	<div class="module">Test::Deep</div>
+	<div class="description">Extremely flexible deep comparison</div>
+
+	<div class="module">Test::Exception</div>
+	<div class="description">Test exception-based code</div>
+
+	<div class="module">Test::Fatal</div>
+	<div class="description">incredibly simple helpers for testing code with exceptions</div>
+
+	<div class="module">Test::Harness</div>
+	<div class="description">Base class that provides common functionality to all TAP::* modules</div>
+
+	<div class="module">Test::Requires</div>
+	<div class="description">Checks to see if the module can be loaded</div>
+
+	<div class="module">Test::SharedFork</div>
+	<div class="description">fork test</div>
+
+	<div class="module">Test::Simple</div>
+	<div class="description">Basic utilities for writing tests.</div>
+
+	<div class="module">Test::TCP</div>
+	<div class="description">testing TCP program</div>
+
+	<div class="module">Try::Tiny</div>
+	<div class="description">minimal try/catch with proper preservation of $@</div>
+
+	<div class="module">IO::Socket::SSL</div>
+	<div class="description">Nearly transparent SSL encapsulation for IO::Socket::INET.</div>
+
+	<div class="module">Mozilla::CA</div>
+	<div class="description">Mozilla's CA cert bundle in PEM format</div>
+
+	<div class="module">Net::SSLeay</div>
+	<div class="description">Perl extension for using OpenSSL</div>
+
+	<div class="module">Data::OptList</div>
+	<div class="description">parse and validate simple name/value option pairs</div>
+
+	<div class="module">Devel::Symdump</div>
+	<div class="description">dump symbol names or the symbol table</div>
+
+	<div class="module">ExtUtils::Config</div>
+	<div class="description">A wrapper for perl's configuration</div>
+
+	<div class="module">ExtUtils::Helpers</div>
+	<div class="description">Various portability utilities for module builders</div>
+
+	<div class="module">ExtUtils::InstallPaths</div>
+	<div class="description">Build.PL install path logic made easy</div>
+
+	<div class="module">IO::Socket::IP</div>
+	<div class="description">Family-neutral IP socket supporting both IPv4 and IPv6</div>
+
+	<div class="module">IO::Socket::Timeout</div>
+	<div class="description">IO::Socket with read/write timeout</div>
+
+	<div class="module">IO::String</div>
+	<div class="description">Emulate file interface for in-core strings</div>
+
+	<div class="module">Mixin::Linewise</div>
+	<div class="description">write your linewise code for handles; this does the rest</div>
+
+	<div class="module">Module::Build::Tiny</div>
+	<div class="description">A tiny replacement for Module::Build</div>
+
+	<div class="module">Params::Util</div>
+	<div class="description">Simple, compact and correct param-checking functions</div>
+
+	<div class="module">PerlIO::utf8_strict</div>
+	<div class="description">Fast and correct UTF-8 IO</div>
+
+	<div class="module">PerlIO::via::Timeout</div>
+	<div class="description">a PerlIO layer that adds read & write timeout to a handle</div>
+
+	<div class="module">Pod::Coverage</div>
+	<div class="description">Checks if the documentation of a module is comprehensive</div>
+
+	<div class="module">Pod::Coverage::TrustPod</div>
+	<div class="description">allow a module's pod to contain Pod::Coverage hints</div>
+
+	<div class="module">Pod::Eventual</div>
+	<div class="description">read a POD document as a series of trivial events</div>
+
+	<div class="module">Redis</div>
+	<div class="description">Perl binding for Redis database</div>
+
+	<div class="module">Socket</div>
+	<div class="description">networking constants and support functions</div>
+
+	<div class="module">Sub::Exporter</div>
+	<div class="description">a sophisticated exporter for custom-built routines</div>
+
+	<div class="module">Sub::Install</div>
+	<div class="description">install subroutines into packages easily</div>
+
+	<div class="module">Sub::Uplevel</div>
+	<div class="description">apparently run a function in a higher stack frame</div>
+
+	<div class="module">Test::CPAN::Meta</div>
+	<div class="description">Validate your CPAN META.json files</div>
+
+	<div class="module">Test::Deep</div>
+	<div class="description">Extremely flexible deep comparison</div>
+
+	<div class="module">Test::Exception</div>
+	<div class="description">Test exception-based code</div>
+
+	<div class="module">Test::Fatal</div>
+	<div class="description">incredibly simple helpers for testing code with exceptions</div>
+
+	<div class="module">Test::Harness</div>
+	<div class="description">Base class that provides common functionality to all TAP::* modules</div>
+
+	<div class="module">Test::Requires</div>
+	<div class="description">Checks to see if the module can be loaded</div>
+
+	<div class="module">Test::SharedFork</div>
+	<div class="description">fork test</div>
+
+	<div class="module">Test::Simple</div>
+	<div class="description">Basic utilities for writing tests.</div>
+
+	<div class="module">Test::TCP</div>
+	<div class="description">testing TCP program</div>
+
+	<div class="module">Try::Tiny</div>
+	<div class="description">minimal try/catch with proper preservation of $@</div>
+
+	<div class="module">IO::All</div>
+	<div class="description">IO::All to Larry Wall!</div>
+
+	<div class="module">List::Util</div>
+	<div class="description">Common Scalar and List utility subroutines</div>
+
+	<div class="module">Cwd</div>
+	<div class="description">get pathname of current working directory</div>
+    <br><br>
+
+    <div class="footer" align="center" >load.sh<br></div>
+
+</body> 
+</html> 

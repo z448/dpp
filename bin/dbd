@@ -197,11 +197,9 @@ my $check_pack = sub {
                 unlink "$cybase/.remove";
             }; $cleanup->();
 
-            
-            
             #web
-            #web($pack->{module});
-            #print colored(['yellow'], "writing: ") . " <div> " . "\n";
+            web($pack->{module});
+            print colored(['yellow'], "writing: ") . " <div> " . "\n";
             #web($pack->{module});
     }
 };
