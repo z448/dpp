@@ -35,7 +35,8 @@ if [ ! -f "$DPP_BUILD/.www" ];then
 fi
 
 
-ln -sf ~/.dpp $PWD/.dpp
+#ln -sf ~/.dpp $PWD/.dpp
+ln -sf $PWD/assets ~/.dpp/assets
 ln -sf $PWD/bin ~/.dpp/.bin
 ln -sf $PWD/lib ~/.dpp/.lib
 ln -sf $PWD/local ~/.dpp/.local

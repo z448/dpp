@@ -168,7 +168,18 @@ my $web = sub {
     while(<$pipe>){
             push @body, $_ if /module/ or /description/;
     }; $html->{ body } = \@body;
-    
+
+    #my %html = ();
+    #{
+    #open(my $fh,"<","$ENV{DPP}/assets/html/html.json") || die "$ENV{DPP}/assets/html/html.json $!";
+    #my $html_json = <$fh>;
+    #my $html_hash = decode_json $html_json;
+    #print Dumper($html_hash);
+    #print $html{head};
+    #close $fh;
+    #die;
+    #}
+
     open( my $fh, '>', "$ENV{HOME}/.dpp/.stash/.index") || die "cant open: $!";
     print $fh $html->{ head };
     say   $fh @{$m->{ div }};
