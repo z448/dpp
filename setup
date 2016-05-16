@@ -1,4 +1,4 @@
-export CYPM=~/.cypm
+export CYPM=~/.dpp
 export CYPOOL=$CYPM/build
 export CYBIN=$CYPM/.bin
 export CYSTASH=$CYPM/.stash
@@ -9,7 +9,7 @@ alias pm2="cd $PWD";
 
 bind '"\C-p":"cd $CYPOOL && clear && pwd\n"';
 
-bind '"\C-g":"cd ~/.cypm/.stash/deb && clear && pwd;\n"';
+bind '"\C-g":"cd ~/.dpp/.stash/deb && clear && pwd;\n"';
 
 
 alias stash="cd $CYPM/.stash"
@@ -35,11 +35,11 @@ if [ ! -f "$CYPOOL/.www" ];then
 fi
 
 
-ln -sf ~/.cypm $PWD/.cypm
-ln -sf $PWD/bin ~/.cypm/.bin
-ln -sf $PWD/lib ~/.cypm/.lib
-ln -sf $PWD/local ~/.cypm/.local
-ln -sf $PWD/bin/.env ~/.cypm/.env
+ln -sf ~/.dpp $PWD/.dpp
+ln -sf $PWD/bin ~/.dpp/.bin
+ln -sf $PWD/lib ~/.dpp/.lib
+ln -sf $PWD/local ~/.dpp/.local
+ln -sf $PWD/bin/.env ~/.dpp/.env
 
 if [[ -z "$CYPM" ]];then 
     echo -e "\e[33m::ok\e[0m\t\$CYPM is in your env"

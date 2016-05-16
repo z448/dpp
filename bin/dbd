@@ -16,7 +16,7 @@ use lib "$FindBin::Bin/../lib";
 use open qw< :encoding(UTF-8) >;
 use Cydia::Meta;
 
-my $cybase = "$ENV{HOME}/.cypm/build";
+my $cybase = "$ENV{HOME}/.dpp/build";
 print colored(['black on_white'],"cybd: staring build") .  "\n\n";
 
 my( $base )= qw< ./cy >;
@@ -74,7 +74,7 @@ my $move_pack = sub {
     my $repo = shift;
     my $cargo = <<"_CYDIA";
     cat .www >> ../.stash/cydia/.www
-    mv *.deb ~/.cypm/.stash/cydia/deb
+    mv *.deb ~/.dpp/.stash/cydia/deb
     cd $ENV{CYSTASH}/cydia
     cysp
     tar -zcvf cydia.tgz Packages.gz deb .www
@@ -96,7 +96,7 @@ my $make_pack = sub {
     cd ../..;
     echo 2.0 > debian-binary;
     arfp r $pm.deb debian-binary control.tar.gz data.tar.gz;
-    mv $pm.deb ~/.cypm/.stash/deb;
+    mv $pm.deb ~/.dpp/.stash/deb;
     rm -rf debian-binary control.tar.gz data.tar.gz DEBIAN;
 _DEB
     #tar czf ../data.tar.gz [a-z]*;
@@ -143,7 +143,7 @@ my $check_pack = sub {
             #my $control = system("touch $pack->{pkg}/DEBIAN/control");
 
             my $fh = undef;
-            my $fn = "$ENV{HOME}/.cypm/build/$pack->{pkg}/DEBIAN/control";
+            my $fn = "$ENV{HOME}/.dpp/build/$pack->{pkg}/DEBIAN/control";
             open( $fh, ">", $fn ) || die "cant open $fn";
             print $fh control("$pack->{module}") . "\n";
             close $fh;
