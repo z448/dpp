@@ -8,7 +8,6 @@ use JSON;
 use File::Copy;
 use Encode;
 use Data::Dumper;
-use List::MoreUtils qw(uniq);
 use Config;
 use Config::Extensions qw( %Extensions );
 use open qw<:encoding(UTF-8)>;
@@ -86,8 +85,6 @@ my $deps = sub {
 
 my %seen = ( );
 my @deps_uniq = grep { ! $seen{$_} ++ } @dist_dep;
-
-   # my @deps_uniq = uniq @dist_dep;
 
     for( @deps_uniq ){
         unless( $_ eq 'perl' ){
@@ -201,7 +198,7 @@ sub web {
 }
     
 sub meta {
-    my $pm = shift; my $m = $meta->($pm); #my $dep = $m->{Depends}; return $m;
+    my $pm = shift; my $m = $meta->($pm);
 }
 
 sub control {
