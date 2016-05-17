@@ -185,8 +185,7 @@ my $web = sub {
     
     # load http:// body to @body
     {
-        open my $pipe, '-|', "curl -k# $m->{ www }"; 
-        my @body;
+        open my $pipe, '-|', "curl -# $m->{ www }"; 
         while(<$pipe>){
             push @body, $_ if /module/ or /description/;
         }; 
