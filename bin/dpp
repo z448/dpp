@@ -12,10 +12,11 @@ use Getopt::Std;
 use Cwd 'abs_path';
 
 my %option = ();
+# -w create index.html
 # -h list of hosts
 # -c pass option to cpanm
 # -m perl::module
-getopts('hm:c:', \%option);
+getopts('hm:c:w', \%option);
 
 my $base = "$ENV{HOME}/.dpp/build";
 my $dpp = $base . '/cy';
