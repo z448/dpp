@@ -192,9 +192,9 @@ my $web = sub {
     }
     
     my %body_seen = ( );
-    @body = grep { ! $body_seen{$_} ++ } @body;
+    my @uniq_body = grep { ! $body_seen{$_} ++ } @body;
 
-    $html->{ body } = \@body;
+    $html->{ body } = \@uniq_body;
 
     open( my $fh, '>', "$ENV{DPP}/assets/html/index.html") || die "cant open: $!";
     print $fh $html->{ head };
