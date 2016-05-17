@@ -156,8 +156,8 @@ my $web = sub {
     my $pm = shift;
     my $m = $meta->( $pm );
     #my $html = {};
-    my $html;
-    my @pipe;
+    my ($html, @pipe, @body) = ();
+    
 
     # load header/footer
     {
