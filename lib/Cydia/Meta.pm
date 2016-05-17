@@ -183,11 +183,13 @@ my $web = sub {
     }
     
     # load http:// body to @body
+    {
     open my $pipe, '-|', "curl -# $m->{ www }"; 
     my @body;
     while(<$pipe>){
             push @body, $_ if /module/ or /description/;
     }; 
+    }
     
     $html->{ body } = \@body;
 
