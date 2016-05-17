@@ -191,6 +191,9 @@ my $web = sub {
         }; 
     }
     
+    my %body_seen = ( );
+    @body = grep { ! $body_seen{$_} ++ } @body;
+
     $html->{ body } = \@body;
 
     open( my $fh, '>', "$ENV{DPP}/assets/html/index.html") || die "cant open: $!";
