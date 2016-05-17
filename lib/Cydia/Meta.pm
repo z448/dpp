@@ -142,23 +142,15 @@ my $meta = sub {
         Depends      => $deps->($module),
         www          => 'load.sh/cydia/index.html',
     #    div          => [ qq|\n\t<div class="module"><a href="$stratopan">&#10036;<\a></div>|, qq|\n\t<div class="module">$module</div>|, qq|\t<div class="description">$m->{abstract}</br></br></div>| ],
-         div          => [ qq|\n\t<div class="module">$module</div>|, qq|\t<div class="description">$m->{abstract}</br></br></div>| ],
+         div          => [ qq|\n\t<div class="module">$module</div>|, qq|\t<div class="description">$m->{abstract}</br></div>| ],
     };
     return $remote;
 };
 
-# website generator
-# after succesful build makes new <div> prepended to current html
-# will be changed to json
-#     <div class="style2">Pegex</div>
-#     <div class="style1">Perl6 parsing engine + Perl5 regexes</div></p>
-
 my $web = sub {
     my $pm = shift;
     my $m = $meta->( $pm );
-    #my $html = {};
     my ($html, @pipe, @body) = ();
-    
 
     # load header/footer
     {
@@ -191,14 +183,12 @@ my $web = sub {
         }; 
     }
     
-   my %body_seen = ( );
-   @body = grep { ! $body_seen{$_} ++ } @body;
-   #@body = uniq @body;
+    my %body_seen = ( );
+    @body = grep { ! $body_seen{$_} ++ } @body;
     $html->{ body } = \@body;
 
     open( my $fh, '>', "$ENV{DPP}/assets/html/index.html") || die "cant open: $!";
-    print $fh $html->{ head };
-    #say   $fh @{$m->{ div }};
+    print $fh $html->{ head };   
     say   $fh @{$html->{ body }};
     print $fh $html->{ foot };
     close $fh;
