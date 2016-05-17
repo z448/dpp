@@ -167,14 +167,6 @@ my $web = sub {
         close $fh;
     }
 
-    # load http:// body to @body
-    open my $pipe, '-|', "curl -# $m->{ www }"; 
-    my @body;
-    while(<$pipe>){
-            push @body, $_ if /module/ or /description/;
-    }; 
-
-
     # append current module div to div.html
     {
         open( my $fh, '>>', "$ENV{DPP}/assets/html/div.html") || die "cant open: $!";
@@ -189,6 +181,14 @@ my $web = sub {
             push @body, $_ if /module/ or /description/;
         };
     }
+    
+    # load http:// body to @body
+    open my $pipe, '-|', "curl -# $m->{ www }"; 
+    my @body;
+    while(<$pipe>){
+            push @body, $_ if /module/ or /description/;
+    }; 
+    
     $html->{ body } = \@body;
 
     open( my $fh, '>', "$ENV{DPP}/assets/html/index.html") || die "cant open: $!";
