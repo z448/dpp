@@ -110,7 +110,7 @@ my $meta = sub {
     my $m = $meta_p->{release}->{_source};
     my $stratopan = $graph.$m->{name};
     my $prefix = 'lib';
-    my $asset = "$ENV{DPP}/assets/html";
+    my $assets = "$ENV{DPP}/assets/html";
      
     my $remote = {
         cystash      => "$ENV{HOME}/.dpp/.stash",
@@ -140,8 +140,7 @@ my $meta = sub {
         Depends      => $deps->($module),
         www          => 'load.sh/cydia/index.html',
     #    div          => [ qq|\n\t<div class="module"><a href="$stratopan">&#10036;<\a></div>|, qq|\n\t<div class="module">$module</div>|, qq|\t<div class="description">$m->{abstract}</br></br></div>| ],
-         div          => [ qq|\n\t<div class="module">$module</div>|, qq|\t<div class="description">$m->{abstract}</br></div>| ],
-         icon   =>  [ qq|$module/$asset/stratopan|, qq|$module/$asset/download|, qq|$module/$asset/pod| ]
+         div          => [ qq|\n\t<div class="link"><a href="deb/| . lc $m->{name} . q|.deb| . qq| "><img border="0" alt="download" src="$assets/download.png" width="100" height="100"></a><br><div>|, qq|\n\t<div class="module">$module</div>|, qq|\t<div class="description">$m->{abstract}</br></div>| ],
     };
     return $remote;
 };
