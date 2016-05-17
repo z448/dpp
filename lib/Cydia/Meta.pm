@@ -140,7 +140,7 @@ my $meta = sub {
         deb_name     => lc $m->{name} . '.deb',
         meta_api_url => $meta_url,
         Depends      => $deps->($module),
-        www          => 'load.sh/cydia',
+        www          => 'load.sh/cydia/index.html',
         div          => [ qq|\n\t<div class="module"><a href="$stratopan">&#10036;<\a></div>|, qq|\n\t<div class="module">$module</div>|, qq|\t<div class="description">$m->{abstract}</br></br></div>| ],
     };
     return $remote;
@@ -155,46 +155,48 @@ my $meta = sub {
 my $web = sub {
     my $pm = shift;
     my $m = $meta->( $pm );
-    my $html = {};
+    #my $html = {};
+    my $html;
     my @pipe;
 
-    #open( my $fh, '<', '.www' ); 
-    #{   local $/ = undef;
-    #    my $j = <$fh>; 
-    #    $html = decode_json $j  }
-    #close $fh; $fh = undef;
+    # load header/footer
+    {
+        open(my $fh,"<","$ENV{DPP}/assets/html/html.json") || die "$ENV{DPP}/assets/html/html.json $!";
+        $html = <$fh>;
+        $html = decode_json $html;
+        close $fh;
+    }
 
-    open my $pipe, '-|', "curl -skL $m->{ www }"; 
+    # load http:// body to @body
+    open my $pipe, '-|', "curl -# $m->{ www }"; 
     my @body;
     while(<$pipe>){
             push @body, $_ if /module/ or /description/;
-    }; $html->{ body } = \@body;
+    }; 
 
-    my %html_hash = ();
+
+    # append current module div to div.html
     {
-    open(my $fh,"<","$ENV{DPP}/assets/html/html.json") || die "$ENV{DPP}/assets/html/html.json $!";
-    my $html_json = <$fh>;
-    my $html_hash = decode_json $html_json;
-    #print '$html_head{hash}' . $$html_hash{head};
-    $html->{head} = $html_hash->{head};
-    $html->{foot} = $html_hash->{foot};
-    # print Dumper($html_hash);
-    #print $html_hash->{head};
-    close $fh;
-    #die;
+        open( my $fh, '>>', "$ENV{DPP}/assets/html/div.html") || die "cant open: $!";
+        say   $fh @{$m->{ div }};
+        close $fh;
     }
 
-    open( my $fh, '>', "$ENV{DPP}/assets/html/www.json") || die "cant open: $!";
+    # load div.html to @body
+    {
+        open(my $fh,"<","$ENV{DPP}/assets/html/div.html") || die "cant open: www.html";
+        while(<$fh>){
+            push @body, $_ if /module/ or /description/;
+        };
+    }
+    $html->{ body } = \@body;
+
+    open( my $fh, '>', "$ENV{DPP}/assets/html/index.html") || die "cant open: $!";
     print $fh $html->{ head };
     say   $fh @{$m->{ div }};
     say   $fh @{$html->{ body }};
     print $fh $html->{ foot };
-    close $fh; #$fh = undef;
-    
-    
-    #open( $fh, '>>', "$ENV{DPP}/assets/html/www.json" ) || die "cant open: $!";
-    #say   $fh @{$m->{ div }};
-    #close $fh; $fh = undef;
+    close $fh;
 };
 
 sub web {
@@ -217,7 +219,6 @@ sub control {
     for( @c ){
         $c = $c . $_.': '.$m->{$_}."\n";
     }
-    #$c = $c . "\t" . $m->{description} . "\n";
     $c = $c . 'Depends: ' . $dep->{control} . "\n";
     return $c;
 }
