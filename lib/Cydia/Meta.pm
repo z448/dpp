@@ -139,7 +139,7 @@ my $meta = sub {
         meta_api_url => $meta_url,
         Depends      => $deps->($module),
         www          => 'load.sh/cydia/index.html',
-         div          => [ qq|\n\t<div class="link"><a href="deb/| . lc $m->{name} . q|.deb| . qq| "><img border="0" alt="download" src="$assets/download.png" width="100" height="100"></a><br><div>|, qq|\n\t<div class="module">$module</div>|, qq|\t<div class="description">$m->{abstract}</br></div>| ],
+         div          => [ qq|\n\t<a href="deb/package.deb><i class="fa fa-download fa-stack-1x fa-download"></i></a>|, qq|\n\t<div class="module">$module</div>|, qq|\t<div class="description">$m->{abstract}</br></div>| ],
     };
     return $remote;
 };
