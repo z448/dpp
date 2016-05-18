@@ -173,11 +173,17 @@ my $web = sub {
     }
     
     # load http:// body to @body
+   # {
+    #    open my $pipe, '-|', "curl -# $m->{ www }"; 
+   #     while(<$pipe>){
+     #       push @body, $_ if /module/ or /description/;
+   #     }; 
+ #   }
+ 
     {
-        open my $pipe, '-|', "curl -# $m->{ www }"; 
-        while(<$pipe>){
-            push @body, $_ if /module/ or /description/;
-        }; 
+        open(my $fh,">","$ENV{DPP}/assets/html/index.html") || die "cant open index.html: $!";
+        say $fh @{$m->{ div }};
+        close $fh;
     }
     
     my %body_seen = ( );
