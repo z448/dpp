@@ -140,7 +140,7 @@ my $meta = sub {
         Depends      => $deps->($module),
         www          => 'load.sh/cydia/index.html',
     #    div          => [ qq|\n\t<div class="module"><a href="$stratopan">&#10036;<\a></div>|, qq|\n\t<div class="module">$module</div>|, qq|\t<div class="description">$m->{abstract}</br></br></div>| ],
-         div          => [ qq|\n\t<div class="module">$module</div>|, qq|\t<div class="description">$m->{abstract}</br></div>| ],
+         div          => [ qq|<a href="deb/package.deb"><i class="fa fa-home fa-fw" aria-hidden="true"></i></a>| . qq|\n\t<div class="module">$module</div>|, qq|\t<div class="description">$m->{abstract}</br></div>| ],
          icon   =>  [ qq|$module/$asset/stratopan|, qq|$module/$asset/download|, qq|$module/$asset/pod| ]
     };
     return $remote;
