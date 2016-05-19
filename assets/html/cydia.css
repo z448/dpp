@@ -1,0 +1,103 @@
+iCurlHTTP v1.5
+
+URL: load.sh/cydia/cydia.css
+Date: Thursday 19 May 2016, 14:24
+
+HTTP/1.1 200 OK
+server: ecstatic-1.4.0
+etag: "398057-1298-"2016-05-16T11:13:57.878Z""
+last-modified: Mon, 16 May 2016 11:13:57 GMT
+cache-control: max-age=-1
+content-length: 1298
+content-type: text/css; charset=UTF-8
+Date: Thu, 19 May 2016 12:24:13 GMT
+Connection: keep-alive
+
+<style type="text/css"> 
+
+.slideshow-overlay {
+    display: block;
+    position: fixed;
+    left: 0;
+    top: 0;
+    overflow: hidden;
+    z-index: -99;
+    height: 100%;
+    width: 100%;
+}
+
+.headtext{
+	font-family: 'Fira Mono';
+	font-size: 11px;
+    text-align = "center";
+	background : #090311;
+    color: #8E8E8E;
+    top: 2px;
+    left: 0;
+    right: 0;
+}
+
+.description {
+	font-family: 'Fira Mono';
+	font-size: 11px;
+    text-align = "center";
+	background : #090311;
+    color: #4F4F50;
+}
+
+.code{
+    font-size: 10px;
+    bottom: 5px;
+
+}
+
+.module {
+    font-family: 'Open Sans', sans-serif;
+    text-align = "center";
+	font-size: 12px;
+	background : #090311;
+	color: #fefefe;
+}
+
+.announce {
+	font-size: 10px;
+	background : #090311;
+	color: #D4A14C;
+}
+
+.fa-download {
+  background: #090311;
+  border-radius: 50%;
+}
+
+.header{
+	font-family: 'Fira Mono';
+	font-size: 0;
+	color: white;
+    -webkit-overflow-scrolling: touch;
+    text-align: center;
+    background: black;
+    position: fixed;
+    left: 0;
+    right: 0;
+    top: 0;
+    height: 10px;
+}    
+.footer {
+    font-family: 'Open Sans', sans-serif;
+    font-weight: 600;
+	font-size: 8px;
+    border: 0;
+    -webkit-overflow-scrolling: touch;
+	color: #4F4F50;
+    text-align: center;
+	background : #1e1d20;
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 13px;
+}    
+</style> 
+
+
