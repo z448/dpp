@@ -198,7 +198,7 @@ my $check_pack = sub {
             }; $cleanup->();
 
             #web
-            web($pack->{module});
+            web($pack->{pkg});
             print colored(['yellow'], "writing: ") . " <div> for $pack->{module} " . "\n";
             #web($pack->{module});
     }
