@@ -161,7 +161,7 @@ my $web = sub {
         #}
 
     # add current pm div into @body
-    @body = decode_json $index->{body};
+    push(@body, @{$index->{body}});
     push @body, $m->{ div };
     #uniq 
     my %body_seen = ( );
