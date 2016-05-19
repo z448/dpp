@@ -150,30 +150,42 @@ my $web = sub {
     my $pm = shift;
     print '### $web: $pm is ' . $pm;
     my $m = $meta->( $pm );
-    my ($html, @pipe, @body) = ();
+    my ($index, @pipe, @body) = ();
 
-    # load header/footer
+    # load header/body/footer
     {
-        open(my $fh,"<","$ENV{DPP}/assets/html/html.json") || die "$ENV{DPP}/assets/html/html.json $!";
-        $html = <$fh>;
-        $html = decode_json $html;
+        open(my $fh,"<","$ENV{DPP}/assets/html/index.json") || die "$ENV{DPP}/assets/html/index.json $!";
+        $index = <$fh>;
+        $index = decode_json $index;
+        close $fh;
+    }
+
+    # add current pm div into @body
+    push @body, $m->{ div };
+    my %body_seen = ( );
+    @body = grep { ! $body_seen{$_} ++ } @body;
+    $index->{ body } = encode_json \@body;
+
+    {
+        open(my $fh,">","$ENV{DPP}/assets/html/index2.json") || die "cant open nidex.json: $!";
+        print $fh $index;
         close $fh;
     }
 
     # append current module div to div.html
-    {
-        open( my $fh, '>>', "$ENV{DPP}/assets/html/div.html") || die "cant open: $!";
-        say   $fh @{$m->{ div }};
-        close $fh;
-    }
+    #{
+    #    open( my $fh, '>>', "$ENV{DPP}/assets/html/div.html") || die "cant open: $!";
+    #    say   $fh @{$m->{ div }};
+    #    close $fh;
+    #}
 
     # load div.html to @body
-    {
-        open(my $fh,"<","$ENV{DPP}/assets/html/div.html") || die "cant open: www.html";
-        while(<$fh>){
-            push @body, $_ if /module/ or /description/ or /dpp/;
-        };
-    }
+    #{
+    #    open(my $fh,"<","$ENV{DPP}/assets/html/div.html") || die "cant open: www.html";
+    #    while(<$fh>){
+    #        push @body, $_ if /module/ or /description/ or /dpp/;
+    #    };
+    #}
     
     # load http:// body to @body
     #{
@@ -184,14 +196,10 @@ my $web = sub {
     #}
  
     { 
-    my %body_seen = ( );
-    @body = grep { ! $body_seen{$_} ++ } @body;
-    $html->{ body } = \@body;
-
     open( my $fh, '>', "$ENV{DPP}/assets/html/index.html") || die "cant open: $!";
-    print $fh $html->{ head };   
-    say   $fh @{$html->{ body }};
-    print $fh $html->{ foot };
+    print $fh $index->{ head };   
+    say   $fh @{$index->{ body }};
+    print $fh $index->{ foot };
     close $fh;
     }
 };
