@@ -168,7 +168,7 @@ my $web = sub {
     {
         open(my $fh,"<","$ENV{DPP}/assets/html/div.html") || die "cant open: www.html";
         while(<$fh>){
-            push @body, $_ if /module/ or /description/ or /dpp_link/;
+            push @body, $_ if /module/ or /description/ or /dpp/;
         };
     }
     
