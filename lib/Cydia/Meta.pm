@@ -161,9 +161,11 @@ my $web = sub {
         #}
 
     # add current pm div into @body
+    @body = @{$index->{body}};
     push @body, $m->{ div };
-    #my %body_seen = ( );
-    #@body = grep { ! $body_seen{$_} ++ } @body;
+    #uniq 
+    my %body_seen = ( );
+    @body = grep { ! $body_seen{$_} ++ } @body;
     $index->{ body } = encode_json \@body;
 
     #{
