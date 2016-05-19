@@ -190,7 +190,8 @@ my $web = sub {
     say   $fh @{$html->{ body }};
     print $fh $html->{ foot };
     close $fh;
-    };
+    }
+};
 
 sub web {
     my $pm = shift;
