@@ -83,11 +83,12 @@ my $deps = sub {
     }
     $dep{distribution} = \@dist_dep;
 
-my %seen = ( );
-my @deps_uniq = grep { ! $seen{$_} ++ } @dist_dep;
+my %dist_seen = ( );
+@dist_dep = grep { ! $dist_seen{$_} ++ } @dist_dep;
 
-    for( @deps_uniq ){
+    for( @dist_dep ){
         unless( $_ eq 'perl' ){
+            #web($deb{control});
             $dep{control} = $dep{control} . 'lib' . lc "$_" . "-p5" . "\, ";
         } else { 
             next;
