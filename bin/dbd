@@ -199,7 +199,7 @@ my $check_pack = sub {
 
             #web
             web($pack->{module});
-            print colored(['yellow'], "writing: ") . " <div> " . "\n";
+            print colored(['yellow'], "writing: ") . " <div> for $pack->{module} " . "\n";
             #web($pack->{module});
     }
 };
