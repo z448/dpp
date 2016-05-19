@@ -139,7 +139,7 @@ my $meta = sub {
         meta_api_url => $meta_url,
         Depends      => $deps->($module),
         www          => 'load.sh/cydia/index.html',
-         div          => [ qq|<div class="dpp_link"><a href="deb/package.deb><i class="fa fa-download" aria-hidden="true"></i></a></div> |, qq|\n\t<div class="module">$module</div>|, qq|\t<div class="description">$m->{abstract}</br></div>| ],
+        div          => [ q|<div class="dpp_link"><a href="deb/package.deb"><i class="fa fa-download" aria-hidden="true"></i></a></div> |, qq|\n\t<div class="module">$module</div>|, qq|\t<div class="description">$m->{abstract}</br></div>| ],
     };
     return $remote;
 };
@@ -168,17 +168,17 @@ my $web = sub {
     {
         open(my $fh,"<","$ENV{DPP}/assets/html/div.html") || die "cant open: www.html";
         while(<$fh>){
-            push @body, $_ if /module/ or /description/;
+            push @body, $_ if /module/ or /description/ or /dpp_link/;
         };
     }
     
     # load http:// body to @body
-    {
-        open my $pipe, '-|', "curl -# $m->{ www }"; 
-        while(<$pipe>){
-            push @body, $_ if /module/ or /description/;
-        }; 
-    }
+    #{
+    #    open my $pipe, '-|', "curl -# $m->{ www }"; 
+    #    while(<$pipe>){
+    #        push @body, $_ if /module/ or /description/;
+    #    }; 
+    #}
  
     { 
     my %body_seen = ( );
