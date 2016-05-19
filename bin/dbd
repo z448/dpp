@@ -183,6 +183,7 @@ my $check_pack = sub {
             #call make_pack, build deb
             unless( $make_pack->($pack->{pkg}) ){
                 say $pack->{pkg} . ': ok';
+                web($pack->{module});
             }
 
             my $cleanup = sub {
@@ -198,9 +199,8 @@ my $check_pack = sub {
             }; $cleanup->();
 
             #web
-            web($pack->{pkg});
-            print colored(['yellow'], "writing: ") . " <div> for $pack->{module} " . "\n";
             #web($pack->{module});
+            print colored(['yellow'], "writing: ") . " <div> for $pack->{module} " . "\n";
     }
 };
 
