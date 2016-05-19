@@ -83,8 +83,8 @@ my $deps = sub {
     }
     $dep{distribution} = \@dist_dep;
 
-my %dist_seen = ( );
-@dist_dep = grep { ! $dist_seen{$_} ++ } @dist_dep;
+    my %dist_seen = ( );
+    @dist_dep = grep { ! $dist_seen{$_} ++ } @dist_dep;
 
     for( @dist_dep ){
         unless( $_ eq 'perl' ){
@@ -167,7 +167,7 @@ my $web = sub {
     $index->{ body } = encode_json \@body;
 
     {
-        open(my $fh,">","$ENV{DPP}/assets/html/index2.json") || die "cant open nidex.json: $!";
+        open(my $fh,">","$ENV{DPP}/assets/html/index2.json") || die "cant open index2.json: $!";
         print $fh $index;
         close $fh;
     }
