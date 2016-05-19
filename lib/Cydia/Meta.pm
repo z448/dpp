@@ -195,13 +195,13 @@ my $web = sub {
     #    }; 
     #}
  
-    { 
-    open( my $fh, '>', "$ENV{DPP}/assets/html/index.html") || die "cant open: $!";
-    print $fh $index->{ head };   
-    say   $fh @{$index->{ body }};
-    print $fh $index->{ foot };
-    close $fh;
-    }
+    #{ 
+    #open( my $fh, '>', "$ENV{DPP}/assets/html/index.html") || die "cant open: $!";
+    #print $fh $index->{ head };   
+    #say   $fh @{$index->{ body }};
+    #print $fh $index->{ foot };
+    #close $fh;
+    #}
 };
 
 sub web {
