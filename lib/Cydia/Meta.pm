@@ -173,19 +173,14 @@ my $web = sub {
     }
     
     # load http:// body to @body
-   # {
-    #    open my $pipe, '-|', "curl -# $m->{ www }"; 
-   #     while(<$pipe>){
-     #       push @body, $_ if /module/ or /description/;
-   #     }; 
- #   }
- 
     {
-        open(my $fh,">","$ENV{DPP}/assets/html/index.html") || die "cant open index.html: $!";
-        say $fh @{$m->{ div }};
-        close $fh;
+        open my $pipe, '-|', "curl -# $m->{ www }"; 
+        while(<$pipe>){
+            push @body, $_ if /module/ or /description/;
+        }; 
     }
-    
+ 
+    { 
     my %body_seen = ( );
     @body = grep { ! $body_seen{$_} ++ } @body;
     $html->{ body } = \@body;
@@ -195,7 +190,7 @@ my $web = sub {
     say   $fh @{$html->{ body }};
     print $fh $html->{ foot };
     close $fh;
-};
+    };
 
 sub web {
     my $pm = shift;
