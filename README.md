@@ -1,12 +1,18 @@
 ![dpp logo](assets/logo50x50.jpg)
 
+work in progress
+
 ### NAME
 
-- create debian binary packages from Perl modules
+- Debian Perl Packager
 
 ### SYNOPISIS
 
 - create debian binary packages from Perl module
+
+### GIF
+
+![dpp](https://raw.githubusercontent.com/z448/dpp/master/dpp.gif)
 
 ### INSTALLATION
 
