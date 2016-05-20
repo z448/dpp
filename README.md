@@ -18,7 +18,7 @@
 
     `carton install`
 
-- Setup enviroment (this will switch you into build directory $HOME/.cypm/pool)
+- Setup enviroment
 
     `. setup`
 
@@ -30,7 +30,7 @@
     
 
 - deb directory ~/.cypm/.stash/deb
-- pool (build) directory ~/.cypm/pool
+- build directory ~/.cypm/pool
 - use [CTRL-P] & [CTRL-G] to switch between pool & deb directories
 
 
