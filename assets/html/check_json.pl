@@ -20,19 +20,21 @@ my $load = sub {
 my $write = sub {
     my $json_file = shift;
     my @body = qw{ <div><a href="deb/package.deb">test_link</a></div> };
-    #open(my $fh,">",$json_file) || die "cant open $json_file";
     my $index = $json_file;
     $index->{body} = \@body;
-    print "########in write#####\n" . Dumper( $index );
+    open(my $fh,">",$json_file) || die "cant open $json_file";
+    print $fh encode_json $index;
+    
+    #print "########in write#####\n" . Dumper( $index );
 
     return $index;
 };
 
 print "########before#####\n" . Dumper( $load->($index_json) );
 
-$write->( $load->($index_json) );
+print "########after#####\n" . $write->( $load->($index_json) );
 
-print "########after#####\n" . Dumper( $load->($index_json) );
+#print "########after#####\n" . Dumper( $load->($index_json) );
 
     
     
