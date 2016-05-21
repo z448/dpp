@@ -155,19 +155,22 @@ my $web = sub {
     # load header/body/footer
     open(my $fh,"<","$ENV{DPP}/assets/html/index.json") || die "$ENV{DPP}/assets/html/index.json $!";
     $index = <$fh>;
-    $index = decode_json $index;
+    my $index = decode_json $index;
+    print "########\n";
+    print Dumper($index);
+    die;
     close $fh;
 
     # add current pm div into @body
-    push(@body, @{$index{body}});
+    #push(@{$index{body}}, @body);
     push @body, $m->{ div };
     #uniq 
     my %body_seen = ( );
     @body = grep { ! $body_seen{$_} ++ } @body;
-    $index->{ body } = encode_json \@body;
+    #$index{body} = encode_json \@body;
 
     open($fh,">","$ENV{DPP}/assets/html/index.json") || die "cant open index.json: $!";
-    print $fh encode_json $index;
+    #print $fh encode_json \%index;
     close $fh;
 
     # append current module div to div.html

@@ -7,14 +7,6 @@ DISTRIBUTIONS
     requirements:
       ExtUtils::MakeMaker 0
       perl 5.008001
-  Exporter-Tiny-0.042
-    pathname: T/TO/TOBYINK/Exporter-Tiny-0.042.tar.gz
-    provides:
-      Exporter::Shiny 0.042
-      Exporter::Tiny 0.042
-    requirements:
-      ExtUtils::MakeMaker 6.17
-      perl 5.006001
   ExtUtils-MakeMaker-7.14
     pathname: B/BI/BINGOS/ExtUtils-MakeMaker-7.14.tar.gz
     provides:
@@ -70,23 +62,6 @@ DISTRIBUTIONS
     requirements:
       ExtUtils::MakeMaker 0
       Test::More 0
-  List-MoreUtils-0.415
-    pathname: R/RE/REHSACK/List-MoreUtils-0.415.tar.gz
-    provides:
-      List::MoreUtils 0.415
-      List::MoreUtils::PP 0.415
-      List::MoreUtils::XS 0.415
-    requirements:
-      Carp 0
-      Exporter::Tiny 0.038
-      ExtUtils::MakeMaker 0
-      File::Basename 0
-      File::Copy 0
-      File::Path 0
-      File::Spec 0
-      IPC::Cmd 0
-      XSLoader 0
-      base 0
   Net-OpenSSH-0.70
     pathname: S/SA/SALVA/Net-OpenSSH-0.70.tar.gz
     provides:
