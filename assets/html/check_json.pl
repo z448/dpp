@@ -25,7 +25,7 @@ my $write = sub {
     open(my $fh,">",'./index.json') || die "cant open $json_file";
     print $fh encode_json $index;
     
-    #print "########in write#####\n" . Dumper( $index );
+    print "########in write#####\n" . Dumper( $index );
 
     return $index;
 };
