@@ -102,7 +102,7 @@ my $deps = sub {
 
 my $meta = sub {
     my $module = shift;
-    print '### $meta: $module is ' . $module;
+    #print '### $meta: $module is ' . $module;
     my $metacpan = 'https://metacpan.org/pod/';
     my $meta_url = 'http://api.metacpan.org/v0/module/'."$module".'?join=release';
     my $graph = 'https://widgets.stratopan.com/wheel?q=';
@@ -155,10 +155,9 @@ my $web = sub {
     # load header/body/footer
     open(my $fh,"<","$ENV{DPP}/assets/html/index.json") || die "$ENV{DPP}/assets/html/index.json $!";
     $index = <$fh>;
-    my $index = decode_json $index;
-    print "########\n";
-    print Dumper($index);
-    die;
+    $index = decode_json $index;
+    #print "########\n";
+    #print Dumper($index);
     close $fh;
 
     # add current pm div into @body

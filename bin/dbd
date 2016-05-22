@@ -17,12 +17,13 @@ use open qw< :encoding(UTF-8) >;
 use Cydia::Meta;
 
 my $cybase = "$ENV{HOME}/.dpp/build";
-print colored(['black on_white'],"cybd: staring build") .  "\n\n";
+#print colored(['black on_white'],"cybd: staring build") .  "\n\n";
 
 my( $base )= qw< ./cy >;
 my @packlist_orig = ();
 
-print "\n\n" . colored(['black on_yellow'],"STARTING find ") . "\n";
+print "\n\n";
+#print "\n\n" . colored(['black on_yellow'],"STARTING find ") . "\n";
 sub wanted {
     if(/\.packlist/){
         push @packlist_orig, "$File::Find::dir/$_";
@@ -33,40 +34,42 @@ sub wanted {
 find(\&wanted, $base);
 
 print colored(['yellow'],"found packlists: ") . "\n";
-say @packlist_orig; 
+for(@packlist_orig){
+    print $_ . "\n";
+}
 
 # --define dir paths
 my $installsitelib = $Config{installsitelib};
 $installsitelib =~ s/^\///;
 mkpath($installsitelib);
-print colored(['magenta'], "installsitelib: ") . $installsitelib . "\n";
+print colored(['yellow'], "installsitelib: ") . $installsitelib . "\n";
 
 my $installbin = $Config{installbin};
 $installbin =~ s/^\///;
 mkpath($installbin);
-print colored(['magenta'], "installbin: ") . $installbin . "\n";
+print colored(['yellow'], "installbin: ") . $installbin . "\n";
 
 my $installsiteman1dir = $Config{installsiteman1dir};
 $installsiteman1dir =~ s/^\///;
 mkpath($installsiteman1dir);
 my $installman = $installsiteman1dir;
 $installman =~ s/(.*\/)(man1)/$1/;
-print colored(['magenta'], "installsiteman1dir: ") . $installsiteman1dir . "\n";
+print colored(['yellow'], "installsiteman1dir: ") . $installsiteman1dir . "\n";
 
 my $installsiteman3dir = $Config{installsiteman3dir};
 $installsiteman3dir =~ s/^\///;
 #$installsiteman3dir =~ s/(.*\/)(man3)/$1/;
 mkpath($installsiteman3dir);
-print colored(['magenta'], "installsiteman3dir: ") . $installsiteman3dir . "\n";
+print colored(['yellow'], "installsiteman3dir: ") . $installsiteman3dir . "\n";
 
 
 my $cytar_lib = $installsitelib;
 $cytar_lib =~ s/(.*?)(\/.*)/$1/;
-#print colored(['magenta'], "cytar_lib: ") . $cytar_lib. "\n";
+#print colored(['yellow'], "cytar_lib: ") . $cytar_lib. "\n";
 
 my $cytar_bin = $installbin;
 $cytar_bin =~ s/(.*?)(\/.*)/$1/;
-#print colored(['magenta'], "cytar_bin: ") . $cytar_bin . "\n";
+#print colored(['yellow'], "cytar_bin: ") . $cytar_bin . "\n";
 
 
 # todo: add xz/lzma compression option (1)
@@ -115,26 +118,27 @@ my $check_pack = sub {
     $cpanm->{bin} = "$base/bin";
     $cpanm->{man} = "$base/man";
 
-    print colored(["white on_red"], $cpanm->{lib}) . "\n";
-    print colored(["white on_red"], $cpanm->{bin}) . "\n";
+    #print colored(["white on_red"], $cpanm->{lib}) . "\n";
+    #print colored(["white on_red"], $cpanm->{bin}) . "\n";
     system("mv $cpanm->{lib}/* $installsitelib");
     system("mv $cpanm->{bin}/* $installbin");
     system("mv $cpanm->{man}/* $installman");
     #system("rm -rf cy");
     print "\n";
-    print colored(['magenta'],"system ") . "$cpanm->{lib}/* $installsitelib";
-    print colored(['magenta'],"system ") . "$cpanm->{bin}/* $installbin";
-    print colored(['magenta'],"system ") . "$cpanm->{man}/* $installman";
-    #print colored(['magenta'],"rm -rf cy ") . "$base";
+    #print colored(['yellow'],"system ") . "$cpanm->{lib}/* $installsitelib";
+    #print colored(['yellow'],"system ") . "$cpanm->{bin}/* $installbin";
+    #print colored(['yellow'],"system ") . "$cpanm->{man}/* $installman";
+    #print colored(['yellow'],"rm -rf cy ") . "$base";
 
     #print colored(["cyan"],"$installsitelib\n$installbin\n\n$cytar_lib\n$cytar_bin") . "\n";
 
     for my $pack( @$p ){
-            print "\n\n" . colored(['black on_yellow'],"STARTING check_pack ") . "\n";
+            print "\n\n";
+            #print "\n\n" . colored(['black on_yellow'],"STARTING check_pack ") . "\n";
 
             # -- list content of received packlist
-            print colored(['magenta'],"packlist path: ") . $pack->{path} . "\n";
-            print colored(['magenta'],"pkg: ") . $pack->{pkg} . "\n";
+            print colored(['yellow'],"packlist path: ") . $pack->{path} . "\n";
+            print colored(['yellow'],"pkg: ") . $pack->{pkg} . "\n";
             print colored(['yellow'],"packlist content: ") . "\n";
             for(@{$pack->{packlist}}){ say $_ }
     
@@ -147,7 +151,7 @@ my $check_pack = sub {
             open( $fh, ">", $fn ) || die "cant open $fn";
             print $fh control("$pack->{module}") . "\n";
             close $fh;
-            print colored(['yellow'],"created control file for: ") . $pack->{module} . "\n";
+            print "\n" . colored(['green'],"created control file for: ") . $pack->{module} . "\n";
             say control($pack->{module});
 
 
@@ -157,7 +161,7 @@ my $check_pack = sub {
 
             find( sub{ if( /\.packlist/ ){ 
                         $dpp_packlist = "$File::Find::dir/$_";
-                        print colored(['white on_red'],"unlink ") . $pack->{path} . "\n";
+                        print colored(['yellow'],"removing") . $pack->{path} . "\n";
                         unlink($pack->{path});
             }}, $installsitelib_dir );
                 
@@ -166,7 +170,7 @@ my $check_pack = sub {
             find( sub{ unless(/perllocal\.pod/){
                         if( -f $_ ){ 
                             open( my $findh, ">>", "$cybase/$pack->{pkg}/.packlist" ) || die "$!: cant open $pack->{pkg}/.packlist";
-                            print colored(['magenta'], "writing file: ") . "$File::Find::dir/$_" . "\n";
+                            print colored(['yellow'], "writing file: ") . "$File::Find::dir/$_" . "\n";
                             say $findh "$File::Find::dir/$_";
                         } else {
                         print colored(['yellow'], "skipping dir: ") . "$File::Find::dir/$_" . "\n";
@@ -182,8 +186,8 @@ my $check_pack = sub {
 
             #call make_pack, build deb
             unless( $make_pack->($pack->{pkg}) ){
-                say $pack->{pkg} . ': ok';
-                web($pack->{module});
+                print colored(['green'], "$pack->{pkg} : ok") . "\n";
+                #web($pack->{module});
             }
 
             my $cleanup = sub {
@@ -200,7 +204,7 @@ my $check_pack = sub {
 
             #web
             #web($pack->{module});
-            print colored(['yellow'], "writing: ") . " <div> for $pack->{module} " . "\n";
+            #print colored(['yellow'], "writing: ") . " <div> for $pack->{module} " . "\n";
     }
 };
 
@@ -209,7 +213,8 @@ my $list_pack = sub {
     my @pack = ();
     my( @meta )= ();
 
-    print "\n\n" . colored(['black on_yellow'],"STARTING list_pack ") . "\n";
+    print "\n\n";
+    #print "\n\n" . colored(['black on_yellow'],"STARTING list_pack ") . "\n";
     print colored(['yellow'],"received packlists: ") . "\n";
     print $_ . "\n" for (@$p);
 
@@ -238,11 +243,11 @@ my $list_pack = sub {
                     s/(.*?)(\/cy\/)(.*)/$3/;
                     push @pack, $_;
 
-                    print colored(['magenta'],"adding: ") . "$_ ";
+                    print colored(['yellow'],"adding: ") . "$_ ";
 
                 }
             } else {
-                print colored(['red'],"skipping: ") . "$_ ";;
+                print colored(['yellow'],"skipping: ") . "$_ ";;
             }
             print "\n";
         }
