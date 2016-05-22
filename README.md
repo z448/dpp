@@ -4,14 +4,14 @@
 
     debian perl packager
 
-# SYNOPISIS
+# SYNOPSIS
 
 - create debian binary packages from Perl modules 
 - supported platforms: Linux, OSX, jailbroken iOS
 
 # GIF
 
-![https://raw.githubusercontent.com/z448/dpp/master/dpp.gif](https://raw.githubusercontent.com/z448/dpp/master/dpp.gif)
+- [https://raw.githubusercontent.com/z448/dpp/master/dpp.gif](https://raw.githubusercontent.com/z448/dpp/master/dpp.gif)
 
 # INSTALLATION
 
