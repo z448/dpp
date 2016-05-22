@@ -1,18 +1,17 @@
-![dpp logo](assets/logo50x50.jpg)
+# NAME
 
-### NAME
+> debian perl packager
 
-- Debian Perl Packager 1.0
+# SYNOPISIS
 
-### SYNOPISIS
+- create debian binary packages from Perl modules 
+- supported platforms: Linux, OSX, jailbroken iOS
 
-- create debian binary packages from Perl module
+# GIF
 
-### GIF
+- [https://raw.githubusercontent.com/z448/dpp/master/dpp.gif](https://raw.githubusercontent.com/z448/dpp/master/dpp.gif)
 
-![dpp](https://raw.githubusercontent.com/z448/dpp/master/dpp.gif)
-
-### INSTALLATION
+# INSTALLATION
 
 - Clone repository
 
@@ -22,20 +21,24 @@
 
     `carton install`
 
-- Setup enviroment
+- Setup environment
 
     `. setup`
 
-### USAGE
+# USAGE
 
-- Pack module and it's dependencies 
+- create package 
 
     `dpp -m Perl::Module`
-    
 
-- deb directory ~/.cypm/.stash/deb
-- build directory ~/.cypm/pool
-- use [CTRL-P] & [CTRL-G] to switch between pool & deb directories
+- - package directory $HOME/.dpp/.stash/deb
+- - build directory $HOME/.dpp/build
+- - use [CTRL-P](https://metacpan.org/pod/CTRL-P) & [CTRL-G](https://metacpan.org/pod/CTRL-G)to switch between build & deb directories
 
+# POD ERRORS
 
+Hey! **The above document had some coding errors, which are explained below:**
 
+- Around line 65:
+
+    &#x3d;over should be: '=over' or '=over positive\_number'

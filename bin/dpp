@@ -73,7 +73,17 @@ debian perl packager
 
 =over 12
 
-=item create debian binary packages from Perl modules
+=item create debian binary packages from Perl modules 
+
+=item supported platforms: Linux, OSX, jailbroken iOS
+
+=back
+
+=head1 GIF
+
+=over 12
+
+=item L<https://raw.githubusercontent.com/z448/dpp/master/dpp.gif>
 
 =back
 
