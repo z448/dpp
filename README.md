@@ -11,7 +11,7 @@
 
 # GIF
 
-- [https://raw.githubusercontent.com/z448/dpp/master/dpp.gif](https://raw.githubusercontent.com/z448/dpp/master/dpp.gif)
+![https://raw.githubusercontent.com/z448/dpp/master/dpp.gif](https://raw.githubusercontent.com/z448/dpp/master/dpp.gif)
 
 # INSTALLATION
 
