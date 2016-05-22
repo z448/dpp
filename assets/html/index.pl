@@ -1,6 +1,9 @@
 #!/usr/bin/env perl
 
 use 5.010;
+use warnings;
+use strict;
+
 use Encode;
 use Data::Dumper;
 use JSON;
@@ -18,11 +21,10 @@ my $make_index = sub {
 
     for(@$tag_file){
         my $tag = $_;
-        # $tag =~ s/(\.\/)(....)(\.html)/$2/;
         $tag =~ s/(\.\/)(.*?)(\..*)/$2/;
         print $tag . "\n";
 
-        open($fh,"<",$_) || die "cant open $_: $!";
+        open(my $fh,"<",$_) || die "cant open $_: $!";
         $index->{$tag} = [];
 
         while(my $line = <$fh>){
@@ -34,28 +36,44 @@ my $make_index = sub {
 
 my $write_index = sub {
     my $file_type = shift;
-    my $file = 'index-test.' . $file_type;
+    my $body = "test body";
+    my $file = 'index.' . $file_type;
     my $index = {};
 
     if($file_type eq 'json'){
         $index = $make_index->(\@tag_file);
-        open($fh,">",$file) || "cant open $file";
+        open(my $fh,">",$file) || "cant open $file";
         print $fh $index;
+        close $fh;
+    }
+    elsif( $file_type eq 'html' ){
+        $file = 'index.json';
+        open(my $fh,"<",$file) || "cant open $file";
+        $index = <$fh>;
+        $index = decode_json $index;
+
+        for( @{$index->{head}} ){ print $_ }
+        for( @{$index->{style}} ){ print $_ }
+        for( @{$index->{body}} ){ print $_ }
+        for( @{$index->{foot}} ){ print $_ }
+
+        # for(keys %$index){
+        #    for my $line ( @{$index->{$_}} ){
+        #            print $line;
+        #    }
+        #}
     }
 };
 
-$write_index->('json');
+#$write_index->('json');
+$write_index->('html');
 
+__DATA__
+        $file = 'index.json';
+        open(my $fh,"<",$file) || die "cant open $file: $!";
+        $index = <$fh>:
+        $index = decode_json $index;
+        $body = $m->{div};
 
-
-
-#    open($fh,"<",$foot_file) || "cant open $foot_file: $!";
-#    $index{foot} = <$fh>;
-#    $index = encode_json \%html;
-#}
-
-#open($fh,">",'./html.json') || die "cant open head.json: $!";
-#print $fh $index;
-#close $fh;
-
+};
 
