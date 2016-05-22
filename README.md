@@ -1,6 +1,8 @@
 # NAME
 
-> debian perl packager
+- dpp
+
+    debian perl packager
 
 # SYNOPISIS
 
@@ -9,7 +11,7 @@
 
 # GIF
 
-- [https://raw.githubusercontent.com/z448/dpp/master/dpp.gif](https://raw.githubusercontent.com/z448/dpp/master/dpp.gif)
+![https://raw.githubusercontent.com/z448/dpp/master/dpp.gif](https://raw.githubusercontent.com/z448/dpp/master/dpp.gif)
 
 # INSTALLATION
 
@@ -34,11 +36,3 @@
 - - package directory $HOME/.dpp/.stash/deb
 - - build directory $HOME/.dpp/build
 - - use [CTRL-P](https://metacpan.org/pod/CTRL-P) & [CTRL-G](https://metacpan.org/pod/CTRL-G)to switch between build & deb directories
-
-# POD ERRORS
-
-Hey! **The above document had some coding errors, which are explained below:**
-
-- Around line 65:
-
-    &#x3d;over should be: '=over' or '=over positive\_number'
