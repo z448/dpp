@@ -1,10 +1,8 @@
 ![dpp logo](assets/logo50x50.jpg)
 
-work in progress
-
 ### NAME
 
-- Debian Perl Packager
+- Debian Perl Packager 1.0
 
 ### SYNOPISIS
 
