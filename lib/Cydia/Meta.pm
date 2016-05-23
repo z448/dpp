@@ -113,6 +113,7 @@ my $meta = sub {
     my $stratopan = $graph.$m->{name};
     my $prefix = 'lib';
     my $assets = "$ENV{DPP}/assets/html";
+    my $deb_url = "deb/.stash/deb/" . $prefix . lc $m->{distribution} . '-p5' . '.deb';
      
     my $remote = {
         cystash      => "$ENV{HOME}/.dpp/.stash",
@@ -141,7 +142,7 @@ my $meta = sub {
         meta_api_url => $meta_url,
         Depends      => $deps->($module),
         www          => 'load.sh/cydia/index.html',
-        div          => [ q|<div class="dpp"><a href="deb/package.deb"><i class="fa fa-download" aria-hidden="true"></i></a></div> |, qq|\n\t<div class="module">$module</div>|, qq|\t<div class="description">$m->{abstract}</br></div>| ],
+        div          => [ qq|<div class="dpp"><a href="$deb_url"><i class="fa fa-download" aria-hidden="true"></i></a></div>|, qq|<div class="module">$module</div>|, qq|<div class="description">$m->{abstract}</br></div>| ],
     };
     return $remote;
 };
@@ -157,53 +158,18 @@ my $web = sub {
     open(my $fh,"<","$ENV{DPP}/assets/html/index.json") || die "$ENV{DPP}/assets/html/index.json $!";
     $index = <$fh>;
     $index = decode_json $index;
-    #print "########\n";
-    #print Dumper($index);
     close $fh;
 
-    # add current pm div into @body
-    #push(@{$index{body}}, @body);
     push $index->{body}, @{$m->{ div }};
+    
     #uniq 
-    #my %body_seen = ( );
-    #@body = grep { ! $body_seen{$_} ++ } @body;
-    #@{$index->{body}} = grep { ! $body_seen{$_} ++ } @{$index->{body}};
-    #$index{body} = encode_json \@body;
+    my %body_seen = ( );
+    @body = grep { ! $body_seen{$_} ++ } @body;
+    @{$index->{body}} = grep { ! $body_seen{$_} ++ } @{$index->{body}};
 
     open($fh,">","$ENV{DPP}/assets/html/index.json") || die "cant open index.json: $!";
     print $fh encode_json $index;
     close $fh;
-
-    # append current module div to div.html
-    #{
-    #    open( my $fh, '>>', "$ENV{DPP}/assets/html/div.html") || die "cant open: $!";
-    #    say   $fh @{$m->{ div }};
-    #    close $fh;
-    #}
-
-    # load div.html to @body
-    #{
-    #    open(my $fh,"<","$ENV{DPP}/assets/html/div.html") || die "cant open: www.html";
-    #    while(<$fh>){
-    #        push @body, $_ if /module/ or /description/ or /dpp/;
-    #    };
-    #}
-    
-    # load http:// body to @body
-    #{
-    #    open my $pipe, '-|', "curl -# $m->{ www }"; 
-    #    while(<$pipe>){
-    #        push @body, $_ if /module/ or /description/;
-    #    }; 
-    #}
- 
-    #{ 
-    #open( my $fh, '>', "$ENV{DPP}/assets/html/index.html") || die "cant open: $!";
-    #print $fh $index->{ head };   
-    #say   $fh @{$index->{ body }};
-    #print $fh $index->{ foot };
-    #close $fh;
-    #}
 };
 
 sub web {

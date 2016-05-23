@@ -277,21 +277,13 @@ my $make_html = sub {
     my $index_json = <$fh>;
     my $index_hash = decode_json $index_json;
     close $fh;
-
+         
     open($fh,">",$html_file) || die "cant open $html_file: $!";
-    for( @{$index_hash->{head}} ){ print $_ }
-    for( @{$index_hash->{style}} ){ print $_ }
-    for( @{$index_hash->{body}} ){ print $_ }
-    for( @{$index_hash->{foot}} ){ print $_ }
+    for( @{$index_hash->{head}} ){ print $fh $_ }
+    for( @{$index_hash->{style}} ){ print $fh $_ }
+    for( @{$index_hash->{body}} ){ print $fh $_ }
+    for( @{$index_hash->{foot}} ){ print $fh $_ }
 
-    #for(keys %$index_json){
-    #  print @{$index_json->{$_}};
-    #}
-    #    print @{$index_hash->{head}};
-    #    print @{$index_hash->{style}};
-    #    print @{$index_hash->{body}};
-    #    print @{$index_hash->{foot}};
-    #}
 };  $make_html->();
 
 rmdir "$cybase/cy";
