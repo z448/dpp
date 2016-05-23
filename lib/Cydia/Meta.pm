@@ -142,7 +142,8 @@ my $meta = sub {
         meta_api_url => $meta_url,
         Depends      => $deps->($module),
         www          => 'load.sh/cydia/index.html',
-        div          => [ qq|<div class="dpp"><a href="$deb_url"><i class="fa fa-download" aria-hidden="true"></i></a></div>|, qq|<div class="module">$module</div>|, qq|<div class="description">$m->{abstract}</br></div>| ],
+        div          => [ qq|<div class="dpp"><a href="$deb_url"><i class="fa fa-download" aria-hidden="true"></i></a></div>|, qq|<div class="stratopan"><a href="$stratopan_url"><i class="icon-asterisk" aria-hidden="true"></i></a></div>|, qq|<div class="module">$module</div>|, qq|<div class="description">$m->{abstract}</br></div>| ],
+       # div          => [ qq|<div class="dpp"><a href="$deb_url"><i class="fa fa-download" aria-hidden="true"></i></a></div>|, qq|<div class="module">$module</div>|, qq|<div class="description">$m->{abstract}</br></div>| ],
     };
     return $remote;
 };
