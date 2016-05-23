@@ -115,6 +115,17 @@ my $meta = sub {
     my $prefix = 'lib';
     my $assets = "$ENV{DPP}/assets/html";
     my $deb_url = "deb/.stash/deb/" . $prefix . lc $m->{distribution} . '-p5' . '.deb';
+
+    my $arch = sub { 
+            my $arch;
+            open my $pipe, '-|', 'uname -m';
+            while(<$pipe>){
+                if(/iPhone/){
+                    $arch = 'iphoneos-arm';
+                } else { $arch = 'all' }
+            }
+            return $arch;
+    };
      
     my $remote = {
         cystash      => "$ENV{HOME}/.dpp/.stash",
@@ -130,7 +141,7 @@ my $meta = sub {
         install_path => $Config{installprivlib},
         module_name  => $meta_p->{module}[0]->{name},
         release_date => $meta_p->{date},
-        Architecture => 'all', #'iphoneos-arm', #$Config{archname}
+        Architecture => $arch->(), #'all', #'iphoneos-arm', #$Config{archname}
         source_url   => $m->{download_url},
         deps_graph   => $graph.$m->{name}, #Moose-2.1205
         pod          => $meta_p->{pod},
