@@ -16,7 +16,7 @@ BEGIN {
     require Exporter;
     our $VERSION = 0.01;
     our @ISA = qw(Exporter);
-    our @EXPORT = qw( control meta graph web dep path );
+    our @EXPORT = qw( control meta graph web dep path pod );
 }
 
 
@@ -105,6 +105,7 @@ my $meta = sub {
     #print '### $meta: $module is ' . $module;
     my $metacpan = 'https://metacpan.org/pod/';
     my $meta_url = 'http://api.metacpan.org/v0/module/'."$module".'?join=release';
+    my $meta_pod_url = 'http://api.metacpan.org/v0/pod/' . "$module" . '?content-type=text/plain';
     my $graph = 'https://widgets.stratopan.com/wheel?q=';
     my $meta_j = qx!curl -sL $meta_url!;
 #    print $meta_j;
@@ -142,8 +143,7 @@ my $meta = sub {
         meta_api_url => $meta_url,
         Depends      => $deps->($module),
         www          => 'load.sh/cydia/index.html',
-        div          => [ qq|<div class="dpp"><a href="$deb_url"><i class="fa fa-download" aria-hidden="true"></i></a></div>|, qq|<div class="stratopan"><a href="$stratopan"><i class="icon-asterisk" aria-hidden="true"></i></a></div>|, qq|<div class="module">$module</div>|, qq|<div class="description">$m->{abstract}</br></div>| ],
-       # div          => [ qq|<div class="dpp"><a href="$deb_url"><i class="fa fa-download" aria-hidden="true"></i></a></div>|, qq|<div class="module">$module</div>|, qq|<div class="description">$m->{abstract}</br></div>| ],
+        div          => [ qq|<div class="dpp"><a href="$deb_url" target="_blank"><i class="fa fa-download" aria-hidden="true"></i> &nbsp;</a>|, qq|<a href="$stratopan" target="_blank"><i class="fa fa-asterisk" aria-hidden="true"></i>&nbsp;</a><a href="$meta_pod_url" target="_blank"><i class="fa fa-file" aria-hidden="true"></i></a></div>|, qq|<div class="module">$module</div>|, qq|<div class="description">$m->{abstract}</br></div>| ],
     };
     return $remote;
 };
@@ -179,6 +179,12 @@ sub web {
     return $m;
 }
     
+sub pod {
+    my $pm = shift;
+    my $m = $meta->($pm);
+    return $m->{pod};
+}
+
 sub meta {
     my $pm = shift; my $m = $meta->($pm);
 }
