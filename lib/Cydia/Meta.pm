@@ -16,7 +16,7 @@ BEGIN {
     require Exporter;
     our $VERSION = 0.01;
     our @ISA = qw(Exporter);
-    our @EXPORT = qw( control meta graph web dep path pod );
+    our @EXPORT_OK = qw( control meta web );
 }
 
 
@@ -62,7 +62,6 @@ my $deps = sub {
 
     for( @dist_dep ){
         unless( $_ eq 'perl' ){
-            #web($deb{control});
             $dep{control} = $dep{control} . 'lib' . lc "$_" . "-p5" . "\, ";
         } else { 
             next;
@@ -79,7 +78,6 @@ my $meta = sub {
     my $meta_pod_url = 'http://api.metacpan.org/v0/pod/' . "$module" . '?content-type=text/plain';
     my $graph = 'https://widgets.stratopan.com/wheel?q=';
     my $meta_j = qx!curl -sL $meta_url!;
-#    print $meta_j;
     my $meta_p = decode_json( encode( 'utf8', $meta_j ) );
     my $m = $meta_p->{release}->{_source};
     my $stratopan = $graph.$m->{name};

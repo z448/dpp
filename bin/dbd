@@ -13,7 +13,7 @@ use Config;
 use FindBin;
 use lib "$FindBin::Bin/../lib";
 use open qw< :encoding(UTF-8) >;
-use Cydia::Meta;
+use Cydia::Meta qw< control meta web >;
 
 my $cybase = "$ENV{HOME}/.dpp/build";
 my( $base )= qw< ./cy >;
@@ -253,8 +253,6 @@ my $make_html = sub {
 };  $make_html->();
 
 rmdir "$cybase/cy";
-#my $repo = 'mobile@load.sh';
-#$move_pack->($repo);
 
 __DATA__
 1. xz/lmza on telesphoero needs fix4 
