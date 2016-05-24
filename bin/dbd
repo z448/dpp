@@ -33,9 +33,10 @@ find( sub {
         if(/\.packlist/){
             push @packlist_orig, "$File::Find::dir/$_"
 }}, $base);
-print colored(['green'],"packlists: ") . "\n";
+print colored(['blue'],"original packlists: ") . "\n";
 print $_ . "\n" for @packlist_orig;
 
+print colored(['blue'],"install directories:") . "\n";
 my $mkpath_installsitelib = sub {
     mkpath($installsitelib);
     push @install_dir, $installsitelib;
@@ -57,7 +58,6 @@ my $mkpath_installsitemandir = sub {
     print colored(['yellow'], "installsiteman3dir: ") . $installsiteman3dir . "\n";
 };
 
-# todo: add xz/lzma compression option
 my $move_pack = sub {
     my $repo = shift;
     my $cargo = <<"_CYDIA";
@@ -68,9 +68,8 @@ my $move_pack = sub {
     tar -zcvf cydia.tgz Packages.gz deb .www
     scp cydia.tgz $repo:~/www/cydia
 _CYDIA
-    my $transfer = sub {
-        system("$cargo");
-    }; $transfer->();
+    my $transfer = sub { system("$cargo") };
+    $transfer->();
 };
 
 my $make_pack = sub { 
@@ -78,9 +77,7 @@ my $make_pack = sub {
     my $dir = ' ';
 
     for(@dir){
-        if(-d $_){
-            $dir .= $_ . ' ';
-        }
+        if(-d $_){ $dir .= $_ . ' ' }
     }
 
     my $ar = <<"_DEB";
@@ -98,8 +95,7 @@ _DEB
     my $package = sub {
         my $packer = shift;
         my $status  = system($packer);
-    }; 
-    my $status = $package->($ar);
+    };  my $status = $package->($ar);
 };
 
 my $check_pack = sub {
@@ -110,19 +106,16 @@ my $check_pack = sub {
     $cpanm->{bin} = "$base/bin";
     $cpanm->{man} = "$base/man";
 
-    if(-d $cpanm->{lib}){ $mkpath_installsitelib->() and system("echo 'mkpath_installsitelib' && mv $cpanm->{lib}/* $installsitelib") }
+    if(-d $cpanm->{lib}){ $mkpath_installsitelib->() and system("mv $cpanm->{lib}/* $installsitelib") }
     if(-d $cpanm->{bin}){ $mkpath_installbin->() and system("mv $cpanm->{bin}/* $installbin") }
     if(-d $cpanm->{man}){ $mkpath_installsitemandir and system("mv $cpanm->{man}/* $installman") }
-    print "\n";
 
     for my $pack( @$p ){
-            print "\n\n";
-         
             # -- list content of received packlist
             print colored(['yellow'],"packlist path: ") . $pack->{path} . "\n";
             print colored(['yellow'],"pkg: ") . $pack->{pkg} . "\n";
             print colored(['yellow'],"packlist content: ") . "\n";
-            for(@{$pack->{packlist}}){ say $_ }
+            for(@{$pack->{packlist}}){ print $_ . "\n" }
     
             my $make_path = mkpath("$pack->{pkg}/DEBIAN");
 
@@ -131,7 +124,7 @@ my $check_pack = sub {
             open( $fh, ">", $fn ) || die "cant open $fn";
             print $fh control("$pack->{module}") . "\n";
             close $fh;
-            print "\n" . colored(['green'],"created control file for: ") . $pack->{module} . "\n";
+            print "\n" . colored(['green'],"control file: ") . $pack->{module} . "\n";
             say control($pack->{module});
 
             my $installsitelib_dir = $installsitelib;
@@ -140,54 +133,35 @@ my $check_pack = sub {
 
             find( sub{ if( /\.packlist/ ){ 
                         $dpp_packlist = "$File::Find::dir/$_";
-                        print colored(['yellow'],"removing") . $pack->{path} . "\n";
+                        print colored(['yellow'],"rm: ") . $pack->{path} . "\n";
                         unlink($pack->{path});
             }}, $installsitelib_dir );
                 
-            
-    #print colored(['yellow'], "writing files to $pack->{pkg}/.packlist") . "$File::Find::dir/$_" . "\n";
             find( sub{ unless(/perllocal\.pod/){
                         if( -f $_ ){ 
-                            open( my $findh, ">>", "$ENV{DPP}/build/$pack->{pkg}/.packlist" ) || die "$!: cant open $pack->{pkg}/.packlist";
-                            print colored(['yellow'], "writing file: ") . "$File::Find::dir/$_" . "\n";
+                            open( my $findh, ">>", "$ENV{DPP}/build/$pack->{pkg}/.packlist" ) || die "cant open $pack->{pkg}/.packlist: $!";
+                            print colored(['yellow'], '+ ') . "$File::Find::dir/$_" . "\n";
                             say $findh "$File::Find::dir/$_";
                         } else {
-                        print colored(['yellow'], "skipping dir: ") . "$File::Find::dir/$_" . "\n";
+                        print colored(['yellow'], "- ") . "$File::Find::dir/$_" . "\n";
                         open(my $fh,">>", "$ENV{DPP}/build/.remove") || die "cant open $!";
                         close $fh;
                     }}}, @install_dir );
-        #}}}, ($installsitelib, $installbin, $installman ));
 
-            #create new data.pack using new packlist
-#########
-            #  open(my $test,"< $pack->{pkg}/.packlist");
-            #while(<$test>){ print $_ . "\n" }
-            #die;
-#########
             my $datapack = sub {
                 my $tar = system("tar cz -T $pack->{pkg}/.packlist -f $pack->{pkg}/data.tar.gz");
             }; $datapack->();
-            print colored(['yellow'], "using: ") . "$pack->{pkg}/.packlist for data.tar.gz" . "\n";
+            print colored(['yellow'], "using packlist: ") . "$pack->{pkg}/.packlist for data.tar.gz" . "\n";
 
             #call make_pack, build deb
             unless( $make_pack->($pack->{pkg}) ){
                 print colored(['green'], "$pack->{pkg} : ok") . "\n";
-                web($pack->{module}) and print "web: $pack->{module}" . " ok\n";
+                web($pack->{module}) and print colored(['green'],"www for $pack->{module}: ok") . "\n";
             }
 
             my $cleanup = sub {
                 system("rm -rf $ENV{DPP}/build/$pack->{pkg}");
-                #open(my $fh, "<", "$ENV{DPP}/build/$pack->{pkg}/.packlist");
-                #while(<$fh>){
-                #    unlink $_;
-                #}; close $fh;
-                #open($fh,"<", "$ENV{DPP}/build/.remove") || die "cant open $!";
-                #while(<$fh>){
-                #    unlink $_;
-                #}; close $fh;
-                #unlink "$ENV{DPP}/build/.remove";
             };  print colored(['green'], "cleanup: ok") . "\n" unless $cleanup->();
-            #print $cleanup->() and die;
     }
 };
 
@@ -196,7 +170,7 @@ my $list_pack = sub {
     my @pack = ();
     my( @meta )= ();
  
-    print "\n\n" . colored(['yellow'],"received packlists: ") . "\n";
+    print "\n\n" . colored(['green'],"packlists: ") . "\n";
     print $_ . "\n" for (@$p);
 
     for my $path( @$p ){
@@ -206,23 +180,19 @@ my $list_pack = sub {
         $module =~ s/(auto.*?\/)(.*?)(\/\.packlist)/$2/;
         $module = $2;
         $module =~ s/\//\:\:/g;
-        print colored(['yellow'],"module is: ") . $module . "\n\n";
+        print colored(['yellow'],"module:") . $module . "\n\n";
 
-        print colored(['yellow'],"packlist content is:") . "\n";
+        print colored(['yellow'],"packlist content:") . "\n";
         open( my $fh, "<", $path );
         while( <$fh>){
             chomp;
-
             #content(file paths) of current packlist
             my $home = qr/$ENV{HOME}/;
             if( /\/cy\// ){
                 if(/$home/){
-
                     s/(.*?)(\/cy\/)(.*)/$3/;
                     push @pack, $_;
-
                     print colored(['yellow'],"adding: ") . "$_ ";
-
                 }
             } else {
                 print colored(['yellow'],"skipping: ") . "$_ ";;
