@@ -183,16 +183,14 @@ my $list_pack = sub {
     my $p = shift;
     my @pack = ();
     my( @meta )= ();
-
-    print "\n\n";
-    print colored(['yellow'],"received packlists: ") . "\n";
+ 
+    print "\n\n" . colored(['yellow'],"received packlists: ") . "\n";
     print $_ . "\n" for (@$p);
 
     for my $path( @$p ){
         chomp(my $module = $path);
 
         # make module($pm) name from packlist($path)
-
         $module =~ s/(auto.*?\/)(.*?)(\/\.packlist)/$2/;
         $module = $2;
         $module =~ s/\//\:\:/g;
@@ -204,8 +202,6 @@ my $list_pack = sub {
             chomp;
 
             #content(file paths) of current packlist
-            #print ' |' . $_ . '| ';
-            # --
             my $home = qr/$ENV{HOME}/;
             if( /\/cy\// ){
                 if(/$home/){
