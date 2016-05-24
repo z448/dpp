@@ -1,5 +1,4 @@
 #!/usr/bin/env perl
-# repath and archive finished build on remote host
 
 use 5.010;
 use warnings;
@@ -17,19 +16,13 @@ use open qw< :encoding(UTF-8) >;
 use Cydia::Meta;
 
 my $cybase = "$ENV{HOME}/.dpp/build";
-#print colored(['black on_white'],"cybd: staring build") .  "\n\n";
-
 my( $base )= qw< ./cy >;
 my @packlist_orig = ();
 
-print "\n\n";
-#print "\n\n" . colored(['black on_yellow'],"STARTING find ") . "\n";
 sub wanted {
     if(/\.packlist/){
         push @packlist_orig, "$File::Find::dir/$_";
-    } else {
-        #say "no packlist " . $_;
-    }
+    } 
 }
 find(\&wanted, $base);
 
@@ -62,15 +55,11 @@ $installsiteman3dir =~ s/^\///;
 mkpath($installsiteman3dir);
 print colored(['yellow'], "installsiteman3dir: ") . $installsiteman3dir . "\n";
 
-
 my $cytar_lib = $installsitelib;
 $cytar_lib =~ s/(.*?)(\/.*)/$1/;
-#print colored(['yellow'], "cytar_lib: ") . $cytar_lib. "\n";
 
 my $cytar_bin = $installbin;
 $cytar_bin =~ s/(.*?)(\/.*)/$1/;
-#print colored(['yellow'], "cytar_bin: ") . $cytar_bin . "\n";
-
 
 # todo: add xz/lzma compression option (1)
 my $move_pack = sub {
@@ -102,7 +91,6 @@ my $make_pack = sub {
     mv $pm.deb ~/.dpp/.stash/deb;
     rm -rf debian-binary control.tar.gz data.tar.gz DEBIAN;
 _DEB
-    #tar czf ../data.tar.gz [a-z]*;
     my $package = sub {
         my $packer = shift;
         my $status  = system($packer);
@@ -118,19 +106,10 @@ my $check_pack = sub {
     $cpanm->{bin} = "$base/bin";
     $cpanm->{man} = "$base/man";
 
-    #print colored(["white on_red"], $cpanm->{lib}) . "\n";
-    #print colored(["white on_red"], $cpanm->{bin}) . "\n";
     system("mv $cpanm->{lib}/* $installsitelib");
     system("mv $cpanm->{bin}/* $installbin");
     system("mv $cpanm->{man}/* $installman");
-    #system("rm -rf cy");
     print "\n";
-    #print colored(['yellow'],"system ") . "$cpanm->{lib}/* $installsitelib";
-    #print colored(['yellow'],"system ") . "$cpanm->{bin}/* $installbin";
-    #print colored(['yellow'],"system ") . "$cpanm->{man}/* $installman";
-    #print colored(['yellow'],"rm -rf cy ") . "$base";
-
-    #print colored(["cyan"],"$installsitelib\n$installbin\n\n$cytar_lib\n$cytar_bin") . "\n";
 
     for my $pack( @$p ){
             print "\n\n";
