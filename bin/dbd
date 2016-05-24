@@ -176,16 +176,18 @@ my $check_pack = sub {
             }
 
             my $cleanup = sub {
-                open(my $fh, "<", "$ENV{DPP}/build/$pack->{pkg}/.packlist");
-                while(<$fh>){
-                    unlink $_;
-                }; close $fh;
-                open($fh,"<", "$ENV{DPP}/build/.remove") || die "cant open $!";
-                while(<$fh>){
-                    unlink $_;
-                }; close $fh;
-                unlink "$ENV{DPP}/build/.remove";
-            }; $cleanup->();
+                system("rm -rf $ENV{DPP}/build/$pack->{pkg}");
+                #open(my $fh, "<", "$ENV{DPP}/build/$pack->{pkg}/.packlist");
+                #while(<$fh>){
+                #    unlink $_;
+                #}; close $fh;
+                #open($fh,"<", "$ENV{DPP}/build/.remove") || die "cant open $!";
+                #while(<$fh>){
+                #    unlink $_;
+                #}; close $fh;
+                #unlink "$ENV{DPP}/build/.remove";
+            };  print colored(['green'], "cleanup: ok") . "\n" unless $cleanup->();
+            #print $cleanup->() and die;
     }
 };
 
