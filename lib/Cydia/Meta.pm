@@ -20,32 +20,6 @@ BEGIN {
 }
 
 
-#for( keys {grep( /Storable/, keys %Extensions)}){
-#print "$_"."\n";
-#}'
-
-### !!! finish orig; find right paths for each platform
-### perl -V + ExtUtils::MakeMaker to find out; 
-
-my $path = sub {
-    my $q = shift;
-    my $post = {
-    original    =>  [ "./usr/local/lib/perl5/site_perl", "./usr/local/lib/perl5/lib/5.14.4", "./usr/local/bin" ],
-    build       =>  [ "./usr/local/lib/perl5/lib", "./usr/local/lib/perl5/lib/perl5", "./usr/local/lib/perl5/bin" ],
-    }; 
-
-    my $pre = {
-    original    =>  [ "./usr/xxxxxxxxxxxerl5/site_perl", "./usr/xxxxxxxxxxperl5/lib/5.14.4" ],
-    build       =>  [ "./usr/xxxxxxxxxxperl5/lib", "./usr/xxxxxxxxxxxxxx5/lib/perl5" ],
-    }; 
-
-    return unless $q;
-    if( $q eq 'post' ){
-        return $post } 
-    elsif ( $q eq 'pre' ){ return $pre }
-
-};
-
 my $deps = sub {
     my $pm = shift;
     my $core_pm = 
@@ -95,14 +69,11 @@ my $deps = sub {
         }
     }
     $dep{control} = $dep{control} . "perl";
-    # (>= 5.14.4)";
     return \%dep;
 };
 
-
 my $meta = sub {
     my $module = shift;
-    #print '### $meta: $module is ' . $module;
     my $metacpan = 'https://metacpan.org/pod/';
     my $meta_url = 'http://api.metacpan.org/v0/module/'."$module".'?join=release';
     my $meta_pod_url = 'http://api.metacpan.org/v0/pod/' . "$module" . '?content-type=text/plain';
@@ -141,9 +112,9 @@ my $meta = sub {
         install_path => $Config{installprivlib},
         module_name  => $meta_p->{module}[0]->{name},
         release_date => $meta_p->{date},
-        Architecture => $arch->(), #'all', #'iphoneos-arm', #$Config{archname}
+        Architecture => $arch->(),
         source_url   => $m->{download_url},
-        deps_graph   => $graph.$m->{name}, #Moose-2.1205
+        deps_graph   => $graph.$m->{name},
         pod          => $meta_p->{pod},
         prefix       => 'lib',
         Package      => $prefix . lc $m->{distribution} . '-p5',
@@ -166,15 +137,16 @@ my $web = sub {
     my ( @pipe, @body ) = ();
     my $index = {};
 
-    # load header/body/footer
+    # load indexsjson
     open(my $fh,"<","$ENV{DPP}/assets/html/index.json") || die "$ENV{DPP}/assets/html/index.json $!";
     $index = <$fh>;
     $index = decode_json $index;
     close $fh;
-
+    
+    # update index.json
     push $index->{body}, @{$m->{ div }};
     
-    #uniq 
+    #uniq body
     my %body_seen = ( );
     @body = grep { ! $body_seen{$_} ++ } @body;
     @{$index->{body}} = grep { ! $body_seen{$_} ++ } @{$index->{body}};
@@ -189,15 +161,10 @@ sub web {
     my $m = $web->($pm);
     return $m;
 }
-    
-sub pod {
-    my $pm = shift;
-    my $m = $meta->($pm);
-    return $m->{pod};
-}
 
 sub meta {
-    my $pm = shift; my $m = $meta->($pm);
+    my $pm = shift; 
+    my $m = $meta->($pm);
 }
 
 sub control {
@@ -221,14 +188,4 @@ sub graph {
     my $deps_graph=qq|'/Applications/Google Chrome.app/Contents/MacOS/Google Chrome' --app="$gui->{deps_graph}" &2>1 /dev/null|;
     system("$deps_graph");
 }
-
-sub path {
-    my $stage = shift;
-    my $p = $path->( $stage );
-    return $p;
-}
-
-
-__DATA__
-
 
