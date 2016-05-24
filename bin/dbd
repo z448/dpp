@@ -18,46 +18,44 @@ use Cydia::Meta qw< control meta web >;
 my( $base )= qw< ./cy >;
 my @packlist_orig = ();
 
+# --define dir paths
+my $installsitelib = $Config{installsitelib}; $installsitelib =~ s/^\///;
+my $installbin = $Config{installbin}; $installbin =~ s/^\///;
+my $installsiteman1dir = $Config{installsiteman1dir}; $installsiteman1dir =~ s/^\///;
+my $installman = $installsiteman1dir; $installman =~ s/(.*\/)(man1)/$1/;
+my $installsiteman3dir = $Config{installsiteman3dir}; $installsiteman3dir =~ s/^\///; #$installsiteman3dir =~ s/(.*\/)(man3)/$1/;
+my $dpp_tar_lib = $installsitelib; $dpp_tar_lib =~ s/(.*?)(\/.*)/$1/;
+my $dpp_tar_bin = $installbin; $dpp_tar_bin =~ s/(.*?)(\/.*)/$1/;
+my @dir = ($installsitelib, $installbin);
+my @install_dir = ();
+
 find( sub {
         if(/\.packlist/){
-            push @packlist_orig, "$File::Find::dir/$_", $base);
-        }
+            push @packlist_orig, "$File::Find::dir/$_"
+}}, $base);
+print colored(['green'],"packlists: ") . "\n";
+print $_ . "\n" for @packlist_orig;
+
+my $mkpath_installsitelib = sub {
+    mkpath($installsitelib);
+    push @install_dir, $installsitelib;
+    print colored(['yellow'], "installsitelib: ") . $installsitelib . "\n";
 };
-        
-print colored(['yellow'],"found packlists: ") . "\n";
-for(@packlist_orig){
-    print $_ . "\n";
-}
 
-# --define dir paths
-my $installsitelib = $Config{installsitelib};
-$installsitelib =~ s/^\///;
-mkpath($installsitelib);
-print colored(['yellow'], "installsitelib: ") . $installsitelib . "\n";
+my $mkpath_installbin = sub {
+    mkpath($installbin);
+    push @install_dir, $installbin;
+    print colored(['yellow'], "installbin: ") . $installbin . "\n";
+};
 
-my $installbin = $Config{installbin};
-$installbin =~ s/^\///;
-mkpath($installbin);
-print colored(['yellow'], "installbin: ") . $installbin . "\n";
-
-my $installsiteman1dir = $Config{installsiteman1dir};
-$installsiteman1dir =~ s/^\///;
-mkpath($installsiteman1dir);
-my $installman = $installsiteman1dir;
-$installman =~ s/(.*\/)(man1)/$1/;
-print colored(['yellow'], "installsiteman1dir: ") . $installsiteman1dir . "\n";
-
-my $installsiteman3dir = $Config{installsiteman3dir};
-$installsiteman3dir =~ s/^\///;
-#$installsiteman3dir =~ s/(.*\/)(man3)/$1/;
-mkpath($installsiteman3dir);
-print colored(['yellow'], "installsiteman3dir: ") . $installsiteman3dir . "\n";
-
-my $dpp_tar_lib = $installsitelib;
-$dpp_tar_lib =~ s/(.*?)(\/.*)/$1/;
-
-my $dpp_tar_bin = $installbin;
-$dpp_tar_bin =~ s/(.*?)(\/.*)/$1/;
+my $mkpath_installsitemandir = sub {
+    mkpath($installsiteman1dir);
+    mkpath($installsiteman3dir);
+    push @install_dir, $installsiteman3dir;
+    push @install_dir, $installsiteman1dir;
+    print colored(['yellow'], "installsiteman1dir: ") . $installsiteman1dir . "\n";
+    print colored(['yellow'], "installsiteman3dir: ") . $installsiteman3dir . "\n";
+};
 
 # todo: add xz/lzma compression option
 my $move_pack = sub {
@@ -77,10 +75,18 @@ _CYDIA
 
 my $make_pack = sub { 
     my $pm = shift;
+    my $dir = ' ';
+
+    for(@dir){
+        if(-d $_){
+            $dir .= $_ . ' ';
+        }
+    }
+
     my $ar = <<"_DEB";
     cd $pm; tar -xvf data.tar.gz;
     rm data.tar.gz;
-    tar czf ../data.tar.gz $installsitelib $installbin;
+    tar czf ../data.tar.gz $dir;
     cd DEBIAN/;
     tar czf ../../control.tar.gz *;
     cd ../..;
@@ -104,9 +110,9 @@ my $check_pack = sub {
     $cpanm->{bin} = "$base/bin";
     $cpanm->{man} = "$base/man";
 
-    system("mv $cpanm->{lib}/* $installsitelib");
-    system("mv $cpanm->{bin}/* $installbin");
-    system("mv $cpanm->{man}/* $installman");
+    if(-d $cpanm->{lib}){ $mkpath_installsitelib->() and system("echo 'mkpath_installsitelib' && mv $cpanm->{lib}/* $installsitelib") }
+    if(-d $cpanm->{bin}){ $mkpath_installbin->() and system("mv $cpanm->{bin}/* $installbin") }
+    if(-d $cpanm->{man}){ $mkpath_installsitemandir and system("mv $cpanm->{man}/* $installman") }
     print "\n";
 
     for my $pack( @$p ){
@@ -149,10 +155,15 @@ my $check_pack = sub {
                         print colored(['yellow'], "skipping dir: ") . "$File::Find::dir/$_" . "\n";
                         open(my $fh,">>", "$ENV{DPP}/build/.remove") || die "cant open $!";
                         close $fh;
-                    }}}, ($installsitelib, $installbin ));
+                    }}}, @install_dir );
         #}}}, ($installsitelib, $installbin, $installman ));
 
             #create new data.pack using new packlist
+#########
+            #  open(my $test,"< $pack->{pkg}/.packlist");
+            #while(<$test>){ print $_ . "\n" }
+            #die;
+#########
             my $datapack = sub {
                 my $tar = system("tar cz -T $pack->{pkg}/.packlist -f $pack->{pkg}/data.tar.gz");
             }; $datapack->();
