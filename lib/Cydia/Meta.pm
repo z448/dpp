@@ -141,7 +141,7 @@ my $web = sub {
     close $fh;
     
     # update index.json
-    push $index->{body}, @{$m->{ div }};
+    push @{$index->{body}}, @{$m->{ div }};
     
     #uniq body
     my %body_seen = ( );
