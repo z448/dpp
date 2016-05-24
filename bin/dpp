@@ -11,34 +11,39 @@ use Config;
 use Getopt::Std;
 use Cwd 'abs_path';
 
-my %option = ();
+
 # -w create index.html
 # -h list of hosts
 # -c pass option to cpanm
 # -m perl::module
+
+my %option = ();
 getopts('hm:c:w', \%option);
 
 my $base = "$ENV{HOME}/.dpp/build";
 my $dpp = $base . '/cy';
 my $pm = $option{m} || " ";
 my $cpanm_option = $option{c} || " ";
-my $installsitelib = $Config{installsitelib};
-$installsitelib =~ s/^\///;
-mkpath("$dpp/$installsitelib");
 
-my $installbin = $Config{installbin};
-$installbin =~ s/^\///;
-mkpath("$dpp/$installbin");
+#=head1
+#my $installsitelib = $Config{installsitelib};
+#$installsitelib =~ s/^\///;
+#mkpath("$dpp/$installsitelib");
 
-my $cytar_lib = $installsitelib;
-$cytar_lib =~ s/(.*?)(\/.*)/$1/;
-mkpath("$dpp/$cytar_lib");
+#my $installbin = $Config{installbin};
+#$installbin =~ s/^\///;
+#mkpath("$dpp/$installbin");
+#
+#my $cytar_lib = $installsitelib;
+#$cytar_lib =~ s/(.*?)(\/.*)/$1/;
+#mkpath("$dpp/$cytar_lib");
+#=cut
 
-my $build = ". ~/.dpp/.env &&  cpanm -n -f $cpanm_option --reinstall -L $dpp $pm";
+my $build = ". ~/.dpp/.env && cpanm -n -f $cpanm_option --reinstall -L $dpp $pm";
 
 sub install {
-    if(defined $option{m}){
     # no option installs on local hosts
+    if(defined $option{m}){
         my $install = sub { system("$build") };
         return \$install->();
     } elsif(defined $option{h}){
@@ -57,7 +62,7 @@ sub install {
 }
 
 unless($option{m}){ system("perldoc $0")};
-say ${install()};
+say 'cpanm: ok' unless ${install()};
 system("cd $base && dbd $pm");
 
 =head1 NAME

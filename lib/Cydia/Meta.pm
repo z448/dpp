@@ -16,35 +16,9 @@ BEGIN {
     require Exporter;
     our $VERSION = 0.01;
     our @ISA = qw(Exporter);
-    our @EXPORT = qw( control meta graph web dep path );
+    our @EXPORT_OK = qw( control meta web );
 }
 
-
-#for( keys {grep( /Storable/, keys %Extensions)}){
-#print "$_"."\n";
-#}'
-
-### !!! finish orig; find right paths for each platform
-### perl -V + ExtUtils::MakeMaker to find out; 
-
-my $path = sub {
-    my $q = shift;
-    my $post = {
-    original    =>  [ "./usr/local/lib/perl5/site_perl", "./usr/local/lib/perl5/lib/5.14.4", "./usr/local/bin" ],
-    build       =>  [ "./usr/local/lib/perl5/lib", "./usr/local/lib/perl5/lib/perl5", "./usr/local/lib/perl5/bin" ],
-    }; 
-
-    my $pre = {
-    original    =>  [ "./usr/xxxxxxxxxxxerl5/site_perl", "./usr/xxxxxxxxxxperl5/lib/5.14.4" ],
-    build       =>  [ "./usr/xxxxxxxxxxperl5/lib", "./usr/xxxxxxxxxxxxxx5/lib/perl5" ],
-    }; 
-
-    return unless $q;
-    if( $q eq 'post' ){
-        return $post } 
-    elsif ( $q eq 'pre' ){ return $pre }
-
-};
 
 my $deps = sub {
     my $pm = shift;
@@ -88,31 +62,39 @@ my $deps = sub {
 
     for( @dist_dep ){
         unless( $_ eq 'perl' ){
-            #web($deb{control});
             $dep{control} = $dep{control} . 'lib' . lc "$_" . "-p5" . "\, ";
         } else { 
             next;
         }
     }
     $dep{control} = $dep{control} . "perl";
-    # (>= 5.14.4)";
     return \%dep;
 };
 
-
 my $meta = sub {
     my $module = shift;
-    #print '### $meta: $module is ' . $module;
     my $metacpan = 'https://metacpan.org/pod/';
     my $meta_url = 'http://api.metacpan.org/v0/module/'."$module".'?join=release';
+    my $meta_pod_url = 'http://api.metacpan.org/v0/pod/' . "$module" . '?content-type=text/plain';
     my $graph = 'https://widgets.stratopan.com/wheel?q=';
     my $meta_j = qx!curl -sL $meta_url!;
-#    print $meta_j;
     my $meta_p = decode_json( encode( 'utf8', $meta_j ) );
     my $m = $meta_p->{release}->{_source};
     my $stratopan = $graph.$m->{name};
     my $prefix = 'lib';
     my $assets = "$ENV{DPP}/assets/html";
+    my $deb_url = "deb/.stash/deb/" . $prefix . lc $m->{distribution} . '-p5' . '.deb';
+
+    my $arch = sub { 
+            my $arch;
+            open my $pipe, '-|', 'uname -m';
+            while(<$pipe>){
+                if(/iPhone/){
+                    $arch = 'iphoneos-arm';
+                } else { $arch = 'all' }
+            }
+            return $arch;
+    };
      
     my $remote = {
         cystash      => "$ENV{HOME}/.dpp/.stash",
@@ -128,9 +110,9 @@ my $meta = sub {
         install_path => $Config{installprivlib},
         module_name  => $meta_p->{module}[0]->{name},
         release_date => $meta_p->{date},
-        Architecture => 'all', #'iphoneos-arm', #$Config{archname}
+        Architecture => $arch->(),
         source_url   => $m->{download_url},
-        deps_graph   => $graph.$m->{name}, #Moose-2.1205
+        deps_graph   => $graph.$m->{name},
         pod          => $meta_p->{pod},
         prefix       => 'lib',
         Package      => $prefix . lc $m->{distribution} . '-p5',
@@ -141,67 +123,34 @@ my $meta = sub {
         meta_api_url => $meta_url,
         Depends      => $deps->($module),
         www          => 'load.sh/cydia/index.html',
-        div          => [ q|<div class="dpp"><a href="deb/package.deb"><i class="fa fa-download" aria-hidden="true"></i></a></div> |, qq|\n\t<div class="module">$module</div>|, qq|\t<div class="description">$m->{abstract}</br></div>| ],
+        div          => [ qq|<div class="dpp"><a href="$deb_url" target="_blank"><i class="fa fa-download" aria-hidden="true"></i> &nbsp;</a>|, qq|<a href="$stratopan" target="_blank"><i class="fa fa-asterisk" aria-hidden="true"></i>&nbsp;</a><a href="$meta_pod_url" target="_blank"><i class="fa fa-file" aria-hidden="true"></i></a></div>|, qq|<div class="module">$module</div>|, qq|<div class="description">$m->{abstract}</br></div>| ],
     };
     return $remote;
 };
 
 my $web = sub {
     my $pm = shift;
-    print '### $web: $pm is ' . $pm;
     my $m = $meta->( $pm );
-    my ($index, @pipe, @body) = ();
+    my ( @pipe, @body ) = ();
+    my $index = {};
 
-    # load header/body/footer
+    # load indexsjson
     open(my $fh,"<","$ENV{DPP}/assets/html/index.json") || die "$ENV{DPP}/assets/html/index.json $!";
     $index = <$fh>;
     $index = decode_json $index;
-    #print "########\n";
-    #print Dumper($index);
     close $fh;
-
-    # add current pm div into @body
-    #push(@{$index{body}}, @body);
-    push @body, $m->{ div };
-    #uniq 
+    
+    # update index.json
+    push $index->{body}, @{$m->{ div }};
+    
+    #uniq body
     my %body_seen = ( );
     @body = grep { ! $body_seen{$_} ++ } @body;
-    #$index{body} = encode_json \@body;
+    @{$index->{body}} = grep { ! $body_seen{$_} ++ } @{$index->{body}};
 
     open($fh,">","$ENV{DPP}/assets/html/index.json") || die "cant open index.json: $!";
-    #print $fh encode_json \%index;
+    print $fh encode_json $index;
     close $fh;
-
-    # append current module div to div.html
-    #{
-    #    open( my $fh, '>>', "$ENV{DPP}/assets/html/div.html") || die "cant open: $!";
-    #    say   $fh @{$m->{ div }};
-    #    close $fh;
-    #}
-
-    # load div.html to @body
-    #{
-    #    open(my $fh,"<","$ENV{DPP}/assets/html/div.html") || die "cant open: www.html";
-    #    while(<$fh>){
-    #        push @body, $_ if /module/ or /description/ or /dpp/;
-    #    };
-    #}
-    
-    # load http:// body to @body
-    #{
-    #    open my $pipe, '-|', "curl -# $m->{ www }"; 
-    #    while(<$pipe>){
-    #        push @body, $_ if /module/ or /description/;
-    #    }; 
-    #}
- 
-    #{ 
-    #open( my $fh, '>', "$ENV{DPP}/assets/html/index.html") || die "cant open: $!";
-    #print $fh $index->{ head };   
-    #say   $fh @{$index->{ body }};
-    #print $fh $index->{ foot };
-    #close $fh;
-    #}
 };
 
 sub web {
@@ -209,9 +158,10 @@ sub web {
     my $m = $web->($pm);
     return $m;
 }
-    
+
 sub meta {
-    my $pm = shift; my $m = $meta->($pm);
+    my $pm = shift; 
+    my $m = $meta->($pm);
 }
 
 sub control {
@@ -235,14 +185,4 @@ sub graph {
     my $deps_graph=qq|'/Applications/Google Chrome.app/Contents/MacOS/Google Chrome' --app="$gui->{deps_graph}" &2>1 /dev/null|;
     system("$deps_graph");
 }
-
-sub path {
-    my $stage = shift;
-    my $p = $path->( $stage );
-    return $p;
-}
-
-
-__DATA__
-
 
