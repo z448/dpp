@@ -11,11 +11,13 @@ use Config;
 use Getopt::Std;
 use Cwd 'abs_path';
 
-my %option = ();
+
 # -w create index.html
 # -h list of hosts
 # -c pass option to cpanm
 # -m perl::module
+
+my %option = ();
 getopts('hm:c:w', \%option);
 
 my $base = "$ENV{HOME}/.dpp/build";
@@ -38,10 +40,12 @@ my $build = ". ~/.dpp/.env &&  cpanm -n -f $cpanm_option --reinstall -L $dpp $pm
 
 sub install {
     if(defined $option{m}){
+    
     # no option installs on local hosts
         my $install = sub { system("$build") };
         return \$install->();
     } elsif(defined $option{h}){
+    
         # -h 'list of hosts' ;todo:split list of hosts into @hosts
         my @hosts = split(" ", $option{h});
         say "\nrunning:"; print colored( "$build\n", 'blue' ); say "on: @hosts ";
