@@ -15,7 +15,6 @@ use lib "$FindBin::Bin/../lib";
 use open qw< :encoding(UTF-8) >;
 use Cydia::Meta qw< control meta web >;
 
-my $cybase = "$ENV{HOME}/.dpp/build";
 my( $base )= qw< ./cy >;
 my @packlist_orig = ();
 
@@ -61,7 +60,7 @@ $cytar_lib =~ s/(.*?)(\/.*)/$1/;
 my $cytar_bin = $installbin;
 $cytar_bin =~ s/(.*?)(\/.*)/$1/;
 
-# todo: add xz/lzma compression option (1)
+# todo: add xz/lzma compression option
 my $move_pack = sub {
     my $repo = shift;
     my $cargo = <<"_CYDIA";
@@ -141,17 +140,18 @@ my $check_pack = sub {
             }}, $installsitelib_dir );
                 
             
-            print colored(['yellow'], "writing files to $pack->{pkg}/.packlist") . "$File::Find::dir/$_" . "\n";
+    #print colored(['yellow'], "writing files to $pack->{pkg}/.packlist") . "$File::Find::dir/$_" . "\n";
             find( sub{ unless(/perllocal\.pod/){
                         if( -f $_ ){ 
-                            open( my $findh, ">>", "$cybase/$pack->{pkg}/.packlist" ) || die "$!: cant open $pack->{pkg}/.packlist";
+                            open( my $findh, ">>", "$ENV{DPP}/build/$pack->{pkg}/.packlist" ) || die "$!: cant open $pack->{pkg}/.packlist";
                             print colored(['yellow'], "writing file: ") . "$File::Find::dir/$_" . "\n";
                             say $findh "$File::Find::dir/$_";
                         } else {
                         print colored(['yellow'], "skipping dir: ") . "$File::Find::dir/$_" . "\n";
-                        open(my $fh,">>", "$cybase/.remove") || die "cant open $!";
+                        open(my $fh,">>", "$ENV{DPP}/build/.remove") || die "cant open $!";
                         close $fh;
-                    }}}, ($installsitelib, $installbin, $installman ));
+                    }}}, ($installsitelib, $installbin ));
+        #}}}, ($installsitelib, $installbin, $installman ));
 
             #create new data.pack using new packlist
             my $datapack = sub {
@@ -166,15 +166,15 @@ my $check_pack = sub {
             }
 
             my $cleanup = sub {
-                open(my $fh, "<", "$cybase/$pack->{pkg}/.packlist");
+                open(my $fh, "<", "$ENV{DPP}/build/$pack->{pkg}/.packlist");
                 while(<$fh>){
                     unlink $_;
                 }; close $fh;
-                open($fh,"<", "$cybase/.remove") || die "cant open $!";
+                open($fh,"<", "$ENV{DPP}/build/.remove") || die "cant open $!";
                 while(<$fh>){
                     unlink $_;
                 }; close $fh;
-                unlink "$cybase/.remove";
+                unlink "$ENV{DPP}/build/.remove";
             }; $cleanup->();
     }
 };
@@ -252,7 +252,7 @@ my $make_html = sub {
 
 };  $make_html->();
 
-rmdir "$cybase/cy";
+rmdir "$ENV{DPP}/build/cy";
 
 __DATA__
 1. xz/lmza on telesphoero needs fix4 

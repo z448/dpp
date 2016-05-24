@@ -130,7 +130,6 @@ my $meta = sub {
 
 my $web = sub {
     my $pm = shift;
-    print '### $web: $pm is ' . $pm;
     my $m = $meta->( $pm );
     my ( @pipe, @body ) = ();
     my $index = {};
