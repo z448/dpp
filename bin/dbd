@@ -18,13 +18,12 @@ use Cydia::Meta qw< control meta web >;
 my( $base )= qw< ./cy >;
 my @packlist_orig = ();
 
-sub wanted {
-    if(/\.packlist/){
-        push @packlist_orig, "$File::Find::dir/$_";
-    } 
-}
-find(\&wanted, $base);
-
+find( sub {
+        if(/\.packlist/){
+            push @packlist_orig, "$File::Find::dir/$_", $base);
+        }
+};
+        
 print colored(['yellow'],"found packlists: ") . "\n";
 for(@packlist_orig){
     print $_ . "\n";
@@ -54,11 +53,11 @@ $installsiteman3dir =~ s/^\///;
 mkpath($installsiteman3dir);
 print colored(['yellow'], "installsiteman3dir: ") . $installsiteman3dir . "\n";
 
-my $cytar_lib = $installsitelib;
-$cytar_lib =~ s/(.*?)(\/.*)/$1/;
+my $dpp_tar_lib = $installsitelib;
+$dpp_tar_lib =~ s/(.*?)(\/.*)/$1/;
 
-my $cytar_bin = $installbin;
-$cytar_bin =~ s/(.*?)(\/.*)/$1/;
+my $dpp_tar_bin = $installbin;
+$dpp_tar_bin =~ s/(.*?)(\/.*)/$1/;
 
 # todo: add xz/lzma compression option
 my $move_pack = sub {
