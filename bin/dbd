@@ -113,8 +113,7 @@ my $check_pack = sub {
 
     for my $pack( @$p ){
             print "\n\n";
-            #print "\n\n" . colored(['black on_yellow'],"STARTING check_pack ") . "\n";
-
+         
             # -- list content of received packlist
             print colored(['yellow'],"packlist path: ") . $pack->{path} . "\n";
             print colored(['yellow'],"pkg: ") . $pack->{pkg} . "\n";
@@ -122,8 +121,6 @@ my $check_pack = sub {
             for(@{$pack->{packlist}}){ say $_ }
     
             my $make_path = mkpath("$pack->{pkg}/DEBIAN");
-            #my $make_path = system("mkdir -p $pack->{pkg}/DEBIAN");
-            #my $control = system("touch $pack->{pkg}/DEBIAN/control");
 
             my $fh = undef;
             my $fn = "$ENV{HOME}/.dpp/build/$pack->{pkg}/DEBIAN/control";
@@ -132,7 +129,6 @@ my $check_pack = sub {
             close $fh;
             print "\n" . colored(['green'],"created control file for: ") . $pack->{module} . "\n";
             say control($pack->{module});
-
 
             my $installsitelib_dir = $installsitelib;
             $installsitelib_dir =~ s/(.*?)(\/.*)/$1/;
@@ -180,10 +176,6 @@ my $check_pack = sub {
                 }; close $fh;
                 unlink "$cybase/.remove";
             }; $cleanup->();
-
-            #web
-            #web($pack->{module});
-            #print colored(['yellow'], "writing: ") . " <div> for $pack->{module} " . "\n";
     }
 };
 
@@ -193,7 +185,6 @@ my $list_pack = sub {
     my( @meta )= ();
 
     print "\n\n";
-    #print "\n\n" . colored(['black on_yellow'],"STARTING list_pack ") . "\n";
     print colored(['yellow'],"received packlists: ") . "\n";
     print $_ . "\n" for (@$p);
 
