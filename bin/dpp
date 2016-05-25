@@ -25,20 +25,6 @@ my $dpp = $base . '/cy';
 my $pm = $option{m} || " ";
 my $cpanm_option = $option{c} || " ";
 
-#=head1
-#my $installsitelib = $Config{installsitelib};
-#$installsitelib =~ s/^\///;
-#mkpath("$dpp/$installsitelib");
-
-#my $installbin = $Config{installbin};
-#$installbin =~ s/^\///;
-#mkpath("$dpp/$installbin");
-#
-#my $cytar_lib = $installsitelib;
-#$cytar_lib =~ s/(.*?)(\/.*)/$1/;
-#mkpath("$dpp/$cytar_lib");
-#=cut
-
 my $build = ". ~/.dpp/.env && cpanm -n -f $cpanm_option --reinstall -L $dpp $pm";
 
 sub install {
@@ -62,7 +48,7 @@ sub install {
 }
 
 unless($option{m}){ system("perldoc $0")};
-say 'cpanm: ok' unless ${install()};
+print 'cpanm build: ' . colored(['green'],'ok') . "\n" unless ${install()};
 system("cd $base && dbd $pm");
 
 =head1 NAME
