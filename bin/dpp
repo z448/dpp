@@ -4,7 +4,6 @@ use 5.010;
 use warnings;
 use strict;
 
-use Net::OpenSSH;
 use Term::ANSIColor;
 use File::Path;
 use Config;
