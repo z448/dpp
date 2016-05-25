@@ -151,17 +151,16 @@ my $check_pack = sub {
             my $datapack = sub {
                 my $tar = system("tar cz -T $pack->{pkg}/.packlist -f $pack->{pkg}/data.tar.gz");
             }; $datapack->();
-            print colored(['yellow'], "using packlist: ") . "$pack->{pkg}/.packlist for data.tar.gz" . "\n";
 
             #call make_pack, build deb
             unless( $make_pack->($pack->{pkg}) ){
-                print colored(['green'], "$pack->{pkg} : ok") . "\n";
-                web($pack->{module}) and print colored(['green'],"www for $pack->{module}: ok") . "\n";
+                print "$pack->{pkg}: " . colored(['green'], "ok") . "\n";
+                web($pack->{module}) and print "index.json: $pack->{module}j" . colored(['green'], "ok") . "\n";
             }
 
             my $cleanup = sub {
                 system("rm -rf $ENV{DPP}/build/$pack->{pkg}");
-            };  print colored(['green'], "cleanup: ok") . "\n" unless $cleanup->();
+            };  print 'cleanup: ' . colored(['green'], "ok") . "\n" unless $cleanup->();
     }
 };
 
