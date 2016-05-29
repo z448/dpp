@@ -27,6 +27,7 @@ my $deps = sub {
     my $dep_dis = sub {
         my $m = shift;
         my $j = qx|curl -skL http://api.metacpan.org/v0/module/$m?join=release|;
+        #my $j = qx|curl -skL http://api.metacpan.org/v0/module/$m?join=release|;
         my $p  = decode_json( encode( 'utf8', $j )); 
         my $d = $p->{release}->{_source}->{distribution};
         return $d;
@@ -35,6 +36,7 @@ my $deps = sub {
     my $dep_pm = sub {
         my $m = shift;
         my $j = qx|curl -skL http://api.metacpan.org/v0/module/$m?join=release|;
+        #my $j = qx|curl -skL http://api.metacpan.org/v0/module/$m?join=release|;
         my $p  = decode_json( encode( 'utf8', $j )); 
         my @d;
         for( keys %{$p->{release}->{_source}->{metadata}->{prereqs}->{runtime}->{requires}} ){
@@ -73,7 +75,7 @@ my $deps = sub {
 
 my $meta = sub {
     my $module = shift;
-    my $metacpan = 'https://metacpan.org/pod/';
+    #my $metacpan = 'https://metacpan.org/pod/';
     my $meta_url = 'http://api.metacpan.org/v0/module/'."$module".'?join=release';
     my $meta_pod_url = 'http://api.metacpan.org/v0/pod/' . "$module" . '?content-type=text/plain';
     my $graph = 'https://widgets.stratopan.com/wheel?q=';
@@ -113,7 +115,7 @@ my $meta = sub {
         Architecture => $arch->(),
         source_url   => $m->{download_url},
         deps_graph   => $graph.$m->{name},
-        pod          => $meta_p->{pod},
+        #   pod          => $meta_p->{pod},
         prefix       => 'lib',
         Package      => $prefix . lc $m->{distribution} . '-p5',
         pkg          => $prefix . lc $m->{distribution} . '-p5',

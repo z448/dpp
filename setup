@@ -6,12 +6,12 @@
 #export DPP_BUILD=$DPP/build
 #export CYBIN=$DPP/.bin
 #export CYSTASH=$DPP/.stash
-    export CURL_CA_BUNDLE="/usr/local/lib/perl5/site_perl/5.14.4/Mozilla/CA/cacert.pem"
+    #export CURL_CA_BUNDLE="/usr/local/lib/perl5/site_perl/5.14.4/Mozilla/CA/cacert.pem"
 #export CYGIT=$PWD
 
-    mkdir -p "$DPP/build";
-    mkdir -p "$DPP/.stash/deb";
-    mkdir -p "$DPP/.stash/tools";
+    #mkdir -p "$DPP/build";
+    #mkdir -p "$DPP/.stash/deb";
+    #mkdir -p "$DPP/.stash/tools";
 
     bind '"\C-p":"cd $DPP/build && clear && pwd\n"';
     bind '"\C-g":"cd ~/.dpp/.stash/deb && clear && pwd;\n"';
@@ -31,11 +31,11 @@
 
 #touch "$DPP/build/DEBIAN/control";
 
-    ln -sf $PWD/assets ~/.dpp/assets
-    ln -sf $PWD/bin ~/.dpp/.bin
-    ln -sf $PWD/lib ~/.dpp/.lib
-    ln -sf $PWD/local ~/.dpp/.local
-    ln -sf $PWD/bin/.env ~/.dpp/.env
+    #ln -sf $PWD/assets ~/.dpp/assets
+    #ln -sf $PWD/bin ~/.dpp/.bin
+    #ln -sf $PWD/lib ~/.dpp/.lib
+    #ln -sf $PWD/local ~/.dpp/.local
+    #ln -sf $PWD/bin/.env ~/.dpp/.env
 
     export PERL5LIB=$PWD/local/lib/perl5:$PWD/lib:$DPP/.stash/tools/usr/share/perl5:$PERL5LIB
     echo -e "\$PERL5LIB is: $PERL5LIB"

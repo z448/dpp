@@ -16,13 +16,15 @@ use Cwd 'abs_path';
 # -c pass option to cpanm
 # -m perl::module
 
-my %option = ();
-getopts('hm:c:w', \%option);
-
+my %option = (); getopts('hm:c:w', \%option);
+my @init_dirs = (  "$ENV{HOME}/.dpp/build", "$ENV{HOME}/.dpp/.stash/deb", "$ENV{HOME}/.dpp/.stash/tools" );
 my $base = "$ENV{HOME}/.dpp/build";
 my $dpp = $base . '/cy';
 my $pm = $option{m} || " ";
 my $cpanm_option = $option{c} || " ";
+
+# create ~/.dpp/... if they dont exist
+mkpath( @init_dirs, 1, 0755 );
 
 my $build = ". ~/.dpp/.env && cpanm -n -f $cpanm_option --reinstall -L $dpp $pm";
 
