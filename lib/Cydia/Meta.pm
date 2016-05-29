@@ -6,19 +6,37 @@ use strict;
 
 use JSON;
 use File::Copy;
+use File::Path;
 use Encode;
 use Data::Dumper;
 use Config;
 use Config::Extensions qw( %Extensions );
+use Cwd qw< abs_path >;
 use open qw<:encoding(UTF-8)>;
 
 BEGIN {
     require Exporter;
     our $VERSION = 0.01;
     our @ISA = qw(Exporter);
-    our @EXPORT_OK = qw( control meta web );
+    our @EXPORT_OK = qw( control meta web init);
 }
 
+
+my $dpp = "$ENV{HOME}/.dpp";
+my $dir = {
+    build   =>  $dpp . '/' . 'build',
+    stash   =>  $dpp . '/' . '.stash',
+    deb     =>  $dpp . '/.stash/deb',
+};
+
+# -  to init dpp direcories
+my $init = sub {
+    mkpath $dpp; 
+    chmod( 0755, $dpp);
+    for(keys %$dir){ mkpath $dir->{$_} }
+    return $dir;
+};
+# ---
 
 my $deps = sub {
     my $pm = shift;
@@ -27,7 +45,6 @@ my $deps = sub {
     my $dep_dis = sub {
         my $m = shift;
         my $j = qx|curl -skL http://api.metacpan.org/v0/module/$m?join=release|;
-        #my $j = qx|curl -skL http://api.metacpan.org/v0/module/$m?join=release|;
         my $p  = decode_json( encode( 'utf8', $j )); 
         my $d = $p->{release}->{_source}->{distribution};
         return $d;
@@ -36,7 +53,6 @@ my $deps = sub {
     my $dep_pm = sub {
         my $m = shift;
         my $j = qx|curl -skL http://api.metacpan.org/v0/module/$m?join=release|;
-        #my $j = qx|curl -skL http://api.metacpan.org/v0/module/$m?join=release|;
         my $p  = decode_json( encode( 'utf8', $j )); 
         my @d;
         for( keys %{$p->{release}->{_source}->{metadata}->{prereqs}->{runtime}->{requires}} ){
@@ -75,7 +91,7 @@ my $deps = sub {
 
 my $meta = sub {
     my $module = shift;
-    #my $metacpan = 'https://metacpan.org/pod/';
+    my $metacpan = 'https://metacpan.org/pod/';
     my $meta_url = 'http://api.metacpan.org/v0/module/'."$module".'?join=release';
     my $meta_pod_url = 'http://api.metacpan.org/v0/pod/' . "$module" . '?content-type=text/plain';
     my $graph = 'https://widgets.stratopan.com/wheel?q=';
@@ -97,7 +113,8 @@ my $meta = sub {
             }
             return $arch;
     };
-     
+
+
     my $remote = {
         cystash      => "$ENV{HOME}/.dpp/.stash",
         Name         => $m->{distribution},
@@ -188,3 +205,6 @@ sub graph {
     system("$deps_graph");
 }
 
+sub init {
+    my $init_status = $init->();
+}

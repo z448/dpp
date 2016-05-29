@@ -8,6 +8,7 @@ use Term::ANSIColor;
 use File::Path;
 use Config;
 use Getopt::Std;
+use Cydia::Meta qw< init >;
 use Cwd 'abs_path';
 
 
@@ -17,14 +18,14 @@ use Cwd 'abs_path';
 # -m perl::module
 
 my %option = (); getopts('hm:c:w', \%option);
-my @init_dirs = (  "$ENV{HOME}/.dpp/build", "$ENV{HOME}/.dpp/.stash/deb", "$ENV{HOME}/.dpp/.stash/tools" );
-my $base = "$ENV{HOME}/.dpp/build";
-my $dpp = $base . '/cy';
+#my @init_dirs = (  "$ENV{HOME}/.dpp/build", "$ENV{HOME}/.dpp/.stash/deb", "$ENV{HOME}/.dpp/.stash/tools" );
+#my $base = "$ENV{HOME}/.dpp/build";
+my %dir = %{init()};
 my $pm = $option{m} || " ";
 my $cpanm_option = $option{c} || " ";
 
 # create ~/.dpp/... if they dont exist
-mkpath( @init_dirs, 1, 0755 );
+mkpath( @init_dirs, 1, 0777 );
 
 my $build = ". ~/.dpp/.env && cpanm -n -f $cpanm_option --reinstall -L $dpp $pm";
 
@@ -50,7 +51,7 @@ sub install {
 
 unless($option{m}){ system("perldoc $0")};
 print 'cpanm build: ' . colored(['green'],'ok') . "\n" unless ${install()};
-system("cd $base && dbd $pm");
+system("cd $dir{build} && dbd $pm");
 
 =head1 NAME
 
