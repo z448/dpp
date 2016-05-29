@@ -61,11 +61,10 @@ my $mkpath_installsitemandir = sub {
 my $move_pack = sub {
     my $repo = shift;
     my $cargo = <<"_CYDIA";
-    cat .www >> ../.stash/cydia/.www
     mv *.deb ~/.dpp/.stash/cydia/deb
     cd $ENV{CYSTASH}/cydia
     cysp
-    tar -zcvf cydia.tgz Packages.gz deb .www
+    tar -zcvf cydia.tgz Packages.gz deb
     scp cydia.tgz $repo:~/www/cydia
 _CYDIA
     my $transfer = sub { system("$cargo") };
@@ -144,8 +143,8 @@ my $check_pack = sub {
                             say $findh "$File::Find::dir/$_";
                         } else {
                         print "- " . "$File::Find::dir/$_" . "\n";
-                        open(my $fh,">>", "$ENV{DPP}/build/.remove") || die "cant open $!";
-                        close $fh;
+                        #open(my $fh,">>", "$ENV{DPP}/build/.remove") || die "cant open $!";
+                        #close $fh;
                     }}}, @install_dir );
 
             my $datapack = sub {

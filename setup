@@ -1,20 +1,24 @@
-export DPP=~/.dpp
-export DPP_BUILD=$DPP/build
-export CYBIN=$DPP/.bin
-export CYSTASH=$DPP/.stash
-export CURL_CA_BUNDLE="/usr/local/lib/perl5/site_perl/5.14.4/Mozilla/CA/cacert.pem"
-export CYGIT=$PWD
-alias build="cd $DPP/build"
-alias pm2="cd $PWD";
+#if [[ -z "$DPP" ]];then 
+#    echo -e "\e[33m::ok\e[0m\t\$DPP is in your env"
+#else
 
-bind '"\C-p":"cd $DPP_BUILD && clear && pwd\n"';
+    export DPP=~/.dpp
+#export DPP_BUILD=$DPP/build
+#export CYBIN=$DPP/.bin
+#export CYSTASH=$DPP/.stash
+    export CURL_CA_BUNDLE="/usr/local/lib/perl5/site_perl/5.14.4/Mozilla/CA/cacert.pem"
+#export CYGIT=$PWD
 
-bind '"\C-g":"cd ~/.dpp/.stash/deb && clear && pwd;\n"';
+    mkdir -p "$DPP/build";
+    mkdir -p "$DPP/.stash/deb";
+    mkdir -p "$DPP/.stash/tools";
 
+    bind '"\C-p":"cd $DPP/build && clear && pwd\n"';
+    bind '"\C-g":"cd ~/.dpp/.stash/deb && clear && pwd;\n"';
 
-alias stash="cd $DPP/.stash"
-alias cybin="cd $CYSTASH"
-alias ckpk='apt-cache search "\-p5" && dpkg -l | grep lib | grep "\-p5"'
+    #alias stash="cd $DPP/.stash"
+    #alias cybin="cd $CYSTASH"
+    #alias ckpk='apt-cache search "\-p5" && dpkg -l | grep lib | grep "\-p5"'
 
 #check if file is a perl file
 # perl -E 'push @l,qx|find /usr/bin|;for( @l ){if(/dpkg\-/){my $file=qx|file $_|; say "$_" if $file =~ /Perl/;} }';
@@ -22,47 +26,27 @@ alias ckpk='apt-cache search "\-p5" && dpkg -l | grep lib | grep "\-p5"'
 # unpack tools.tgz into $CYSTASH
 
 
-echo -e "\e[33m::ok \e[0m\tchecking dependencies"
+    #echo -e "\e[33m::ok \e[0m\tchecking dependencies"
 #carton install
 
-mkdir -p "$DPP/build/DEBIAN";
-mkdir -p "$CYSTASH/deb";
-mkdir -p "$CYSTASH/tools";
-touch "$DPP/build/DEBIAN/control";
+#touch "$DPP/build/DEBIAN/control";
 
-if [ ! -f "$DPP_BUILD/.www" ];then
-    echo '{}' > $DPP_BUILD/.www
-fi
+    ln -sf $PWD/assets ~/.dpp/assets
+    ln -sf $PWD/bin ~/.dpp/.bin
+    ln -sf $PWD/lib ~/.dpp/.lib
+    ln -sf $PWD/local ~/.dpp/.local
+    ln -sf $PWD/bin/.env ~/.dpp/.env
 
-
-#ln -sf ~/.dpp $PWD/.dpp
-ln -sf $PWD/assets ~/.dpp/assets
-ln -sf $PWD/bin ~/.dpp/.bin
-ln -sf $PWD/lib ~/.dpp/.lib
-ln -sf $PWD/local ~/.dpp/.local
-ln -sf $PWD/bin/.env ~/.dpp/.env
-
-if [[ -z "$DPP" ]];then 
-    echo -e "\e[33m::ok\e[0m\t\$DPP is in your env"
-else
     export PERL5LIB=$PWD/local/lib/perl5:$PWD/lib:$DPP/.stash/tools/usr/share/perl5:$PERL5LIB
-fi
-
-echo -e "\e[33m::ok\e[0m\t\$PERL5LIB is: $PERL5LIB"
+    echo -e "\$PERL5LIB is: $PERL5LIB"
 
 #curl -kL https://github.com/z448/alios.git > bin/cpanm && chmod +x bin/cpanm
 
-#PERL5LIB=$PWD/local/lib/perl5:$PWD/lib:$PERL5LIB
-#PERL_LOCAL_LIB_ROOT="/var/mobile/perl5:/var/mobile/perl5"
-#PERL_MB_OPT="--install_base "$DPP_BUILD/usr/local/lib/perl5"
-#PERL_MM_OPT="INSTALL_BASE="$DPP_BUILD/usr/local/lib/perl5"
 
-export PATH=$PWD/local/bin:$PWD/bin:$PATH
-#export PATH=/usr/local/bin:$PWD/bin:$PATH
+    export PATH=$PWD/local/bin:$PWD/bin:$PATH
 
-export PS_PATH=/usr/bin/ps
+    export PS_PATH=/usr/bin/ps
 
 
 #cd $CYSTASH && tar -xvf $CYGIT/bin/tools/tools.tgz && cd $DPP_BUILD
 #export PATH=$CYBIN:$DPP/.stash/tools:$PATH
-
