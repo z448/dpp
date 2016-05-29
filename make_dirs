@@ -1,0 +1,14 @@
+#!/usr/bin/env perl
+#
+use warnings;
+use strict;
+
+use File::Path qw< mkpath >;
+
+my @init_dirs = (  "$ENV{HOME}/.dpp/build", "$ENV{HOME}/.dpp/.stash/deb", "$ENV{HOME}/.dpp/.stash/tools" );
+
+mkpath @init_dirs;
+     
+# symlink perl
+# http://perldoc.perl.org/functions/symlink.html
+
