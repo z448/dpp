@@ -27,16 +27,24 @@ my $dir = {
     build   =>  $dpp . '/' . 'build',
     stash   =>  $dpp . '/' . '.stash',
     deb     =>  $dpp . '/.stash/deb',
+    cpanm   =>  $dpp . '/' . 'build' . '/' . '.cpanm',
 };
 
 # -  to init dpp direcories
 my $init = sub {
-    mkpath $dpp; 
-    chmod( 0755, $dpp);
-    for(keys %$dir){ mkpath $dir->{$_} }
-    return $dir;
-};
-# ---
+    my $get = shift;
+    
+    # return dir PATH if param else create dirs and return \%dir
+    if($get){
+        return $dir->{$get};
+    } else {
+        mkpath $dpp;
+        chmod( 0755, $dpp);
+        for(keys %$dir){ mkpath $dir->{$_} }
+        return $dir;
+    }
+}; $init->();
+# --
 
 my $deps = sub {
     my $pm = shift;
@@ -206,5 +214,6 @@ sub graph {
 }
 
 sub init {
-    my $init_status = $init->();
+    my $get = shift;
+    my $init_status = $init->($get);
 }

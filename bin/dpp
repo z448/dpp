@@ -20,19 +20,22 @@ use Cwd 'abs_path';
 my %option = (); getopts('hm:c:w', \%option);
 #my @init_dirs = (  "$ENV{HOME}/.dpp/build", "$ENV{HOME}/.dpp/.stash/deb", "$ENV{HOME}/.dpp/.stash/tools" );
 #my $base = "$ENV{HOME}/.dpp/build";
+
 my %dir = %{init()};
 my $pm = $option{m} || " ";
 my $cpanm_option = $option{c} || " ";
 
 # create ~/.dpp/... if they dont exist
-mkpath( @init_dirs, 1, 0777 );
+#mkpath( @init_dirs, 1, 0777 );
 
-my $build = ". ~/.dpp/.env && cpanm -n -f $cpanm_option --reinstall -L $dpp $pm";
+my $build = "cpanm -n -f $cpanm_option --reinstall -L $dir{cpanm} $pm";
+#my $build = ". ~/.dpp/.env && cpanm -n -f $cpanm_option --reinstall -L $dir{build} $pm";
 
 sub install {
     # no option installs on local hosts
     if(defined $option{m}){
         my $install = sub { system("$build") };
+        print 'Starting build in ' . $dir{build} . "\n";
         return \$install->();
     } elsif(defined $option{h}){
         # -h 'list of hosts' ;todo:split list of hosts into @hosts
@@ -51,7 +54,8 @@ sub install {
 
 unless($option{m}){ system("perldoc $0")};
 print 'cpanm build: ' . colored(['green'],'ok') . "\n" unless ${install()};
-system("cd $dir{build} && dbd $pm");
+
+system("cd $dir{cpanm} && dbd");
 
 =head1 NAME
 

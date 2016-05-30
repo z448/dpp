@@ -2,7 +2,7 @@
 #    echo -e "\e[33m::ok\e[0m\t\$DPP is in your env"
 #else
 
-    export DPP=~/.dpp
+#    export DPP=~/.dpp
 #export DPP_BUILD=$DPP/build
 #export CYBIN=$DPP/.bin
 #export CYSTASH=$DPP/.stash
