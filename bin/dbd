@@ -16,7 +16,6 @@ use open qw< :encoding(UTF-8) >;
 use Cydia::Meta qw< control meta web init >;
 
 my $base = init('cpanm');
-#print $base . "\n" and die;
 my @packlist_orig = ();
  
 # --define dir paths
@@ -139,10 +138,9 @@ my $check_pack = sub {
                         unlink($pack->{path});
             }}, $installsitelib_dir );
                 
-            my $cpanm_build = init('cpanm');
             find( sub{ unless(/perllocal\.pod/){
                         if( -f $_ ){ 
-                            open( my $findh, ">>", "$cpanm_build/$pack->{pkg}/.packlist" ) || die "cant open $pack->{pkg}/.packlist: $!";
+                            open( my $findh, ">>", "$base/$pack->{pkg}/.packlist" ) || die "cant open $pack->{pkg}/.packlist: $!";
                             print '+ ' . "$File::Find::dir/$_" . "\n";
                             say $findh "$File::Find::dir/$_";
                         } else {
@@ -162,7 +160,8 @@ my $check_pack = sub {
             }
 
             my $cleanup = sub {
-                system("rm -rf init('dpp')/build/$pack->{pkg}");
+                my $dpp_dir = init('dpp');
+                system("rm -rf  $base/$pack->{pkg}");
             };  print 'cleanup: ' . colored(['green'], "ok") . "\n" unless $cleanup->();
     }
 };
@@ -233,7 +232,10 @@ my $make_html = sub {
 
 };  print "index.html: " . colored(['green'], 'ok') unless $make_html->();
 
-rmdir init('cpanm');
+my $cleanup = sub {
+    my $cleanup_dir = shift;
+    rmdir $cleanup_dir;
+}; print "cleanup: " . colored(['green'], 'ok') unless $cleanup->($base);
 
 __DATA__
 1. xz/lmza on telesphoero needs fix4 

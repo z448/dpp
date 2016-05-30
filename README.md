@@ -1,5 +1,8 @@
-work in progress
+##UPDATE: 
 
+**Mon May 30 21:46:25 CEST 2016:**
+- release stable: makes .deb packages, generates index.html
+    
 # NAME
 
 - dpp

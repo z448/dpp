@@ -46,8 +46,12 @@ my $init = sub {
 
         #symlink ~/.dpp/assets/html/index.json --> index.json
         my $link = init('assets_html') . "/index.json";
-        my $file = abs_path($0); $file =~ s/(.*)\/index\.json/$1/;
+        my $file = abs_path($0);
+
+        print '## debug --> ' . $file . "\n";
+        $file =~ s/(.*)\/bin\/dpp/$1/;
         $file = $file . "/assets/html/index.json";
+        #print $file . "\n" and die;
         symlink $file, $link;
         return $dir;
     }
