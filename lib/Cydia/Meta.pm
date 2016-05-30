@@ -24,10 +24,12 @@ BEGIN {
 
 my $dpp = "$ENV{HOME}/.dpp";
 my $dir = {
-    build   =>  $dpp . '/' . 'build',
-    stash   =>  $dpp . '/' . '.stash',
-    deb     =>  $dpp . '/.stash/deb',
-    cpanm   =>  $dpp . '/' . 'build' . '/' . '.cpanm',
+    dpp             =>  $dpp,
+    assets_html     =>  $dpp . '/' . 'assets' . '/' . 'html',
+    build           =>  $dpp . '/' . 'build',
+    stash           =>  $dpp . '/' . '.stash',
+    deb             =>  $dpp . '/.stash/deb',
+    cpanm           =>  $dpp . '/' . 'build' . '/' . '.cpanm',
 };
 
 # -  to init dpp direcories
@@ -41,9 +43,16 @@ my $init = sub {
         mkpath $dpp;
         chmod( 0755, $dpp);
         for(keys %$dir){ mkpath $dir->{$_} }
+
+        #symlink ~/.dpp/assets/html/index.json --> index.json
+        my $link = init('assets_html') . "/index.json";
+        my $file = abs_path($0); $file =~ s/(.*)\/index\.json/$1/;
+        $file = $file . "/assets/html/index.json";
+        symlink $file, $link;
         return $dir;
     }
-}; $init->();
+};
+# $init->();
 # --
 
 my $deps = sub {

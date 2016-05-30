@@ -16,6 +16,7 @@ use open qw< :encoding(UTF-8) >;
 use Cydia::Meta qw< control meta web init >;
 
 my $base = init('cpanm');
+#print $base . "\n" and die;
 my @packlist_orig = ();
  
 # --define dir paths
@@ -60,9 +61,10 @@ my $mkpath_installsitemandir = sub {
 
 my $move_pack = sub {
     my $repo = shift;
+    my $stash = init('stash');
     my $cargo = <<"_CYDIA";
     mv *.deb ~/.dpp/.stash/cydia/deb
-    cd $ENV{CYSTASH}/cydia
+    cd $stash/cydia
     cysp
     tar -zcvf cydia.tgz Packages.gz deb
     scp cydia.tgz $repo:~/www/cydia
@@ -119,7 +121,8 @@ my $check_pack = sub {
             my $make_path = mkpath("$pack->{pkg}/DEBIAN");
 
             my $fh = undef;
-            my $fn = "$ENV{HOME}/.dpp/build/$pack->{pkg}/DEBIAN/control";
+            my $fn = init('cpanm') . "/$pack->{pkg}/DEBIAN/control";
+            #my $fn = "$ENV{HOME}/.dpp/build/$pack->{pkg}/DEBIAN/control";
             open( $fh, ">", $fn ) || die "cant open $fn";
             print $fh control("$pack->{module}") . "\n";
             close $fh;
@@ -136,14 +139,15 @@ my $check_pack = sub {
                         unlink($pack->{path});
             }}, $installsitelib_dir );
                 
+            my $cpanm_build = init('cpanm');
             find( sub{ unless(/perllocal\.pod/){
                         if( -f $_ ){ 
-                            open( my $findh, ">>", "$ENV{DPP}/build/$pack->{pkg}/.packlist" ) || die "cant open $pack->{pkg}/.packlist: $!";
+                            open( my $findh, ">>", "$cpanm_build/$pack->{pkg}/.packlist" ) || die "cant open $pack->{pkg}/.packlist: $!";
                             print '+ ' . "$File::Find::dir/$_" . "\n";
                             say $findh "$File::Find::dir/$_";
                         } else {
                         print "- " . "$File::Find::dir/$_" . "\n";
-                        #open(my $fh,">>", "$ENV{DPP}/build/.remove") || die "cant open $!";
+                        #open(my $fh,">>", init('dpp') . "/build/.remove") || die "cant open $!";
                         #close $fh;
                     }}}, @install_dir );
 
@@ -158,7 +162,7 @@ my $check_pack = sub {
             }
 
             my $cleanup = sub {
-                system("rm -rf $ENV{DPP}/build/$pack->{pkg}");
+                system("rm -rf init('dpp')/build/$pack->{pkg}");
             };  print 'cleanup: ' . colored(['green'], "ok") . "\n" unless $cleanup->();
     }
 };
@@ -185,9 +189,11 @@ my $list_pack = sub {
             chomp;
             #content(file paths) of current packlist
             my $home = qr/$ENV{HOME}/;
-            if( /\/cy\// ){
+            #if( /\/cy\// ){
+            if( /\/build\/\.cpanm\// ){
                 if(/$home/){
-                    s/(.*?)(\/cy\/)(.*)/$3/;
+                    s/(.*?)(\/\.cpanm\/)(.*)/$3/;
+                    #s/(.*?)(\/cy\/)(.*)/$3/;
                     push @pack, $_;
                 }
             } 
@@ -211,8 +217,8 @@ my $list_pack = sub {
 $list_pack->(\@packlist_orig);
 
 my $make_html = sub {
-    my $json_file = "$ENV{DPP}/assets/html/index.json";
-    my $html_file= "$ENV{DPP}/assets/html/index.html";
+    my $json_file = init('assets_html') . "/index.json";
+    my $html_file= init('assets_html') . "/index.html";
 
     open(my $fh,"<",$json_file) || die "cant open $json_file: $!";
     my $index_json = <$fh>;
@@ -227,7 +233,7 @@ my $make_html = sub {
 
 };  print "index.html: " . colored(['green'], 'ok') unless $make_html->();
 
-rmdir "$ENV{DPP}/build/cy";
+rmdir init('cpanm');
 
 __DATA__
 1. xz/lmza on telesphoero needs fix4 
