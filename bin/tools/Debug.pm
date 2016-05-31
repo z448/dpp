@@ -23,6 +23,12 @@ BEGIN {
 }
 
 
+my %control = (
+    Maintainer   => 'name (nick) <email>',
+);
+
+=head 
+
 my $control = {
     Name         => '$m->{distribution}',
     Version      => '$m->{version}',
@@ -36,11 +42,13 @@ my $control = {
     Depends      => '$deps->($module)',
 };
 
+=cut 
+
 sub control_json {
     my @control = ();
-    push @control, $control;
+    #push @control, $control;
     #return $control_p5;
 
-    my $control_json = encode_json \@control;
+    my $control_json = encode_json {%control};
     return $control_json;
 }

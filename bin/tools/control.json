@@ -1,0 +1,1 @@
+{"Maintainer":"name (nick) <email>","Author":"$m->{author}","Name":"$m->{distribution}","Description":"$m->{abstract}","Version":"$m->{version}","Section":"Perl","Package":"$prefix . lc $m->{distribution} . \"-p5\"","Architecture":"$arch->()","Homepage":"$metacpan . $meta_p->{module}[0]->{name}","Depends":"$deps->($module)"}
