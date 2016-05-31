@@ -32,13 +32,6 @@ my $dir = {
     deb             =>  $dpp . '/.stash/deb',
     cpanm           =>  $dpp . '/' . 'build' . '/' . '.cpanm',
 };
-
-my $maintainer = sub {
-    my $maintainer_file = init('assets') . '/' .  'maintainer.json';
-    open(my $fh, "<", $maintainer_file) || die "cant open $maintainer_file: $!"; my $maintainer = <$fh>;
-    return $maintainer;
-};
-
 # -  to init dpp direcories
 my $init = sub {
     my $get = shift;
@@ -239,6 +232,12 @@ sub init {
 }
 
 sub maintainer {
+    my $maintainer = sub {
+        my $maintainer_file = init('assets') . '/' .  'maintainer.json';
+        open(my $fh, "<", $maintainer_file) || die "cant open $maintainer_file: $!"; my $maintainer = <$fh>;
+        return $maintainer;
+    };
+
     my $m = $maintainer->();
     return $m;
 }
