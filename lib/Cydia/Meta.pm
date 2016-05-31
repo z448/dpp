@@ -18,7 +18,7 @@ BEGIN {
     require Exporter;
     our $VERSION = 0.01;
     our @ISA = qw(Exporter);
-    our @EXPORT_OK = qw( control meta web init);
+    our @EXPORT_OK = qw( control meta web init maintainer );
 }
 
 
@@ -30,6 +30,11 @@ my $dir = {
     stash           =>  $dpp . '/' . '.stash',
     deb             =>  $dpp . '/.stash/deb',
     cpanm           =>  $dpp . '/' . 'build' . '/' . '.cpanm',
+};
+
+my $maintainer = sub {
+    open(my $fh, "<", 'maintainer.json' ) || die "cant open maintainer.json: $!"; my $maintainer = <$fh>;
+    return $maintainer;
 };
 
 # -  to init dpp direcories
@@ -230,3 +235,9 @@ sub init {
     my $get = shift;
     my $init_status = $init->($get);
 }
+
+sub maintainer {
+    my $m = $maintainer->();
+    print $m and die;
+}
+
