@@ -233,9 +233,12 @@ sub init {
 
 sub maintainer {
     my $maintainer = sub {
+        local $/;
         my $maintainer_file = init('assets') . '/' .  'maintainer.json';
-        open(my $fh, "<", $maintainer_file) || die "cant open $maintainer_file: $!"; my $maintainer = <$fh>;
-        return $maintainer;
+        open(my $fh, "<", $maintainer_file) || die "cant open $maintainer_file: $!"; 
+            my $maintainer = <$fh>;
+            $maintainer = decode_json $maintainer;
+            return $maintainer;
     };
 
     my $m = $maintainer->();
