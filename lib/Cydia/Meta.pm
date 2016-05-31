@@ -25,6 +25,7 @@ BEGIN {
 my $dpp = "$ENV{HOME}/.dpp";
 my $dir = {
     dpp             =>  $dpp,
+    assets          =>  $dpp . '/' . 'assets',
     assets_html     =>  $dpp . '/' . 'assets' . '/' . 'html',
     build           =>  $dpp . '/' . 'build',
     stash           =>  $dpp . '/' . '.stash',
@@ -33,7 +34,8 @@ my $dir = {
 };
 
 my $maintainer = sub {
-    open(my $fh, "<", 'maintainer.json' ) || die "cant open maintainer.json: $!"; my $maintainer = <$fh>;
+    my $maintainer_file = init('assets') . '/' .  'maintainer.json';
+    open(my $fh, "<", $maintainer_file) || die "cant open $maintainer_file: $!"; my $maintainer = <$fh>;
     return $maintainer;
 };
 
@@ -238,6 +240,6 @@ sub init {
 
 sub maintainer {
     my $m = $maintainer->();
-    print $m and die;
+    return $m;
 }
 
