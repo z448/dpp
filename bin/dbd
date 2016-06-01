@@ -232,11 +232,6 @@ my $make_html = sub {
 
 };  print "index.html: " . colored(['green'], 'ok') unless $make_html->();
 
-my $cleanup = sub {
-    my $cleanup_dir = shift;
-    rmdir $cleanup_dir;
-}; print "cleanup: " . colored(['green'], 'ok') unless $cleanup->($base);
-
 __DATA__
 1. xz/lmza on telesphoero needs fix4 
 tar -cf - usr | xz -9 -c - > ../data.tar.xz
