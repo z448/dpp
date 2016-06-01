@@ -5,10 +5,11 @@ use warnings;
 use strict;
 
 use Term::ANSIColor;
+use Data::Dumper;
 use File::Path;
 use Config;
 use Getopt::Std;
-use Cydia::Meta qw< init >;
+use Cydia::Meta qw< init maintainer >;
 use Cwd 'abs_path';
 
 
@@ -56,6 +57,18 @@ unless($option{m}){ system("perldoc $0")};
 print 'cpanm build: ' . colored(['green'],'ok') . "\n" unless ${install()};
 
 system("cd $dir{cpanm} && dbd $pm");
+
+
+
+
+print 'Dumper' . "\n";
+my $control = maintainer();
+print $control . "\n";
+
+print $control->[0]->{Maintainer};
+#for( @$control ){
+#    print Dumper($_);
+
 
 =head1 NAME
 

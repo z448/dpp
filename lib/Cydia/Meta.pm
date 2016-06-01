@@ -45,14 +45,23 @@ my $init = sub {
         for(keys %$dir){ mkpath $dir->{$_} }
 
         #symlink ~/.dpp/assets/html/index.json --> index.json
-        my $link = init('assets_html') . "/index.json";
-        my $file = abs_path($0);
+        my $index_link = init('assets_html') . "/index.json";
 
-        print '## debug --> ' . $file . "\n";
-        $file =~ s/(.*)\/bin\/dpp/$1/;
-        $file = $file . "/assets/html/index.json";
-        #print $file . "\n" and die;
-        symlink $file, $link;
+        #symlink ~/.dpp/assets/control.json --> control.json
+        my $control_link = init('assets') . "/control.json";
+
+        my $dpp_install_dir = abs_path($0);
+        #my $index_file = abs_path($0);
+        $dpp_install_dir =~ s/(.*)\/bin\/dpp/$1/;
+        #$index_file =~ s/(.*)\/bin\/dpp/$1/;
+
+
+        my $index_file = $dpp_install_dir . "/assets/html/index.json";
+        symlink $index_file, $index_link;
+
+        my $control_file = $dpp_install_dir . "/assets/control.json";
+        symlink $control_file, $control_link;
+
         return $dir;
     }
 };
@@ -233,9 +242,12 @@ sub init {
 
 sub maintainer {
     my $maintainer = sub {
-        my $maintainer_file = init('assets') . '/' .  'maintainer.json';
-        open(my $fh, "<", $maintainer_file) || die "cant open $maintainer_file: $!"; my $maintainer = <$fh>;
-        return $maintainer;
+        local $/;
+        my $maintainer_file = init('assets') . '/' .  'control.json';
+        open(my $fh, "<", $maintainer_file) || die "cant open $maintainer_file: $!"; 
+            my $maintainer = <$fh>;
+            $maintainer = decode_json $maintainer;
+            return $maintainer;
     };
 
     my $m = $maintainer->();
