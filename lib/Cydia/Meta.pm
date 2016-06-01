@@ -18,7 +18,7 @@ BEGIN {
     require Exporter;
     our $VERSION = 0.01;
     our @ISA = qw(Exporter);
-    our @EXPORT_OK = qw( control meta web init maintainer );
+    our @EXPORT_OK = qw( control meta web init cleanup );
 }
 
 
@@ -32,6 +32,12 @@ my $dir = {
     deb             =>  $dpp . '/.stash/deb',
     cpanm           =>  $dpp . '/' . 'build' . '/' . '.cpanm',
 };
+
+my $cleanup = sub {
+    my $dirty_dir = shift;
+    rmdir( $dirty_dir );
+};
+
 # -  to init dpp direcories
 my $init = sub {
     my $get = shift;
@@ -144,6 +150,14 @@ my $meta = sub {
             return $arch;
     };
 
+    my $maintainer = sub {
+        local $/;
+        my $maintainer_file = init('assets') . '/' .  'control.json';
+        open(my $fh, "<", $maintainer_file) || die "cant open $maintainer_file: $!"; 
+            my $maintainer = <$fh>;
+            $maintainer = decode_json $maintainer;
+            return $maintainer->[0]->{Maintainer};
+    };
 
     my $remote = {
         cystash      => "$ENV{HOME}/.dpp/.stash",
@@ -155,7 +169,8 @@ my $meta = sub {
         Depiction    => $graph.$m->{name},
         description  => $meta_p->{description},
         Homepage     => $metacpan.$meta_p->{module}[0]->{name},
-        Maintainer   => 'zedbe (z448) <z448@module.pm>',
+        Maintainer   => $maintainer->(),
+        #Maintainer   => 'zedbe (z448) <z448@module.pm>',
         install_path => $Config{installprivlib},
         module_name  => $meta_p->{module}[0]->{name},
         release_date => $meta_p->{date},
@@ -240,17 +255,9 @@ sub init {
     my $init_status = $init->($get);
 }
 
-sub maintainer {
-    my $maintainer = sub {
-        local $/;
-        my $maintainer_file = init('assets') . '/' .  'control.json';
-        open(my $fh, "<", $maintainer_file) || die "cant open $maintainer_file: $!"; 
-            my $maintainer = <$fh>;
-            $maintainer = decode_json $maintainer;
-            return $maintainer;
-    };
+sub cleanup {
+    my $dirty_dir = shift;
+    print '$cleanup->(' . $dirty_dir . ')';
+};
 
-    my $m = $maintainer->();
-    return $m;
-}
 

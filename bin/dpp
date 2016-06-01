@@ -9,7 +9,7 @@ use Data::Dumper;
 use File::Path;
 use Config;
 use Getopt::Std;
-use Cydia::Meta qw< init maintainer >;
+use Cydia::Meta qw< init cleanup >;
 use Cwd 'abs_path';
 
 
@@ -58,17 +58,7 @@ print 'cpanm build: ' . colored(['green'],'ok') . "\n" unless ${install()};
 
 system("cd $dir{cpanm} && dbd $pm");
 
-
-
-
-print 'Dumper' . "\n";
-my $control = maintainer();
-print $control . "\n";
-
-print $control->[0]->{Maintainer};
-#for( @$control ){
-#    print Dumper($_);
-
+print 'cleaup: ' . colored(['green'], 'ok') . "\n" unless cleanup($dir{cpanm});
 
 =head1 NAME
 
