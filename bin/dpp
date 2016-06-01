@@ -5,6 +5,7 @@ use warnings;
 use strict;
 
 use Term::ANSIColor;
+use Data::Dumper;
 use File::Path;
 use Config;
 use Getopt::Std;
@@ -57,18 +58,16 @@ print 'cpanm build: ' . colored(['green'],'ok') . "\n" unless ${install()};
 
 system("cd $dir{cpanm} && dbd $pm");
 
-print 'maintainer()' . "\n";
-print maintainer() . "\n\n";
+
+
 
 print 'Dumper' . "\n";
 my $control = maintainer();
-{
-    local $/;
-    $control = decode_json $control;
-    for( @$control ){
-        print Dumper($_);
-    }
-}
+print $control . "\n";
+
+print $control->[0]->{Maintainer};
+#for( @$control ){
+#    print Dumper($_);
 
 
 =head1 NAME
