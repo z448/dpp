@@ -58,7 +58,7 @@ print 'cpanm build: ' . colored(['green'],'ok') . "\n" unless ${install()};
 
 system("cd $dir{cpanm} && dbd $pm");
 
-print 'cleaup: ' . colored(['green'], 'ok') . "\n" unless cleanup($dir{cpanm});
+print 'cleaup: ' . colored(['green'], 'ok') . "\n" if cleanup($dir{cpanm});
 
 =head1 NAME
 

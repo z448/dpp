@@ -35,7 +35,9 @@ my $dir = {
 
 my $cleanup = sub {
     my $dirty_dir = shift;
-    rmdir( $dirty_dir );
+    system("chmod -R 0755 $dirty_dir");
+    system("rm -r $dirty_dir");
+    #rmdir $dirty_dir;
 };
 
 # -  to init dpp direcories
@@ -257,7 +259,8 @@ sub init {
 
 sub cleanup {
     my $dirty_dir = shift;
-    print '$cleanup->(' . $dirty_dir . ')';
+    #print '$cleanup->(' . $dirty_dir . ')';
+    $cleanup->($dirty_dir);
 };
 
 
