@@ -129,11 +129,27 @@ my $deps = sub {
 
 my $meta = sub {
     my $module = shift;
+    my $meta_j = '';
     my $metacpan = 'https://metacpan.org/pod/';
     my $meta_url = 'http://api.metacpan.org/v0/module/'."$module".'?join=release';
     my $meta_pod_url = 'http://api.metacpan.org/v0/pod/' . "$module" . '?content-type=text/plain';
     my $graph = 'https://widgets.stratopan.com/wheel?q=';
-    my $meta_j = qx!curl -sL $meta_url!;
+    #  curl my $meta_j = qx!curl -sL $meta_url!;
+
+    ### HTTP::Tiny
+    my $response = HTTP::Tiny->new->get("$meta_url");
+    if($response->{success}){
+        my $meta_j = $response->{content}
+    } else {
+        die "http request failed";
+    }
+    #-
+                                     
+    print $response->{content} if length $response->{content};
+    #my $meta_j = qx!curl -sL $meta_url!;
+    ## -
+
+
     my $meta_p = decode_json( encode( 'utf8', $meta_j ) );
     my $m = $meta_p->{release}->{_source};
     my $stratopan = $graph.$m->{name};
