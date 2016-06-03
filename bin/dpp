@@ -19,18 +19,12 @@ use Cwd 'abs_path';
 # -m perl::module
 
 my %option = (); getopts('hm:c:w', \%option);
-#my @init_dirs = (  "$ENV{HOME}/.dpp/build", "$ENV{HOME}/.dpp/.stash/deb", "$ENV{HOME}/.dpp/.stash/tools" );
-#my $base = "$ENV{HOME}/.dpp/build";
 
 my %dir = %{init()};
 my $pm = $option{m} || " ";
 my $cpanm_option = $option{c} || " ";
 
-# create ~/.dpp/... if they dont exist
-#mkpath( @init_dirs, 1, 0777 );
-
 my $build = "cpanm -n -f $cpanm_option --reinstall -L $dir{cpanm} $pm";
-#my $build = ". ~/.dpp/.env && cpanm -n -f $cpanm_option --reinstall -L $dir{build} $pm";
 
 sub install {
     # no option installs on local hosts
@@ -39,7 +33,7 @@ sub install {
         print '--> ' . colored(['blue'], 'cpanm') . " starting build in $dir{build}" . "\n";
         return \$install->();
     } elsif(defined $option{h}){
-        # -h 'list of hosts' ;todo:split list of hosts into @hosts
+        #todo: multiple hosts; -h 'list of hosts' ;todo:split list of hosts into @hosts
         my @hosts = split(" ", $option{h});
         say "\nrunning:"; print colored( "$build\n", 'blue' ); say "on: @hosts ";
         my %conn = map { $_ => Net::OpenSSH->new($_, async => 1) } @hosts;
@@ -53,9 +47,12 @@ sub install {
     } 
 }
 
+
+### start dpp
 unless($option{m}){ system("perldoc $0")};
 print 'cpanm build: ' . colored(['green'],'ok') . "\n" unless ${install()};
 
+### start dbd
 system("cd $dir{cpanm} && dbd $pm");
 
 print 'cleaup: ' . colored(['green'], 'ok') . "\n" if cleanup($dir{cpanm});
