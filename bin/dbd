@@ -115,7 +115,7 @@ my $check_pack = sub {
             print "packlist path: " . $pack->{path} . "\n";
             print "pkg: " . $pack->{pkg} . "\n";
             print "packlist content: " . "\n";
-            for(@{$pack->{packlist}}){ print $_ . "\n" }
+            for(@{$pack->{packlist}}){ print colored(['white'], "$_" ) . "\n"; }
     
             my $make_path = mkpath("$pack->{pkg}/DEBIAN");
 
@@ -156,7 +156,7 @@ my $check_pack = sub {
             #call make_pack, build deb
             unless( $make_pack->($pack->{pkg}) ){
                 print "$pack->{pkg}: " . colored(['green'], "ok") . "\n";
-                web($pack->{module}) and print "index.json: $pack->{module}j" . colored(['green'], "ok") . "\n";
+                web($pack->{module}) and print "index.json: $pack->{module}" . colored(['green'], "ok") . "\n";
             }
 
             my $cleanup = sub {
@@ -175,7 +175,8 @@ my $list_pack = sub {
     print $_ . "\n" for (@$p);
 
     for my $path( @$p ){
-        chomp(my $module = $path);
+        chomp($path);
+        my $module = $path;
 
         # make module($pm) name from packlist($path)
         $module =~ s/(auto.*?\/)(.*?)(\/\.packlist)/$2/;
@@ -230,7 +231,7 @@ my $make_html = sub {
     for( @{$index_hash->{body}} ){ print $fh $_ }
     for( @{$index_hash->{foot}} ){ print $fh $_ }
 
-};  print "index.html: " . colored(['green'], 'ok') unless $make_html->();
+};  print "index.html: " . colored(['green'], 'ok') . "\n"  unless $make_html->();
 
 __DATA__
 1. xz/lmza on telesphoero needs fix4 

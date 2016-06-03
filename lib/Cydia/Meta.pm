@@ -10,6 +10,7 @@ use File::Path;
 use Encode;
 use Data::Dumper;
 use Config;
+use HTTP::Tiny;
 use Config::Extensions qw( %Extensions );
 use Cwd qw< abs_path >;
 use open qw<:encoding(UTF-8)>;
@@ -38,6 +39,11 @@ my $cleanup = sub {
     system("chmod -R 0755 $dirty_dir");
     system("rm -r $dirty_dir");
     #rmdir $dirty_dir;
+};
+
+my $perl_version = sub {
+    my $perl_version = $Config{PERL_REVISION} . '.' . $Config{PERL_VERSION} . '.' . $Config{PERL_SUBVERSION};
+    my $perl_version = 'perl (= ' . $perl_version . ')';
 };
 
 # -  to init dpp direcories
@@ -123,13 +129,14 @@ my $deps = sub {
             next;
         }
     }
-    $dep{control} = $dep{control} . "perl";
+    $dep{control} = $dep{control} . $perl_version->();
+    #$dep{control} = $dep{control} . "perl";
     return \%dep;
 };
 
 my $meta = sub {
     my $module = shift;
-    my $meta_j = '';
+    my $meta_j;
     my $metacpan = 'https://metacpan.org/pod/';
     my $meta_url = 'http://api.metacpan.org/v0/module/'."$module".'?join=release';
     my $meta_pod_url = 'http://api.metacpan.org/v0/pod/' . "$module" . '?content-type=text/plain';
@@ -139,7 +146,7 @@ my $meta = sub {
     ### HTTP::Tiny
     my $response = HTTP::Tiny->new->get("$meta_url");
     if($response->{success}){
-        my $meta_j = $response->{content}
+        $meta_j = $response->{content} if length $response->{content};
     } else {
         die "http request failed";
     }
@@ -150,7 +157,8 @@ my $meta = sub {
     ## -
 
 
-    my $meta_p = decode_json( encode( 'utf8', $meta_j ) );
+    my $meta_p = decode_json( $meta_j );
+    #my $meta_p = decode_json( encode( 'utf8', $meta_j ) );
     my $m = $meta_p->{release}->{_source};
     my $stratopan = $graph.$m->{name};
     my $prefix = 'lib';
