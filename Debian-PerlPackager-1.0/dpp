@@ -1,0 +1,126 @@
+#!/usr/bin/env perl
+#
+use 5.010;
+use warnings;
+use strict;
+
+use Term::ANSIColor;
+use Data::Dumper;
+use File::Path;
+use Config;
+use Getopt::Std;
+use Debian::PerlPackager qw< init cleanup >;
+use Cwd 'abs_path';
+
+
+# -w create index.html
+# -h list of hosts
+# -c pass option to cpanm
+# -m perl::module
+
+my %option = (); getopts('hm:c:w', \%option);
+#my @init_dirs = (  "$ENV{HOME}/.dpp/build", "$ENV{HOME}/.dpp/.stash/deb", "$ENV{HOME}/.dpp/.stash/tools" );
+#my $base = "$ENV{HOME}/.dpp/build";
+
+my %dir = %{init()};
+my $pm = $option{m} || " ";
+my $cpanm_option = $option{c} || " ";
+
+# create ~/.dpp/... if they dont exist
+#mkpath( @init_dirs, 1, 0777 );
+
+my $build = "cpanm -n -f $cpanm_option --reinstall -L $dir{cpanm} $pm";
+#my $build = ". ~/.dpp/.env && cpanm -n -f $cpanm_option --reinstall -L $dir{build} $pm";
+
+sub install {
+    # no option installs on local hosts
+    if(defined $option{m}){
+        my $install = sub { system("$build") };
+        print '--> ' . colored(['blue'], 'cpanm') . " starting build in $dir{build}" . "\n";
+        return \$install->();
+    } elsif(defined $option{h}){
+        # -h 'list of hosts' ;todo:split list of hosts into @hosts
+        my @hosts = split(" ", $option{h});
+        say "\nrunning:"; print colored( "$build\n", 'blue' ); say "on: @hosts ";
+        my %conn = map { $_ => Net::OpenSSH->new($_, async => 1) } @hosts;
+        my @pid;
+        for my $host (@hosts) {
+            open my($fh), '>', "/tmp/out-$host.txt"
+              or die "unable to create file: $!";
+            push @pid,  $conn{$host}->spawn({stdout_fh => $fh}, $build);
+        } 
+    waitpid($_, 0) for @pid;
+    } 
+}
+
+unless($option{m}){ system("perldoc $0")};
+print 'cpanm build: ' . colored(['green'],'ok') . "\n" unless ${install()};
+
+system("cd $dir{cpanm} && dbd $pm");
+
+print 'cleaup: ' . colored(['green'], 'ok') . "\n" if cleanup($dir{cpanm});
+
+=head1 NAME
+
+=over 12
+
+=item dpp
+
+debian perl packager
+
+=back
+
+=head1 SYNOPSIS
+
+=over 12
+
+=item create debian binary packages from Perl modules 
+
+=item supported platforms: Linux, OSX, jailbroken iOS
+
+=back
+
+=head1 GIF
+
+=over 12
+
+=item L<https://raw.githubusercontent.com/z448/dpp/master/dpp.gif>
+
+=back
+
+=head1 INSTALLATION
+
+=over 12 
+
+=item Clone repository
+
+C<git clone https://github.com/z448/dpp>
+
+=item Install dependencies with L<Carton>
+
+C<carton install>
+
+=item Setup environment
+
+C<. setup>
+
+=back
+
+=head1 USAGE
+
+=over 12
+
+=item create package 
+
+C<dpp -m Perl::Module>
+
+=item - package directory $HOME/.dpp/.stash/deb
+
+=item - build directory $HOME/.dpp/build
+
+=item - use L<CTRL-P> & L<CTRL-G>to switch between build & deb directories
+
+=back
+
+=cut
+

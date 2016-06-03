@@ -1,0 +1,3 @@
+requires 'JSON::PP', '2.27300';
+requires 'App::cpanminus', '1.7040';
+requires 'Encode', '2.72';
