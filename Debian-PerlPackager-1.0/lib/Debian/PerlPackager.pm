@@ -47,6 +47,19 @@ my $cleanup = sub {
     #rmdir $dirty_dir;
 };
 
+
+my $meta_api = sub {
+    my $meta_url = shift;
+    #my $meta_url = 'http://api.metacpan.org/v0/module/'."$module".'?join=release';
+    my $response = HTTP::Tiny->new->get("$meta_url");
+    if($response->{success}){
+        my $meta = $response->{content} if length $response->{content};
+        $meta = decode_json $meta;
+    } else {
+        die "http request failed";
+    }
+};
+
 my $perl_version = sub {
     my $perl_version = $Config{PERL_REVISION} . '.' . $Config{PERL_VERSION} . '.' . $Config{PERL_SUBVERSION};
     $perl_version = 'perl (= ' . $perl_version . ')';
@@ -142,14 +155,15 @@ my $deps = sub {
 
 my $meta = sub {
     my $module = shift;
-    my $meta_j;
+    my $meta;
     my $metacpan = 'https://metacpan.org/pod/';
     my $meta_url = 'http://api.metacpan.org/v0/module/'."$module".'?join=release';
     my $meta_pod_url = 'http://api.metacpan.org/v0/pod/' . "$module" . '?content-type=text/plain';
     my $graph = 'https://widgets.stratopan.com/wheel?q=';
     #  curl my $meta_j = qx!curl -sL $meta_url!;
 
-    ### HTTP::Tiny
+=head    ### HTTP::Tiny
+    my $meta_url = 'http://api.metacpan.org/v0/module/'."$module".'?join=release';
     my $response = HTTP::Tiny->new->get("$meta_url");
     if($response->{success}){
         $meta_j = $response->{content} if length $response->{content};
@@ -161,11 +175,13 @@ my $meta = sub {
     print $response->{content} if length $response->{content};
     #my $meta_j = qx!curl -sL $meta_url!;
     ## -
+=cut
 
 
-    my $meta_p = decode_json( $meta_j );
-    #my $meta_p = decode_json( encode( 'utf8', $meta_j ) );
-    my $m = $meta_p->{release}->{_source};
+    $meta = $meta_api->( $meta_url );
+    #my $meta_p = decode_json( $meta );
+    #my $meta = decode_json( encode( 'utf8', $meta_j ) );
+    my $m = $meta->{release}->{_source};
     my $stratopan = $graph.$m->{name};
     my $prefix = 'lib';
     #my $assets = "$ENV{DPP}/assets/html";
@@ -201,17 +217,17 @@ my $meta = sub {
         Section      => 'Perl',
         Description  => $m->{abstract},
         Depiction    => $graph.$m->{name},
-        description  => $meta_p->{description},
-        Homepage     => $metacpan.$meta_p->{module}[0]->{name},
+        description  => $meta->{description},
+        Homepage     => $metacpan.$meta->{module}[0]->{name},
         Maintainer   => $maintainer->(),
         #Maintainer   => 'zedbe (z448) <z448@module.pm>',
         install_path => $Config{installprivlib},
-        module_name  => $meta_p->{module}[0]->{name},
-        release_date => $meta_p->{date},
+        module_name  => $meta->{module}[0]->{name},
+        release_date => $meta->{date},
         Architecture => $arch->(),
         source_url   => $m->{download_url},
         deps_graph   => $graph.$m->{name},
-        #   pod          => $meta_p->{pod},
+        #   pod          => $meta->{pod},
         prefix       => 'lib',
         Package      => $prefix . lc $m->{distribution} . '-p5',
         pkg          => $prefix . lc $m->{distribution} . '-p5',
@@ -228,7 +244,7 @@ my $meta = sub {
 
 my $web = sub {
     my $pm = shift;
-    my $index_json = $dir->{'assets'} . '/' . 'lib/Debian/index.json';
+    my $index_json = $dir->{'assets'} . '/' . 'index.json';
     my $m = $meta->( $pm );
     my ( @pipe, @body ) = ();
     my $index = {};
