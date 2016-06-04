@@ -1,0 +1,7 @@
+Changes
+Makefile.PL
+dpp
+dbd
+lib/Debian/PerlPackager.pm
+MANIFEST			This list of files
+README

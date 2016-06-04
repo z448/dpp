@@ -68,6 +68,7 @@ my $init = sub {
         #my $index_file = abs_path($0);
         $dpp_install_dir =~ s/(.*)\/bin\/dpp/$1/;
         #$index_file =~ s/(.*)\/bin\/dpp/$1/;
+        print $dpp_install_dir and die;
 
 
         my $index_file = $dpp_install_dir . '/' . "lib/Debian/assets/index.json";
