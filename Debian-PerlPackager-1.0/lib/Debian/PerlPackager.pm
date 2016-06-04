@@ -84,15 +84,19 @@ my $init = sub {
         my $control_link = init('assets') . "/control.json";
 
         my $dpp_install_dir = abs_path($0);
+        $dpp_install_dir =~ s/(.*)\/bin\/dpp$/$1/;
+        $dpp_install_dir = $dpp_install_dir . '/' . 'lib/perl5/Debian';
+
         #my $index_file = abs_path($0);
-        $dpp_install_dir =~ s/(.*)\/bin\/dpp/$1/;
         #$index_file =~ s/(.*)\/bin\/dpp/$1/;
 
-        my $index_file = $dpp_install_dir . '/' . 'lib/perl5/Debian/index.json';
+        my $index_file = $dpp_install_dir . '/' . 'index.json';
+        chmod( 0644, $index_file);
         #my $index_file = $dpp_install_dir . "/assets/html/index.json";
         symlink $index_file, $index_link;
 
-        my $control_file = $dpp_install_dir . '/' . 'lib/perl5/Debian/control.json';
+        my $control_file = $dpp_install_dir . '/' . 'control.json';
+        chmod( 0644, $control_file);
         symlink $control_file, $control_link;
 
         return $dir;

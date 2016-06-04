@@ -217,8 +217,8 @@ my $list_pack = sub {
 $list_pack->(\@packlist_orig);
 
 my $make_html = sub {
-    my $json_file = init('assets_html') . "/index.json";
-    my $html_file= init('assets_html') . "/index.html";
+    my $json_file = init('assets') . "/index.json";
+    my $html_file= init('assets') . "/index.html";
 
     open(my $fh,"<",$json_file) || die "cant open $json_file: $!";
     my $index_json = <$fh>;
