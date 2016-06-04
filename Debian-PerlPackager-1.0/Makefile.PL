@@ -19,13 +19,12 @@ WriteMakefile(
         'Test::More' => 0,
     },
     PREREQ_PM => {
-        'JSON::PP'          =>      '2.27300';
-        'App::cpanminus'    =>      '1.7040';
-        'Encode'            =>      '2.72';
+        'JSON::PP'          =>      '2.27300',
+        'App::cpanminus'    =>      '1.7040',
+        'Encode'            =>      '2.72',
         #'ABC'              => 1.6,
         #'Foo::Bar::Module' => 5.0401,
     },
     dist  => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
-    clean => { FILES => 'App-ssl4curl-*' },
     clean => { FILES => 'Debian-PerlPackager-1.0-*' },
 );

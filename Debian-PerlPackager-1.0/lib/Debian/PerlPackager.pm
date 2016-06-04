@@ -1,6 +1,5 @@
 package Debian::PerlPackager;
 
-use 5.010;
 use warnings;
 use strict;
 
@@ -15,6 +14,12 @@ use Config::Extensions qw( %Extensions );
 use Cwd qw< abs_path >;
 use open qw<:encoding(UTF-8)>;
 
+=head1 NAME
+
+Debian::PerlPackager - make debian binary packages of perl modules
+
+=cut
+
 BEGIN {
     require Exporter;
     our $VERSION = 0.01;
@@ -22,6 +27,7 @@ BEGIN {
     our @EXPORT_OK = qw( control meta web init cleanup );
 }
 
+our $VERSION = '1.0';
 
 my $dpp = "$ENV{HOME}/.dpp";
 my $dir = {
@@ -68,14 +74,12 @@ my $init = sub {
         #my $index_file = abs_path($0);
         $dpp_install_dir =~ s/(.*)\/bin\/dpp/$1/;
         #$index_file =~ s/(.*)\/bin\/dpp/$1/;
-        print $dpp_install_dir and die;
 
-
-        my $index_file = $dpp_install_dir . '/' . "lib/Debian/assets/index.json";
+        my $index_file = $dpp_install_dir . '/' . 'lib/perl5/Debian/index.json';
         #my $index_file = $dpp_install_dir . "/assets/html/index.json";
         symlink $index_file, $index_link;
 
-        my $control_file = $dpp_install_dir . '/' . "lib/Debian/assets/control.json";
+        my $control_file = $dpp_install_dir . '/' . 'lib/perl5/Debian/control.json';
         symlink $control_file, $control_link;
 
         return $dir;
@@ -182,7 +186,7 @@ my $meta = sub {
     my $maintainer = sub {
         local $/;
         my $maintainer_file = init('assets') . '/' .  'control.json';
-        print '## debug--> $maintainer_file' . "$maintainer_file" and die;
+        #print '## debug--> $maintainer_file' . "$maintainer_file" and die;
         open(my $fh, "<", $maintainer_file) || die "cant open $maintainer_file: $!"; 
             my $maintainer = <$fh>;
             $maintainer = decode_json $maintainer;
