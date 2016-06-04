@@ -65,7 +65,7 @@ my $perl_version = sub {
     $perl_version = 'perl (= ' . $perl_version . ')';
 };
 
-# -  to init dpp direcories
+##-  to init dpp direcories
 my $init = sub {
     my $get = shift;
     
@@ -77,7 +77,7 @@ my $init = sub {
         chmod( 0755, $dpp);
         for(keys %$dir){ mkpath $dir->{$_} }
 
-        #symlink ~/.dpp/assets/html/index.json --> index.json
+        #symlink ~/.dpp/assets/index.json --> index.json
         my $index_link = init('assets') . "/index.json";
 
         #symlink ~/.dpp/assets/control.json --> control.json
@@ -85,14 +85,10 @@ my $init = sub {
 
         my $dpp_install_dir = abs_path($0);
         $dpp_install_dir =~ s/(.*)\/bin\/dpp$/$1/;
-        $dpp_install_dir = $dpp_install_dir . '/' . 'lib/perl5/Debian';
-
-        #my $index_file = abs_path($0);
-        #$index_file =~ s/(.*)\/bin\/dpp/$1/;
+        $dpp_install_dir = $dpp_install_dir . '/' . 'lib/perl5/Debian';      
 
         my $index_file = $dpp_install_dir . '/' . 'index.json';
         chmod( 0644, $index_file);
-        #my $index_file = $dpp_install_dir . "/assets/html/index.json";
         symlink $index_file, $index_link;
 
         my $control_file = $dpp_install_dir . '/' . 'control.json';
@@ -102,8 +98,7 @@ my $init = sub {
         return $dir;
     }
 };
-# $init->();
-# --
+#-
 
 my $deps = sub {
     my $pm = shift;
@@ -153,7 +148,6 @@ my $deps = sub {
         }
     }
     $dep{control} = $dep{control} . $perl_version->();
-    #$dep{control} = $dep{control} . "perl";
     return \%dep;
 };
 
@@ -164,31 +158,11 @@ my $meta = sub {
     my $meta_url = 'http://api.metacpan.org/v0/module/'."$module".'?join=release';
     my $meta_pod_url = 'http://api.metacpan.org/v0/pod/' . "$module" . '?content-type=text/plain';
     my $graph = 'https://widgets.stratopan.com/wheel?q=';
-    #  curl my $meta_j = qx!curl -sL $meta_url!;
-
-=head    ### HTTP::Tiny
-    my $meta_url = 'http://api.metacpan.org/v0/module/'."$module".'?join=release';
-    my $response = HTTP::Tiny->new->get("$meta_url");
-    if($response->{success}){
-        $meta_j = $response->{content} if length $response->{content};
-    } else {
-        die "http request failed";
-    }
-    #-
-                                     
-    print $response->{content} if length $response->{content};
-    #my $meta_j = qx!curl -sL $meta_url!;
-    ## -
-=cut
-
-
+  
     $meta = $meta_api->( $meta_url );
-    #my $meta_p = decode_json( $meta );
-    #my $meta = decode_json( encode( 'utf8', $meta_j ) );
     my $m = $meta->{release}->{_source};
     my $stratopan = $graph.$m->{name};
-    my $prefix = 'lib';
-    #my $assets = "$ENV{DPP}/assets/html";
+    my $prefix = 'lib';p
     my $assets = $dir->{'assets'};
     my $deb_url = "deb/.stash/deb/" . $prefix . lc $m->{distribution} . '-p5' . '.deb';
 
@@ -205,7 +179,7 @@ my $meta = sub {
 
     my $maintainer = sub {
         local $/;
-        my $maintainer_file = init('assets') . '/' .  'control.json';
+        my $maintainer_file = init('assets') . '/' .   'control.json';
         #print '## debug--> $maintainer_file' . "$maintainer_file" and die;
         open(my $fh, "<", $maintainer_file) || die "cant open $maintainer_file: $!"; 
             my $maintainer = <$fh>;
