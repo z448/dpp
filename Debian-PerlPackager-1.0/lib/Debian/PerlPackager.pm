@@ -180,11 +180,10 @@ my $meta = sub {
     my $maintainer = sub {
         local $/;
         my $maintainer_file = init('assets') . '/' .   'control.json';
-        #print '## debug--> $maintainer_file' . "$maintainer_file" and die;
         open(my $fh, "<", $maintainer_file) || die "cant open $maintainer_file: $!"; 
-            my $maintainer = <$fh>;
-            $maintainer = decode_json $maintainer;
-            return $maintainer->[0]->{Maintainer};
+        my $maintainer = <$fh>;
+        $maintainer = decode_json $maintainer;
+        return $maintainer->[0]->{Maintainer};
     };
 
     my $remote = {
@@ -198,14 +197,12 @@ my $meta = sub {
         description  => $meta->{description},
         Homepage     => $metacpan.$meta->{module}[0]->{name},
         Maintainer   => $maintainer->(),
-        #Maintainer   => 'zedbe (z448) <z448@module.pm>',
         install_path => $Config{installprivlib},
         module_name  => $meta->{module}[0]->{name},
         release_date => $meta->{date},
         Architecture => $arch->(),
         source_url   => $m->{download_url},
         deps_graph   => $graph.$m->{name},
-        #   pod          => $meta->{pod},
         prefix       => 'lib',
         Package      => $prefix . lc $m->{distribution} . '-p5',
         pkg          => $prefix . lc $m->{distribution} . '-p5',
