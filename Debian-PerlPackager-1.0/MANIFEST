@@ -3,5 +3,7 @@ Makefile.PL
 dpp
 dbd
 lib/Debian/PerlPackager.pm
+lib/Debian/control.json
+lib/Debian/index.json
 MANIFEST			This list of files
 README
