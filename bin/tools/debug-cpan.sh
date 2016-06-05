@@ -1,3 +1,6 @@
+
+export PERL_MM_USE_DEFAULT=1;
+
 perl -MCPAN -e'shell'
 
 cpan[1]> o conf mbuildpl_arg "--install_base /home/charlie"
