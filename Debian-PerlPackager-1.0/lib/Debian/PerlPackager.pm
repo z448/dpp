@@ -50,7 +50,6 @@ my $cleanup = sub {
 
 my $meta_api = sub {
     my $meta_url = shift;
-    #my $meta_url = 'http://api.metacpan.org/v0/module/'."$module".'?join=release';
     my $response = HTTP::Tiny->new->get("$meta_url");
     if($response->{success}){
         my $meta = $response->{content} if length $response->{content};
@@ -65,7 +64,7 @@ my $perl_version = sub {
     $perl_version = 'perl (= ' . $perl_version . ')';
 };
 
-##-  to init dpp direcories
+### init dpp direcories
 my $init = sub {
     my $get = shift;
     
@@ -98,30 +97,33 @@ my $init = sub {
         return $dir;
     }
 };
-#-
+##-
 
+### takes module name, returns hash ref with 2 hashes: $dep{control} and $dep{distribution}
 my $deps = sub {
     my $pm = shift;
     my $core_pm = 
 
+    ### takes module name; return distribution name
     my $dep_dis = sub {
-        my $m = shift;
-        my $j = qx|curl -skL http://api.metacpan.org/v0/module/$m?join=release|;
-        my $p  = decode_json( encode( 'utf8', $j )); 
-        my $d = $p->{release}->{_source}->{distribution};
-        return $d;
+        my $module_name = shift;
+        my $meta_hash  = $meta_api->("http://api.metacpan.org/v0/module/$module_name?join=release"); 
+        my $dist_dependencies = $meta_hash->{release}->{_source}->{distribution};
+        return $dist_dependencies;
     };
+    ##-
 
+    ### takes module name returns array ref of module::name depandencies
     my $dep_pm = sub {
-        my $m = shift;
-        my $j = qx|curl -skL http://api.metacpan.org/v0/module/$m?join=release|;
-        my $p  = decode_json( encode( 'utf8', $j )); 
-        my @d;
-        for( keys %{$p->{release}->{_source}->{metadata}->{prereqs}->{runtime}->{requires}} ){
-            push @d, $_ unless $Extensions{$_};
+        my $module_name = shift;
+        my $meta_hash  = $meta_api->("http://api.metacpan.org/v0/module/$module_name?join=release"); 
+        my @module_dependencies = ();
+        for( keys %{$meta_hash->{release}->{_source}->{metadata}->{prereqs}->{runtime}->{requires}} ){
+            push @module_dependencies, $_ unless $Extensions{$_};
         }
-        return \@d;
+        return \@module_dependencies;
     };
+    ##- 
 
     my %dep;
     my @module_dep = ();
@@ -137,6 +139,7 @@ my $deps = sub {
     }
     $dep{distribution} = \@dist_dep;
 
+    # uniq
     my %dist_seen = ( );
     @dist_dep = grep { ! $dist_seen{$_} ++ } @dist_dep;
 
@@ -150,6 +153,7 @@ my $deps = sub {
     $dep{control} = $dep{control} . $perl_version->();
     return \%dep;
 };
+##-
 
 my $meta = sub {
     my $module = shift;
@@ -162,10 +166,11 @@ my $meta = sub {
     $meta = $meta_api->( $meta_url );
     my $m = $meta->{release}->{_source};
     my $stratopan = $graph.$m->{name};
-    my $prefix = 'lib';p
+    my $prefix = 'lib';
     my $assets = $dir->{'assets'};
     my $deb_url = "deb/.stash/deb/" . $prefix . lc $m->{distribution} . '-p5' . '.deb';
 
+    ### if arch is iPhone use 'iphoneos-arm' string in control file otherwise use 'all'
     my $arch = sub { 
             my $arch;
             open my $pipe, '-|', 'uname -m';
@@ -176,6 +181,7 @@ my $meta = sub {
             }
             return $arch;
     };
+    #-
 
     my $maintainer = sub {
         local $/;
