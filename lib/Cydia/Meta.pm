@@ -43,7 +43,7 @@ my $cleanup = sub {
 
 my $perl_version = sub {
     my $perl_version = $Config{PERL_REVISION} . '.' . $Config{PERL_VERSION} . '.' . $Config{PERL_SUBVERSION};
-    my $perl_version = 'perl (= ' . $perl_version . ')';
+    my $perl_version = 'perl (>= ' . $perl_version . ')';
 };
 
 # -  to init dpp direcories
