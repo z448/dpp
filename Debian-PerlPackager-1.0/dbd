@@ -5,6 +5,7 @@ use warnings;
 use strict;
 
 use JSON::PP;
+use Data::Dumper;
 use File::Find;
 use File::Path;
 use File::Copy;
@@ -90,8 +91,9 @@ my $make_pack = sub {
     echo 2.0 > debian-binary;
     arfp r $pm.deb debian-binary control.tar.gz data.tar.gz;
     mv $pm.deb ~/.dpp/.stash/deb;
-    rm -rf debian-binary control.tar.gz data.tar.gz DEBIAN;
+    cd .. && rm -rf $pm;
 _DEB
+    #rm -rf debian-binary control.tar.gz data.tar.gz DEBIAN;
     my $package = sub {
         my $packer = shift;
         my $status  = system($packer);
@@ -135,7 +137,8 @@ my $check_pack = sub {
             find( sub{ if( /\.packlist/ ){ 
                         $dpp_packlist = "$File::Find::dir/$_";
                         print "rm: " . $pack->{path} . "\n";
-                        unlink($pack->{path});
+                        system("rm -rf $pack->{path}");
+                        #unlink($pack->{path});
             }}, $installsitelib_dir );
                 
             find( sub{ unless(/perllocal\.pod/){
@@ -158,23 +161,28 @@ my $check_pack = sub {
                 print "$pack->{pkg}: " . colored(['green'], "ok") . "\n";
                 web($pack->{module}) and print "index.json: $pack->{module}" . colored(['green'], "ok") . "\n";
             }
+            
+            system("rm -rf $pack->{pkg}/.packlist");
 
             my $cleanup = sub {
                 my $dpp_dir = init('dpp');
-                system("rm -rf  $base/$pack->{pkg}");
+                ################test
+                my $cleanit = "$base/$pack->{pkg}";
+                system("rm -rf  $cleanit");
+                ################test
             };  print 'cleanup: ' . colored(['green'], "ok") . "\n" unless $cleanup->();
     }
 };
 
 my $list_pack = sub {
     my $p = shift;
-    my @pack = ();
     my( @meta )= ();
  
     print "\n\n" . colored(['green'],"packlists: ") . "\n";
     print $_ . "\n" for (@$p);
 
     for my $path( @$p ){
+        my @pack = ();
         chomp($path);
         my $module = $path;
 
@@ -208,9 +216,16 @@ my $list_pack = sub {
             path       =>  $path,
             packlist   =>  \@pack,
         };         
+
+        ######
+        print Dumper($pack) and die;
+        ########
     push @meta, $pack;
     close $fh;
     }
+    ##########test
+    #print Dumper(@meta) and die;
+    ###############test
     $check_pack->( \@meta );
 };
 
