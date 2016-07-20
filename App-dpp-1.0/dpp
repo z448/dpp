@@ -11,10 +11,13 @@ use Data::Dumper;
 use JSON;
 use Config;
 use File::Find;
-use open qw< :encoding(UTF-8) >;#use App::Dpp;
+use File::Path;
+use open qw< :encoding(UTF-8) >;
 
 my $options = {};
+
 getopts('d:', $options);
+init();
 
 sub find_packlist {
     my $siteperl_path = shift;
@@ -33,9 +36,6 @@ sub parse_packlist {
     my $packlist_path = shift;
     my( @meta )= ();
  
-    #print "\n\n" . colored(['green'],"packlists: ") . "\n";
-    #print $_ . "\n" for (@$packlist_path);
-
     for my $path( @$packlist_path ){
         my @pack = ();
         chomp($path);
@@ -58,21 +58,37 @@ sub parse_packlist {
             control    =>  control($module),
         };         
 
-        while( my($key, $value) = each(%$pack)){
-            if($key eq 'packlist'){
-                print $key . "\t -->";
-                print @$value;
-                print "\n";
-            } else {
-                print $key . "\t --> " . $value . "\n";
-            }
-        }
-        print "\n";
+#        while( my($key, $value) = each(%$pack)){
+#            if($key eq 'packlist'){
+#                print $key . "\t -->";
+#                print @$value;
+#                print "\n";
+#            } else {
+#                print $key . "\t --> " . $value . "\n";
+#            }
+#        }
+#        print "\n";
 
-    push @meta, $pack;
+#    push @meta, $pack;
     close $fh;
+    pack_packlist($pack);
+    die;
     }
 };
+
+sub pack_packlist {
+    my $meta_pack = shift;
+    my $pack_path = init('build') . "/$meta_pack->{pkg}";
+
+    mkpath($pack_path);
+    system("tar cz -T $meta_pack->{path} -f $pack_path/data.tar.gz");
+}
+
+
+
+
+
+
 
 parse_packlist(find_packlist("/usr/local/lib/perl5/site_perl"));
 

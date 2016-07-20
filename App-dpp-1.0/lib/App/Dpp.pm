@@ -29,14 +29,14 @@ BEGIN {
 
 our $VERSION = '1.0';
 
-my $dpp = "$ENV{HOME}/.dpp";
+my $dpp = "$ENV{HOME}/dpp";
 my $dir = {
     dpp             =>  $dpp,
     assets          =>  $dpp . '/' . 'assets',
     assets_html     =>  $dpp . '/' . 'assets' . '/' . 'html',
     build           =>  $dpp . '/' . 'build',
-    stash           =>  $dpp . '/' . '.stash',
-    deb             =>  $dpp . '/.stash/deb',
+    stash           =>  $dpp . '/' . 'stash',
+    deb             =>  $dpp . '/stash/deb',
     cpanm           =>  $dpp . '/' . 'build' . '/' . '.cpanm',
 };
 
