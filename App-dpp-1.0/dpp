@@ -4,7 +4,9 @@ use 5.010;
 use warnings;
 use strict;
 
+use Term::ANSIColor;
 use Getopt::Std;
+use App::Dpp qw< control meta web init cleanup >;
 use Data::Dumper;
 use JSON;
 use Config;
@@ -16,42 +18,62 @@ getopts('d:', $options);
 
 sub find_packlist {
     my $siteperl_path = shift;
-    my @packlist = ();
-    my $packlist = {};
-    find( sub { if(/\.packlist/){
-                open(my $fh,"<","$File::Find::dir/$_") || die "cant open $File::Find::dir/$_";
-                my @packlist_content = ();
-                while(my $content = <$fh>){
-                    push @packlist_content, $content;
-                }
+    my @packlist_file = ();
 
-                $packlist->{"$File::Find::dir/$_"} = \@packlist_content;
-                #push @packlist, "$File::Find::dir/$_";
-                }
-            }, $siteperl_path);
+    find( sub {
+            if(/\.packlist/){
+                push @packlist_file, "$File::Find::dir/$_";
+            }
+        }, $siteperl_path );
+    return \@packlist_file;
+}
 
-    return $packlist;
+
+sub parse_packlist {
+    my $packlist_path = shift;
+    my( @meta )= ();
+ 
+    #print "\n\n" . colored(['green'],"packlists: ") . "\n";
+    #print $_ . "\n" for (@$packlist_path);
+
+    for my $path( @$packlist_path ){
+        my @pack = ();
+        chomp($path);
+        my $module = $path;
+
+        # make module($pm) name from packlist($path)
+        $module =~ s/(auto.*?\/)(.*?)(\/\.packlist)/$2/;
+        $module = $2;
+        $module =~ s/\//\:\:/g;
+        open( my $fh, "<", $path );
+        while( <$fh>){ chomp and push @pack, $_ }
+        
+        my $meta = meta($module);
+        my $pkg = $meta->{pkg};
+        my $pack = {
+            pkg        =>  $pkg,
+            module     =>  $module,
+            path       =>  $path,
+            packlist   =>  \@pack,
+            control    =>  control($module),
+        };         
+
+        while( my($key, $value) = each(%$pack)){
+            if($key eq 'packlist'){
+                print $key . "\t -->";
+                print @$value;
+                print "\n";
+            } else {
+                print $key . "\t --> " . $value . "\n";
+            }
+        }
+        print "\n";
+
+    push @meta, $pack;
+    close $fh;
+    }
 };
 
-print Dumper(find_packlist("/usr/local/lib/perl5"));
-__DATA__
-sub read_packlist {
-    my $packlist_path = shift;
-    open(my $fh,"<",$packlist_path) || die "cant open $packlist_path: $!";
-    while(<$fh>){ say $_ };
-    close $fh;
-}
-
-
-for(@{find_packlist("/usr/local/lib/perl5/")}){
-    read_packlist($_);
-}
-
-
-
-                    
-
-
-
+parse_packlist(find_packlist("/usr/local/lib/perl5/site_perl"));
 
 

@@ -1,4 +1,4 @@
-package Debian::PerlPackager;
+package App::Dpp;
 
 use warnings;
 use strict;
@@ -16,7 +16,7 @@ use open qw<:encoding(UTF-8)>;
 
 =head1 NAME
 
-Debian::PerlPackager - make debian binary packages of perl modules
+App::Dpp - make debian binary packages of perl modules
 
 =cut
 
