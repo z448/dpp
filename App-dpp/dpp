@@ -1,0 +1,57 @@
+#!/usr/bin/env perl
+
+use 5.010;
+use warnings;
+use strict;
+
+use Getopt::Std;
+use Data::Dumper;
+use JSON;
+use Config;
+use File::Find;
+use open qw< :encoding(UTF-8) >;#use App::Dpp;
+
+my $options = {};
+getopts('d:', $options);
+
+sub find_packlist {
+    my $siteperl_path = shift;
+    my @packlist = ();
+    my $packlist = {};
+    find( sub { if(/\.packlist/){
+                open(my $fh,"<","$File::Find::dir/$_") || die "cant open $File::Find::dir/$_";
+                my @packlist_content = ();
+                while(my $content = <$fh>){
+                    push @packlist_content, $content;
+                }
+
+                $packlist->{"$File::Find::dir/$_"} = \@packlist_content;
+                #push @packlist, "$File::Find::dir/$_";
+                }
+            }, $siteperl_path);
+
+    return $packlist;
+};
+
+print Dumper(find_packlist("/usr/local/lib/perl5"));
+__DATA__
+sub read_packlist {
+    my $packlist_path = shift;
+    open(my $fh,"<",$packlist_path) || die "cant open $packlist_path: $!";
+    while(<$fh>){ say $_ };
+    close $fh;
+}
+
+
+for(@{find_packlist("/usr/local/lib/perl5/")}){
+    read_packlist($_);
+}
+
+
+
+                    
+
+
+
+
+
