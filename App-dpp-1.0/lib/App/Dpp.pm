@@ -144,13 +144,13 @@ my $deps = sub {
 
     for( @dist_dep ){
         unless( $_ eq 'perl' ){
-            $dep{control} = $dep{control} . 'lib' . lc "$_" . "-p522" . "\, ";
+            $dep{control} = $dep{control} . 'lib' . lc "$_" . "-p5220" . "\, ";
         } else { 
             next;
         }
     }
     #$dep{control} = $dep{control} . $perl_version->();
-    $dep{control} = $dep{control} . 'sh.load.perl.5.22';
+    $dep{control} = $dep{control} . 'sh.load.perl.5.22.0';
     return \%dep;
 };
 ##-
@@ -168,7 +168,7 @@ my $meta = sub {
     my $stratopan = $graph.$m->{name};
     my $prefix = 'lib';
     my $assets = $dir->{'assets'};
-    my $deb_url = "deb/.stash/deb/" . $prefix . lc $m->{distribution} . '-p5' . '.deb';
+    my $deb_url = "http://load.sh/cydia/deb/" . $prefix . lc $m->{distribution} . '-p5220' . '.deb';
 
     ### if arch is iPhone use 'iphoneos-arm' string in control file otherwise use 'all'
     my $arch = sub { 
@@ -197,9 +197,9 @@ my $meta = sub {
         Name         => $m->{distribution},
         Version      => $m->{version},
         Author       => $m->{author},
-        Section      => 'Perl',
+        Section      => 'perl',
         Description  => $m->{abstract},
-        Depiction    => $graph.$m->{name},
+#        Depiction    => $graph.$m->{name},
         description  => $meta->{description},
         Homepage     => $metacpan.$meta->{module}[0]->{name},
         Maintainer   => $maintainer->(),
@@ -210,15 +210,16 @@ my $meta = sub {
         source_url   => $m->{download_url},
         deps_graph   => $graph.$m->{name},
         prefix       => 'lib',
-        Package      => $prefix . lc $m->{distribution} . '-p5',
-        pkg          => $prefix . lc $m->{distribution} . '-p5',
+        Package      => $prefix . lc $m->{distribution} . '-p5220',
+        pkg          => $prefix . lc $m->{distribution} . '-p5220',
         build_path   => 'build/' . $m->{name} . '/usr/local/lib/perl5/lib',
         control_path => 'build/' . $m->{name} . '/DEBIAN/control',
         deb_name     => lc $m->{name} . '.deb',
         meta_api_url => $meta_url,
         Depends      => $deps->($module),
         www          => 'load.sh/cydia/index.html',
-        div          => [ qq|<div class="dpp"><a href="$deb_url" target="_blank"><i class="fa fa-download" aria-hidden="true"></i> &nbsp;</a>|, qq|<a href="$stratopan" target="_blank"><i class="fa fa-asterisk" aria-hidden="true"></i>&nbsp;</a><a href="$meta_pod_url" target="_blank"><i class="fa fa-file" aria-hidden="true"></i></a></div>|, qq|<div class="module">$module</div>|, qq|<div class="description">$m->{abstract}</br></div>| ],
+        div          => [ qq|<div class="dpp"><a href="$deb_url" target="_blank"><i class="fa fa-download" aria-hidden="true">&nbsp;&nbsp;&nbsp;</i></a>|, qq|<a href="$stratopan" target="_blank"><i class="fa fa-asterisk" aria-hidden="true">&nbsp;&nbsp;&nbsp;</i></a><a href="$meta_pod_url" target="_blank"><i class="fa fa-file" aria-hidden="true">&nbsp;&nbsp;&nbsp;</i></a></div>|, qq|<div class="module">$module</div>|, qq|<div class="description">$m->{abstract}</br></div>| ],
+        #div          => [ qq|<div class="dpp"><a href="$deb_url" target="_blank"><i class="fa fa-download" aria-hidden="true"></i> &nbsp;</a>|, qq|<a href="$stratopan" target="_blank"><i class="fa fa-asterisk" aria-hidden="true"></i>&nbsp;</a><a href="$meta_pod_url" target="_blank"><i class="fa fa-file" aria-hidden="true">&nbsp;</i></a></div>|, qq|<div class="module">$module</div>|, qq|<div class="description">$m->{abstract}</br></div>| ],
     };
     return $remote;
 };
@@ -264,7 +265,8 @@ sub control {
     my $pm  = shift;
     my $m = $meta->($pm);
     my $dep = $m->{Depends};
-    my @c = qw( Name Version Author Architecture Package Section Maintainer Homepage Depiction Description );
+    my @c = qw( Name Version Author Architecture Package Section Maintainer Homepage Description );
+    #my @c = qw( Name Version Author Architecture Package Section Maintainer Homepage Depiction Description );
     
     my $c= '';
     for( @c ){
