@@ -19,6 +19,7 @@ my $options = {};
 getopts('d:', $options);
 init();
 
+# takes path to site_perl dir; returns array ref with all .packlist paths
 sub find_packlist {
     my $siteperl_path = shift;
     my @packlist_file = ();
@@ -31,7 +32,8 @@ sub find_packlist {
     return \@packlist_file;
 }
 
-
+# takes array ref containing .packlist paths;
+# makes hash ref containing { pkg => package name, module => module name, path => .packlist path, packlist => .packlist contents, control => control file }
 sub parse_packlist {
     my $packlist_path = shift;
     my( @meta )= ();
@@ -57,31 +59,43 @@ sub parse_packlist {
             packlist   =>  \@pack,
             control    =>  control($module),
         };         
-
-#        while( my($key, $value) = each(%$pack)){
-#            if($key eq 'packlist'){
-#                print $key . "\t -->";
-#                print @$value;
-#                print "\n";
-#            } else {
-#                print $key . "\t --> " . $value . "\n";
-#            }
-#        }
-#        print "\n";
+        push @{$pack->{packlist}}, $pack->{$path};
 
 #    push @meta, $pack;
     close $fh;
     pack_packlist($pack);
-    die;
     }
 };
 
 sub pack_packlist {
     my $meta_pack = shift;
+    my $build_path = init('build');
     my $pack_path = init('build') . "/$meta_pack->{pkg}";
-
+    my $deb_path = init('deb');
     mkpath($pack_path);
-    system("tar cz -T $meta_pack->{path} -f $pack_path/data.tar.gz");
+
+    # tar packlist content into data.tar.gz
+    system("tar cz -T $meta_pack->{path} -f $build_path/data.tar.gz");
+    mkpath("$pack_path/DEBIAN");
+
+    # write control file
+    open(my $fh,">", "$pack_path/DEBIAN/control") || die "cant open $pack_path/DEBIAN/control: $!";
+    print $fh $meta_pack->{control};
+    close $fh;
+
+    # make .deb
+    my $packer = <<"_DEB";
+    cd $pack_path/DEBIAN;
+    tar czf ../../control.tar.gz *;
+    cd ../..;
+    echo 2.0 > debian-binary;
+    /var/mobile/Documents/dpp/App-dpp-1.0/arfp r $meta_pack->{pkg}.deb debian-binary control.tar.gz data.tar.gz;
+    mv $meta_pack->{pkg}.deb $deb_path;
+    rm -rf $meta_pack->{pkg};
+    rm -rf debian-binary control.tar.gz data.tar.gz DEBIAN;
+_DEB
+    system("$packer");
+    die;
 }
 
 

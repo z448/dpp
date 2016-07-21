@@ -37,7 +37,6 @@ my $dir = {
     build           =>  $dpp . '/' . 'build',
     stash           =>  $dpp . '/' . 'stash',
     deb             =>  $dpp . '/stash/deb',
-    cpanm           =>  $dpp . '/' . 'build' . '/' . '.cpanm',
 };
 
 my $cleanup = sub {
