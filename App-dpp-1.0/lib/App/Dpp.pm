@@ -83,7 +83,7 @@ my $init = sub {
 
         my $dpp_install_dir = abs_path($0);
         $dpp_install_dir =~ s/(.*)\/bin\/dpp$/$1/;
-        $dpp_install_dir = $dpp_install_dir . '/' . 'lib/perl5/Debian';      
+        $dpp_install_dir = $dpp_install_dir . '/' . 'lib/perl5/App/Dpp';      
 
         my $index_file = $dpp_install_dir . '/' . 'index.json';
         chmod( 0644, $index_file);

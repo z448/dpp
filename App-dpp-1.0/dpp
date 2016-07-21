@@ -89,15 +89,32 @@ sub pack_packlist {
     tar czf ../../control.tar.gz *;
     cd ../..;
     echo 2.0 > debian-binary;
-    /var/mobile/Documents/dpp/App-dpp-1.0/arfp r $meta_pack->{pkg}.deb debian-binary control.tar.gz data.tar.gz;
+    /var/mobile/Documents/dpp/App-dpp-1.0/lib/App/Dpp/arfp r $meta_pack->{pkg}.deb debian-binary control.tar.gz data.tar.gz;
     mv $meta_pack->{pkg}.deb $deb_path;
     rm -rf $meta_pack->{pkg};
     rm -rf debian-binary control.tar.gz data.tar.gz DEBIAN;
 _DEB
     system("$packer");
+    make_html();
     die;
 }
 
+sub make_html {
+    my $json_file = init('assets') . "/index.json";
+    my $html_file= init('assets') . "/index.html";
+
+    open(my $fh,"<",$json_file) || die "cant open $json_file: $!";
+    my $index_json = <$fh>;
+    my $index_hash = decode_json $index_json;
+    close $fh;
+         
+    open($fh,">",$html_file) || die "cant open $html_file: $!";
+    for( @{$index_hash->{head}} ){ print $fh $_ }
+    for( @{$index_hash->{style}} ){ print $fh $_ }
+    for( @{$index_hash->{body}} ){ print $fh $_ }
+    for( @{$index_hash->{foot}} ){ print $fh $_ }
+
+}
 
 
 
