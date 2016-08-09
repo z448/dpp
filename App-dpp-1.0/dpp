@@ -25,7 +25,7 @@ sub find_packlist {
     my @packlist_file = ();
 
     find( sub {
-            if(/\.packlist/){
+            if(/\.packlist_marked/){
                 push @packlist_file, "$File::Find::dir/$_";
             }
         }, $siteperl_path );
@@ -48,8 +48,11 @@ sub parse_packlist {
         $module = $2;
         $module =~ s/\//\:\:/g;
         open( my $fh, "<", $path );
-        while( <$fh>){ chomp and push @pack, $_ }
-        
+        while( <$fh>){
+            chomp;
+            push @pack, $;
+        }
+
         my $meta = meta($module);
         my $pkg = $meta->{pkg};
         my $pack = {
@@ -63,6 +66,7 @@ sub parse_packlist {
 
 #    push @meta, $pack;
     close $fh;
+    print "packing $pack->{module}\t" . ' <--> ' . "$pack->{pkg}\t\n";
     pack_packlist($pack);
     }
 };
@@ -75,7 +79,7 @@ sub pack_packlist {
     mkpath($pack_path);
 
     # tar packlist content into data.tar.gz
-    system("tar cz -T $meta_pack->{path} -f $build_path/data.tar.gz");
+    system("tar cz -T $meta_pack->{path} -f $build_path/data.tar.gz && cd $build_path && tar -zcf data.tar.gz * && cd -");
     mkpath("$pack_path/DEBIAN");
 
     # write control file
@@ -95,9 +99,9 @@ sub pack_packlist {
     rm -rf debian-binary control.tar.gz data.tar.gz DEBIAN;
 _DEB
     system("$packer");
-    web("$meta_pack->{module}");
+    eval { web("$meta_pack->{module}") };
     make_html();
-    die;
+    #die;
 }
 
 sub make_html {
