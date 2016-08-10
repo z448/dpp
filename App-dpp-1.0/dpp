@@ -7,6 +7,7 @@ use strict;
 use Term::ANSIColor;
 use Getopt::Std;
 use App::Dpp qw< control meta web init cleanup >;
+use App::Dpp::Packlist qw< packages >;
 use Data::Dumper;
 use JSON;
 use Config;
@@ -21,15 +22,7 @@ init();
 
 # takes path to site_perl dir; returns array ref with all .packlist paths
 sub find_packlist {
-    my $siteperl_path = shift;
-    my @packlist_file = ();
-
-    find( sub {
-            if(/\.packlist_marked/){
-                push @packlist_file, "$File::Find::dir/$_";
-            }
-        }, $siteperl_path );
-    return \@packlist_file;
+    return packages('notpackaged');
 }
 
 # takes array ref containing .packlist paths;
