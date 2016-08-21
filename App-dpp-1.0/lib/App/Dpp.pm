@@ -54,7 +54,8 @@ my $meta_api = sub {
         my $meta = $response->{content} if length $response->{content};
         $meta = decode_json $meta;
     } else {
-        die "http request failed";
+        next;
+        #die "http request failed";
     }
 };
 

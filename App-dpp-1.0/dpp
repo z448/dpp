@@ -7,13 +7,11 @@ use strict;
 use Term::ANSIColor;
 use Getopt::Std;
 use App::Dpp qw< control meta web init cleanup >;
-use App::Dpp::Packlist qw< packages >;
 use Data::Dumper;
 use JSON;
 use Config;
 use File::Find;
 use File::Path;
-use Data::Dumper;
 use open qw< :encoding(UTF-8) >;
 
 my $options = {};
@@ -23,11 +21,16 @@ init();
 
 # takes path to site_perl dir; returns array ref with all .packlist paths
 sub find_packlist {
-    my $packlists = packages('notpackaged');
-    return $packlists;
-}
+    my $siteperl_path = shift;
+    my @packlist_file = ();
 
-#print Dumper(find_packlist());
+    find( sub {
+            if(/\.packlist/){
+                push @packlist_file, "$File::Find::dir/$_";
+            }
+        }, $siteperl_path );
+    return \@packlist_file;
+}
 
 # takes array ref containing .packlist paths;
 # makes hash ref containing { pkg => package name, module => module name, path => .packlist path, packlist => .packlist contents, control => control file }
@@ -45,11 +48,8 @@ sub parse_packlist {
         $module = $2;
         $module =~ s/\//\:\:/g;
         open( my $fh, "<", $path );
-        while( <$fh>){
-            chomp;
-            push @pack, $;
-        }
-
+        while( <$fh>){ chomp and push @pack, $_ }
+        
         my $meta = meta($module);
         my $pkg = $meta->{pkg};
         my $pack = {
@@ -76,7 +76,7 @@ sub pack_packlist {
     mkpath($pack_path);
 
     # tar packlist content into data.tar.gz
-    system("tar cz -T $meta_pack->{path} -f $build_path/data.tar.gz && cd $build_path && tar -zcf data.tar.gz * && cd -");
+    system("tar cz -T $meta_pack->{path} -f $build_path/data.tar.gz && cd $build_path && tar -xvf data.tar.gz && rm -rf data.tar.gz && tar -zcvf data.tar.gz * && mv data.tar.gz .. && rm -rf * && mv ../data.tar.gz . && cd -");
     mkpath("$pack_path/DEBIAN");
 
     # write control file
@@ -86,6 +86,7 @@ sub pack_packlist {
 
     # make .deb
     my $packer = <<"_DEB";
+
     cd $pack_path/DEBIAN;
     tar czf ../../control.tar.gz *;
     cd ../..;
@@ -123,6 +124,6 @@ sub make_html {
 
 
 
-parse_packlist(find_packlist());
+parse_packlist(find_packlist("/usr/local/lib/perl5/site_perl"));
 
 
