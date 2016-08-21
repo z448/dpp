@@ -42,7 +42,7 @@ sub installed {
             sub {
                 my $path = "$File::Find::name";
                 my %packlist = ();
-                if ( $path =~ /\.packlist/) {
+                if ( $path =~ /\.packlist$/) {
                     chomp($path);
                     $packlist{path} = "$path";
 
