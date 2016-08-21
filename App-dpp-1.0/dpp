@@ -13,6 +13,7 @@ use JSON;
 use Config;
 use File::Find;
 use File::Path;
+use Data::Dumper;
 use open qw< :encoding(UTF-8) >;
 
 my $options = {};
@@ -22,8 +23,11 @@ init();
 
 # takes path to site_perl dir; returns array ref with all .packlist paths
 sub find_packlist {
-    return packages('notpackaged');
+    my $packlists = packages('notpackaged');
+    return $packlists;
 }
+
+#print Dumper(find_packlist());
 
 # takes array ref containing .packlist paths;
 # makes hash ref containing { pkg => package name, module => module name, path => .packlist path, packlist => .packlist contents, control => control file }
@@ -119,6 +123,6 @@ sub make_html {
 
 
 
-parse_packlist(find_packlist("/usr/local/lib/perl5/site_perl"));
+parse_packlist(find_packlist());
 
 

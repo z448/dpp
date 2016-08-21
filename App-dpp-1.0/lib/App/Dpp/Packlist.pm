@@ -62,7 +62,7 @@ sub installed {
 }
 
 sub packages {
-    y $query = shift;
+    my $query = shift;
     my @result = ();
     if( $query eq 'installed'){
         for(@{installed()}){
