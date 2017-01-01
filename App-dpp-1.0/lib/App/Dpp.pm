@@ -3,7 +3,7 @@ package App::Dpp;
 use warnings;
 use strict;
 
-use JSON;
+use JSON::PP;
 use File::Copy;
 use File::Path;
 use Encode;

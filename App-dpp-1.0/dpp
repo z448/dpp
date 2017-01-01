@@ -8,7 +8,7 @@ use Term::ANSIColor;
 use Getopt::Std;
 use App::Dpp qw< control meta web init cleanup >;
 use Data::Dumper;
-use JSON;
+use JSON::PP;
 use Config;
 use File::Find;
 use File::Path;
