@@ -151,7 +151,7 @@ my $deps = sub {
         }
     }
     #$dep{control} = $dep{control} . $perl_version->();
-    $dep{control} = $dep{control} . 'sh.load.perl.5.22.0';
+    $dep{control} = $dep{control} . 'perl';
     return \%dep;
 };
 ##-
