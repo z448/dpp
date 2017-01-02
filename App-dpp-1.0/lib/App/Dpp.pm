@@ -1,5 +1,6 @@
 package App::Dpp;
 
+use 5.010;
 use warnings;
 use strict;
 
@@ -10,10 +11,11 @@ use Encode;
 use Data::Dumper;
 use Config;
 use HTTP::Tiny;
-use Config::Extensions qw( %Extensions );
+use Config::Extensions '%Extensions';
 use Cwd qw< abs_path >;
 use open qw<:encoding(UTF-8)>;
 
+use Term::ANSIColor;
 =head1 NAME
 
 App::Dpp - make debian binary packages of perl modules
@@ -28,6 +30,7 @@ BEGIN {
 }
 
 our $VERSION = '1.0';
+
 
 my $dpp = "$ENV{HOME}/dpp";
 my $dir = {
@@ -99,6 +102,31 @@ my $init = sub {
 };
 ##-
 
+
+my $arch = arch();
+my @install_path = qw< installarchlib installprivlib installextrasarch installextraslib installupdatesarch installupdateslib installvendorarch installvendorlib >;
+my @osx_extra_path = qw< installsitearch installsitelib >;
+push @install_path, @osx_extra_path if $arch eq 'darwin';
+
+sub arch {
+    open my $pipe,"-|",'uname -a';
+    while(<$pipe>){
+        if(/iPhone/){ return 'iphoneos-arm' }
+        else { return $^O }
+    }
+}
+
+sub core_module {
+    my $module = shift;
+    my %core_path = ();
+    for( @install_path ){
+        $core_path{$_} = $Config{$_} . '/' . "$module" . '.pm';
+        $core_path{$_} = '/System' . $core_path{$_} if /installsite/;
+        $core_path{$_} =~ s/::/\//g;
+        return $core_path{$_} if -f $core_path{$_};
+    }
+}
+
 ### takes module name, returns hash ref with 2 hashes: $dep{control} and $dep{distribution}
 my $deps = sub {
     my $pm = shift;
@@ -119,7 +147,7 @@ my $deps = sub {
         my $meta_hash  = $meta_api->("http://api.metacpan.org/v0/module/$module_name?join=release"); 
         my @module_dependencies = ();
         for( keys %{$meta_hash->{release}->{_source}->{metadata}->{prereqs}->{runtime}->{requires}} ){
-            push @module_dependencies, $_ unless $Extensions{$_};
+                push @module_dependencies, $_ unless core_module($_);
         }
         return \@module_dependencies;
     };
