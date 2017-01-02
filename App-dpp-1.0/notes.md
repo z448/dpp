@@ -3,4 +3,5 @@ TODO
 
 - exclude core modules from including into Depends field of control file except if it dependes on newer version
 
-
+LINKS
+- [Debian Perl Group](https://pkg-perl.alioth.debian.org/)
