@@ -53,6 +53,8 @@ my $cleanup = sub {
 my $meta_api = sub {
     my $meta_url = shift;
     my $response = HTTP::Tiny->new->get("$meta_url");
+    #$response->{content} if length $response->{content};
+
     if($response->{success}){
         my $meta = $response->{content} if length $response->{content};
         $meta = decode_json $meta;
@@ -120,6 +122,7 @@ sub core_module {
     my $module = shift;
     my %core_path = ();
     for( @install_path ){
+        next unless defined $Config{$_};
         $core_path{$_} = $Config{$_} . '/' . "$module" . '.pm';
         $core_path{$_} = '/System' . $core_path{$_} if /installsite/;
         $core_path{$_} =~ s/::/\//g;
@@ -147,7 +150,7 @@ my $deps = sub {
         my $meta_hash  = $meta_api->("http://api.metacpan.org/v0/module/$module_name?join=release"); 
         my @module_dependencies = ();
         for( keys %{$meta_hash->{release}->{_source}->{metadata}->{prereqs}->{runtime}->{requires}} ){
-                push @module_dependencies, $_ unless core_module($_);
+                push @module_dependencies, $_ unless (core_module($_));
         }
         return \@module_dependencies;
     };
