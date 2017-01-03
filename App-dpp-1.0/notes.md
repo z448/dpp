@@ -2,7 +2,7 @@ TODO
 - fix symlinks "control.json + index.json" 
 `cant open /var/root/dpp/assets/control.json: No such file or directory at /usr/local/lib/perl5/site_perl/5.22.0/App/Dpp.pm line 190, <$fh> chunk 5.`
 
-- cpan on ubuntu under root user doesnt install packlists (get packlist from Metacpan ?)
+- cpan on ubuntu under root user doesnt install packlists (get packlist from Metacpan API ?)
 
 - add architectore check on debian using command `dpkg --print-architecture`;
 ```
