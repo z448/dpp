@@ -71,12 +71,12 @@ sub parse_packlist {
 sub pack_packlist {
     my $meta_pack = shift;
     my $build_path = init('build');
-    my $pack_path = init('build') . "/$meta_pack->{pkg}";
+    my $pack_path = $build_path . "/$meta_pack->{pkg}";
     my $deb_path = init('deb');
     mkpath($pack_path);
 
     # tar packlist content into data.tar.gz
-    system("tar cz -T $meta_pack->{path} -f $build_path/data.tar.gz && cd $build_path && tar -xvf data.tar.gz && rm -rf data.tar.gz && tar -zcvf data.tar.gz * && mv data.tar.gz .. && rm -rf * && mv ../data.tar.gz . && cd -");
+    system("tar cz -T $meta_pack->{path} -f $build_path/data.tar.gz && cd $build_path && tar -xvf data.tar.gz && rm -rf data.tar.gz && rm -rf $pack_path  && tar -zcvf data.tar.gz * && mv data.tar.gz .. && rm -rf * && mv ../data.tar.gz . && cd -");
     mkpath("$pack_path/DEBIAN");
 
     # write control file
