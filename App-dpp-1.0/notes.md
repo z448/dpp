@@ -2,6 +2,14 @@ TODO
 - fix symlinks "control.json + index.json" 
 `cant open /var/root/dpp/assets/control.json: No such file or directory at /usr/local/lib/perl5/site_perl/5.22.0/App/Dpp.pm line 190, <$fh> chunk 5.`
 
+- add architectore check on debian using command `dpkg --print-architecture`;
+```
+~/tmp/mydir uname -a
+Linux load.sh 3.13.0-24-generic #47-Ubuntu SMP Fri May 2 23:30:00 UTC 2014 x86_64 x86_64 x86_64 GNU/Linux
+~/tmp/mydir dpkg --print-architecture
+amd64
+```
+
 LINKS
 - [Debian Perl Group](https://pkg-perl.alioth.debian.org/)
 
