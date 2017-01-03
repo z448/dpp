@@ -103,8 +103,9 @@ _DEB
 }
 
 sub make_html {
-    my $json_file = init('assets') . "/index.json";
-    my $html_file= init('assets') . "/index.html";
+    my $json_file = "$ENV{HOME}/dpp/index.json";
+    #my $json_file = init('assets') . "/index.json";
+    my $html_file = "$ENV{HOME}/dpp/index.html";
 
     open(my $fh,"<",$json_file) || die "cant open $json_file: $!";
     my $index_json = <$fh>;

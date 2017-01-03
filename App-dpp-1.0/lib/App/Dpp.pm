@@ -35,8 +35,9 @@ our $VERSION = '1.0';
 my $dpp = "$ENV{HOME}/dpp";
 my $dir = {
     dpp             =>  $dpp,
-    assets          =>  $dpp . '/' . 'assets',
-    assets_html     =>  $dpp . '/' . 'assets' . '/' . 'html',
+    assets          =>  $dpp,
+    #assets          =>  $dpp . '/' . 'assets',
+    #assets_html     =>  $dpp . '/' . 'assets' . '/' . 'html',
     build           =>  $dpp . '/' . 'build',
     stash           =>  $dpp . '/' . 'stash',
     deb             =>  $dpp . '/stash/deb',
@@ -80,24 +81,30 @@ my $init = sub {
         mkpath $dpp;
         chmod( 0755, $dpp);
         for(keys %$dir){ mkpath $dir->{$_} }
-
+        
+        my $index_data = <DATA>;
+        my $index_file = $dir->{dpp} . '/' . 'index.json';
+        open(my $fh,'>',$index_file) || die "cant open $index_file: $!";
+        print $fh $index_data;
+        close $fh;
         #symlink ~/.dpp/assets/index.json --> index.json
-        my $index_link = init('assets') . "/index.json";
+        #my $index_link = init('assets') . "/index.json";
 
+        my $control_file = $dir->{dpp} . '/' . 'control.json';
         #symlink ~/.dpp/assets/control.json --> control.json
-        my $control_link = init('assets') . "/control.json";
+        #my $control_link = init('assets') . "/control.json";
 
-        my $dpp_install_dir = abs_path($0);
-        $dpp_install_dir =~ s/(.*)\/bin\/dpp$/$1/;
-        $dpp_install_dir = $dpp_install_dir . '/' . 'lib/perl5/site_perl/' . $perl_version->() . '/App/Dpp';      
+        #my $dpp_install_dir = abs_path($0);
+        #$dpp_install_dir =~ s/(.*)\/bin\/dpp$/$1/;
+        #$dpp_install_dir = $dpp_install_dir . '/' . 'lib/perl5/site_perl/' . $perl_version->() . '/App/Dpp';      
 
-        my $index_file = $dpp_install_dir . '/' . 'index.json';
-        chmod( 0644, $index_file);
-        symlink $index_file, $index_link;
+        #my $index_file = $dpp_install_dir . '/' . 'index.json';
+        #chmod( 0644, $index_file);
+        #symlink $index_file, $index_link;
 
-        my $control_file = $dpp_install_dir . '/' . 'control.json';
-        chmod( 0644, $control_file);
-        symlink $control_file, $control_link;
+        #my $control_file = $dpp_install_dir . '/' . 'control.json';
+        #chmod( 0644, $control_file);
+        #symlink $control_file, $control_link;
 
         return $dir;
     }
@@ -327,4 +334,5 @@ sub cleanup {
     $cleanup->($dirty_dir);
 };
 
-
+__DATA__
+{"body":["<div class=\"dpp\"> </div>\n","<div class=\"dpp\"><a href=\"deb/.stash/deb/libhttp-tiny-p5.deb\" target=\"_blank\"><i class=\"fa fa-download\" aria-hidden=\"true\"></i> &nbsp;</a>","<a href=\"https://widgets.stratopan.com/wheel?q=HTTP-Tiny-0.058\" target=\"_blank\"><i class=\"fa fa-asterisk\" aria-hidden=\"true\"></i>&nbsp;</a><a href=\"http://api.metacpan.org/v0/pod/HTTP::Tiny?content-type=text/plain\" target=\"_blank\"><i class=\"fa fa-file\" aria-hidden=\"true\"></i></a></div>","<div class=\"module\">HTTP::Tiny</div>","<div class=\"description\">A small, simple, correct HTTP/1.1 client</br></div>"],"foot":["<div class=\"footer\" align=\"center\" >dpp<br></div>\n","</body>\n","</html>\n"],"head":["<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">\n","<html xmlns=\"http://www.w3.org/1999/xhtml\">\n","<head>\n","<title>dpp</title>\n","<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\n","<meta name=\"viewport\" content=\"width=device-width; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;\"/>\n","<meta name=\"apple-mobile-web-app-capable\" content=\"yes\" />\n","<meta name=\"apple-mobile-web-app-status-bar-style\" content=\"black-translucent\"/>\n","<script src=\"https://code.jquery.com/jquery-2.2.3.min.js\" integrity=\"sha256-a23g1Nt4dtEYOj7bR+vTu7+T8VP13humZFBJNIYoEJo=\" crossorigin=\"anonymous\"></script>\n","<link rel=\"stylesheet\" href=\"https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css\" />\n","<link rel=\"stylesheet\" href=\"//code.cdn.mozilla.net/fonts/fira.css\">\n","<link rel=\"stylesheet\" href=\"//netdna.bootstrapcdn.com/bootswatch/3.3.0/paper/bootstrap.min.css\" />\n","<link rel=\"stylesheet\" type=\"text/css\" href=\"style.css\">\n","</head>\n","\n","<body bgcolor=\"#090311\">\n","<div align=\"center\" >\n","<div class=\"headtext\"><br><br><sub>This is APT repository index.</sub><br><br></div>\n"],"style":["<style type=\"text/css\"> \n","\n",".slideshow-overlay {\n","    display: block;\n","    position: fixed;\n","    left: 0;\n","    top: 0;\n","    overflow: hidden;\n","    z-index: -99;\n","    height: 100%;\n","    width: 100%;\n","}\n","\n",".fa-download {\n","    background: #090311;\n","}\n","\n",".dpp {\n","    background: #090311;\n","}\n","\n",".headtext {\n","\tfont-family: 'Fira Mono';\n","\tfont-size: 11px;\n","    text-align = \"center\";\n","\tbackground : #090311;\n","    color: #8E8E8E;\n","    top: 2px;\n","    left: 0;\n","    right: 0;\n","}\n","\n",".description {\n","\tfont-family: 'Fira Mono';\n","\tfont-size: 11px;\n","    text-align = \"center\";\n","\tbackground : #090311;\n","    color: #4F4F50;\n","}\n","\n",".code{\n","    font-size: 10px;\n","    bottom: 5px;\n","\n","}\n","\n",".module {\n","    font-family: 'Open Sans', sans-serif;\n","    text-align = \"center\";\n","\tfont-size: 12px;\n","\tbackground : #090311;\n","\tcolor: #fefefe;\n","}\n","\n",".header{\n","\tfont-family: 'Fira Mono';\n","\tfont-size: 0;\n","\tcolor: white;\n","    -webkit-overflow-scrolling: touch;\n","    text-align: center;\n","    background: black;\n","    position: fixed;\n","    left: 0;\n","    right: 0;\n","    top: 0;\n","    height: 10px;\n","}    \n",".footer {\n","    font-family: 'Open Sans', sans-serif;\n","    font-weight: 600;\n","\tfont-size: 8px;\n","    border: 0;\n","    -webkit-overflow-scrolling: touch;\n","\tcolor: #4F4F50;\n","    text-align: center;\n","\tbackground : #1e1d20;\n","    position: fixed;\n","    left: 0;\n","    right: 0;\n","    bottom: 0;\n","    height: 13px;\n","}    \n","</style> \n"]}
