@@ -2,7 +2,7 @@ TODO
 - fix symlinks "control.json + index.json" 
 `cant open /var/root/dpp/assets/control.json: No such file or directory at /usr/local/lib/perl5/site_perl/5.22.0/App/Dpp.pm line 190, <$fh> chunk 5.`
 
-- cpan on ubuntu under root user doesnt install packlists; not posible to get packlist from Metacpan API as non .pm files created after build are not included; Therefore for root get module path and create own packlist including all files under module path in installsitelib + installarchlib; cpan under non root user is ok, it include packlists
+- cpan on ubuntu under root user doesnt install packlists; not posible to get packlist from Metacpan API as non .pm files created after build are not included; Therefore for root get module path and create own packlist including all files under module path in installsitelib + installarchlib; cpan under non root user is ok, it include packlists but such .deb package would include local username (/home/zdenek)
 
 - add architectore check on debian using command `dpkg --print-architecture`;
 ```
