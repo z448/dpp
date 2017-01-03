@@ -91,7 +91,7 @@ sub pack_packlist {
     tar czf ../../control.tar.gz *;
     cd ../..;
     echo 2.0 > debian-binary;
-    /var/mobile/Documents/dpp/App-dpp-1.0/lib/App/Dpp/arfp r $meta_pack->{pkg}.deb debian-binary control.tar.gz data.tar.gz;
+    ar r $meta_pack->{pkg}.deb debian-binary control.tar.gz data.tar.gz;
     mv $meta_pack->{pkg}.deb $deb_path;
     rm -rf $meta_pack->{pkg};
     rm -rf debian-binary control.tar.gz data.tar.gz DEBIAN;
@@ -124,6 +124,7 @@ sub make_html {
 
 
 
-parse_packlist(find_packlist("/usr/local/lib/perl5/site_perl"));
+die "add path to perl modules dir" unless $ARGV[0];
+parse_packlist(find_packlist("$ARGV[0]"));
 
 
