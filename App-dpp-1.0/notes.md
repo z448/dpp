@@ -1,5 +1,6 @@
 TODO
 
+- generate Packages.gz into dpp_home
 - make sure custom dpp_home is in/above users home dir
 - add -p for tar compress to preserve permissions and change first tar/untar method
 - fix symlinks "control.json + index.json" 
