@@ -1,4 +1,6 @@
 TODO
+
+- add -p for tar compress to preserve permissions and change first tar/untar method
 - fix symlinks "control.json + index.json" 
 `cant open /var/root/dpp/assets/control.json: No such file or directory at /usr/local/lib/perl5/site_perl/5.22.0/App/Dpp.pm line 190, <$fh> chunk 5.`
 
