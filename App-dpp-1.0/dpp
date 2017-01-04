@@ -48,8 +48,14 @@ sub parse_packlist {
         $module = $2;
         $module =~ s/\//\:\:/g;
         open( my $fh, "<", $path );
-        while( <$fh>){ chomp and push @pack, $_ }
-        
+        while( <$fh>){ 
+            chomp and push @pack, $_ ;
+            s/(.*)(\/.*)/$1/; push @pack, $1; # risky; wont work if there is directory with nothing else but another directory todo
+        }
+        # uniq
+        my %pack_seen  = ( );
+        @pack = grep { ! $pack_seen{"$_"} ++ } @pack;
+
         my $meta = meta($module);
         my $pkg = $meta->{pkg};
         my $pack = {
@@ -79,7 +85,8 @@ sub pack_packlist {
     mkpath($pack_path);
 
     # tar packlist content into data.tar.gz
-    system("mkdir $path->{build} && tar cz -T $meta_pack->{path} -f $path->{build}/data.tar.gz && cd $path->{build} && tar -xvf data.tar.gz && rm -rf data.tar.gz && rm -rf $pack_path  && tar -zcvf data.tar.gz * && mv data.tar.gz .. && rm -rf * && mv ../data.tar.gz . && cd -");
+    system("tar pcz -T $meta_pack->{path} -f $build_path/data.tar.gz && cd $build_path  && mv data.tar.gz .. && rm -rf * && mv ../data.tar.gz . && cd -");
+    #system("mkdir $path->{build} && tar cz -T $meta_pack->{path} -f $path->{build}/data.tar.gz && cd $path->{build} && tar -xvf data.tar.gz && rm -rf data.tar.gz && rm -rf $pack_path  && tar -zcvf data.tar.gz * && mv data.tar.gz .. && rm -rf * && mv ../data.tar.gz . && cd -");
     mkpath("$pack_path/DEBIAN");
 
     # write control file
