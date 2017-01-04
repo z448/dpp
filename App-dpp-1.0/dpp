@@ -6,7 +6,7 @@ use strict;
 
 use Term::ANSIColor;
 use Getopt::Std;
-use App::Dpp qw< control meta web init cleanup >;
+use App::Dpp qw< control meta web init >;
 use Data::Dumper;
 use JSON::PP;
 use Config;
@@ -70,13 +70,16 @@ sub parse_packlist {
 
 sub pack_packlist {
     my $meta_pack = shift;
-    my $build_path = init('build');
-    my $pack_path = $build_path . "/$meta_pack->{pkg}";
+    my $path = init();
+    $path->{build} = $path->{dpp} . '/' . 'build';
+
+    #my $build_path = init('build');
+    my $pack_path = $path->{build} . "/$meta_pack->{pkg}";
     my $deb_path = init('deb');
     mkpath($pack_path);
 
     # tar packlist content into data.tar.gz
-    system("tar cz -T $meta_pack->{path} -f $build_path/data.tar.gz && cd $build_path && tar -xvf data.tar.gz && rm -rf data.tar.gz && rm -rf $pack_path  && tar -zcvf data.tar.gz * && mv data.tar.gz .. && rm -rf * && mv ../data.tar.gz . && cd -");
+    system("mkdir $path->{build} && tar cz -T $meta_pack->{path} -f $path->{build}/data.tar.gz && cd $path->{build} && tar -xvf data.tar.gz && rm -rf data.tar.gz && rm -rf $pack_path  && tar -zcvf data.tar.gz * && mv data.tar.gz .. && rm -rf * && mv ../data.tar.gz . && cd -");
     mkpath("$pack_path/DEBIAN");
 
     # write control file
