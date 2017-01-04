@@ -72,19 +72,21 @@ my $perl_version = sub {
 };
 
 ### init dpp direcories
-my $init = sub {
+sub init {
     my $get = shift;
-    my $dpp_home = ref $get eq 'HASH' ? $get->{dpp} : "$ENV{HOME}/dpp";
+    my $dpp_home = "$ENV{HOME}/dpp";
+    #my $dpp_home = ref $get eq 'HASH' ? $get->{dpp} : "$ENV{HOME}/dpp";
 
     my $dir = {
         dpp             =>  $dpp_home,
         deb             =>  $dpp_home . '/' . 'deb',
+        build           =>  $dpp_home . '/' . 'build',
     };
     
     # return dir PATH if param is string else create dirs and return \%dir
     # if its a ref it passing getopts() (currently custom home for dpp)
-    unless(ref $get){
-        return $dir->{$get} if defined $dir->{$get};
+    if($get){
+        return $dir->{$get};
     } else {
         mkpath $dpp_home;
         chmod( 0755, $dpp_home);
@@ -225,7 +227,7 @@ my $meta = sub {
     my $m = $meta->{release}->{_source};
     my $stratopan = $graph.$m->{name};
     my $prefix = 'lib';
-    my $assets = $init->{dpp};
+    my $assets = init('dpp');
     #my $assets = $dir->{'assets'};
     my $deb_url = "http://load.sh/cydia/deb/" . $prefix . lc $m->{distribution} . '-p5220' . '.deb';
 
@@ -244,7 +246,7 @@ my $meta = sub {
 
     my $maintainer = sub {
         local $/;
-        my $maintainer_file = init('assets') . '/' .   'control.json';
+        my $maintainer_file = init('dpp') . '/' .   'control.json';
         open(my $fh, "<", $maintainer_file) || die "cant open $maintainer_file: $!"; 
         my $maintainer = <$fh>;
         $maintainer = decode_json $maintainer;
@@ -285,7 +287,10 @@ my $meta = sub {
 
 my $web = sub {
     my $pm = shift;
+
+    my $init = init('dpp');
     my $index_json = $init->{dpp} . '/' . 'index.json';
+    #my $index_json = $init->{dpp} . '/' . 'index.json';
     #my $index_json = $dir->{'assets'} . '/' . 'index.json';
     my $m = $meta->( $pm );
     my ( @pipe, @body ) = ();
@@ -344,10 +349,10 @@ sub graph {
     system("$deps_graph");
 }
 
-sub init {
-    my $get = shift;
-    my $init_status = $init->($get);
-}
+#sub init {
+#    my $get = shift;
+#    my $init_status = $init->($get);
+#}
 
 #sub cleanup {
 #   my $dirty_dir = shift;

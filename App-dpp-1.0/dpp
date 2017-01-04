@@ -17,7 +17,7 @@ use open qw< :encoding(UTF-8) >;
 my $options = {};
 
 getopts('d:', $options);
-init();
+my $dir = init();
 
 # takes path to site_perl dir; returns array ref with all .packlist paths
 sub find_packlist {
@@ -37,6 +37,9 @@ sub find_packlist {
 sub parse_packlist {
     my $packlist_path = shift;
     my( @meta )= ();
+
+    mkpath("$dir->{build}");
+    my $tmp_pack_file = "$dir->{build}/tmp_pack_file.tar.gz";
  
     for my $path( @$packlist_path ){
         my @pack = ();
@@ -47,14 +50,25 @@ sub parse_packlist {
         $module =~ s/(auto.*?\/)(.*?)(\/\.packlist)/$2/;
         $module = $2;
         $module =~ s/\//\:\:/g;
-        open( my $fh, "<", $path );
-        while( <$fh>){ 
-            chomp and push @pack, $_ ;
-            s/(.*)(\/.*)/$1/; push @pack, $1; # risky; wont work if there is directory with nothing else but another directory todo
+
+
+        system("tar -cz -T $path -f $tmp_pack_file && cd $dir->{build} && tar -xvf $tmp_pack_file && rm -rf $tmp_pack_file && find . > ../packlist");
         }
-        # uniq
-        my %pack_seen  = ( );
-        @pack = grep { ! $pack_seen{"$_"} ++ } @pack;
+        #print "$_\n" for @pack;
+        
+
+        #open(my $pipe,'-|', "tar -xvf $tmp_pack_file") || die "cant open $pipe: $!";
+        #while( <$pipe> ){ chomp and push @pack, '/' . $_ }
+
+        #open( my $fh, "<", "$dir->{dpp}/packlist");
+        #    while( <$fh>){ 
+        #        chomp and push @pack, $_ ;
+        #    }
+        #}
+           #       s/(.*)(\/.*)/$1/; push @pack, $1; # risky; wont work if there is directory with nothing else but another directory todo
+        #    uniq
+        #my %pack_seen  = ( );
+        #@pack = grep { ! $pack_seen{"$_"} ++ } @pack;
 
         my $meta = meta($module);
         my $pkg = $meta->{pkg};
@@ -67,8 +81,8 @@ sub parse_packlist {
         };         
         push @{$pack->{packlist}}, $pack->{$path};
 
-#    push @meta, $pack;
-    close $fh;
+#   push @meta, $pack;
+        #close $fh;
     print "packing $pack->{module}\t" . ' <--> ' . "$pack->{pkg}\t\n";
     pack_packlist($pack);
     }
@@ -77,15 +91,17 @@ sub parse_packlist {
 sub pack_packlist {
     my $meta_pack = shift;
     my $path = init();
-    $path->{build} = $path->{dpp} . '/' . 'build';
 
     #my $build_path = init('build');
     my $pack_path = $path->{build} . "/$meta_pack->{pkg}";
-    my $deb_path = init('deb');
-    mkpath($pack_path);
+    #my $path->{deb} = init('deb');
+    mkpath("$path->{build}/$meta_pack->{pkg}");
+    my $data_paths = join(' ', @{$meta_pack->{packlist}});
 
     # tar packlist content into data.tar.gz
-    system("tar pcz -T $meta_pack->{path} -f $build_path/data.tar.gz && cd $build_path  && mv data.tar.gz .. && rm -rf * && mv ../data.tar.gz . && cd -");
+    system("tar -pzcf $dir->{build}/data.tar.gz $dir->{dpp}/packlist && cd $dir->{build} && mv data.tar.gz .. && rm -rf * && mv ../data.tar.gz . && cd -");
+    #system("tar pcz -T $meta_pack->{path} -f $build_path/data.tar.gz && cd $build_path  && mv data.tar.gz .. && rm -rf * && mv ../data.tar.gz . && cd -");
+
     #system("mkdir $path->{build} && tar cz -T $meta_pack->{path} -f $path->{build}/data.tar.gz && cd $path->{build} && tar -xvf data.tar.gz && rm -rf data.tar.gz && rm -rf $pack_path  && tar -zcvf data.tar.gz * && mv data.tar.gz .. && rm -rf * && mv ../data.tar.gz . && cd -");
     mkpath("$pack_path/DEBIAN");
 
@@ -98,11 +114,11 @@ sub pack_packlist {
     my $packer = <<"_DEB";
 
     cd $pack_path/DEBIAN;
-    tar czf ../../control.tar.gz *;
+    tar pczf ../../control.tar.gz *;
     cd ../..;
     echo 2.0 > debian-binary;
     ar r $meta_pack->{pkg}.deb debian-binary control.tar.gz data.tar.gz;
-    mv $meta_pack->{pkg}.deb $deb_path;
+    mv $meta_pack->{pkg}.deb $path->{deb};
     rm -rf $meta_pack->{pkg};
     rm -rf debian-binary control.tar.gz data.tar.gz DEBIAN;
 _DEB
