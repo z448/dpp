@@ -6,7 +6,7 @@ use strict;
 
 use Term::ANSIColor;
 use Getopt::Std;
-use App::Dpp qw< control meta web init >;
+use App::Dpp qw< control meta web init digest >;
 use Data::Dumper;
 use JSON::PP;
 use Config;
@@ -59,12 +59,15 @@ sub parse_packlist {
 
         #system("tar -cz -T $path -f $tmp_pack_file && cd $dir->{build} && tar -xf $tmp_pack_file && rm -rf $tmp_pack_file && find . > ../packlist");
 	my @preinst =  ('#!/bin/sh');
+    my @md5sums = ();
         open(my $fh,'<', $path) || die "cant open $path:$!";
         while( <$fh> ){ 
             chomp;
+            my $md5 = $_; $md5 = digest($md5) . '  ' . $md5;
+            push @md5sums, $md5;
+            my $dir = $_; $dir =~ s/(.*)(\/.*)/$1/;
+            push @preinst, qq|mkdir -p '$dir';|;
             push @pack, $_;
-	s/(.*)(\/.*)/$1/;
-	push @preinst, qq|mkdir -p '$_';|;
         }; 
         close $fh;
 
@@ -100,6 +103,7 @@ sub parse_packlist {
             module     =>  $module,
             path       =>  $path,
             packlist   =>  \@pack,
+            md5sums    =>  \@md5sums,
             preinst    =>  \@preinst,
             control    =>  control($module),
         };         
@@ -136,6 +140,11 @@ sub pack_packlist {
     # write control file
     open($fh,">", "$pack_path/DEBIAN/control") || die "cant open $pack_path/DEBIAN/control: $!";
     print $fh $meta_pack->{control};
+    close $fh;
+
+    # write md5sums file
+    open($fh,">", "$pack_path/DEBIAN/md5sums") || die "cant open $pack_path/DEBIAN/md5sums: $!";
+    print $fh $_ . "\n" for @{$meta_pack->{md5sums}};
     close $fh;
 
     # make .deb

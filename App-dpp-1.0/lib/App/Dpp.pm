@@ -11,6 +11,7 @@ use Encode;
 use Data::Dumper;
 use Config;
 use HTTP::Tiny;
+use Digest::MD5 qw< md5_hex >;
 use Config::Extensions '%Extensions';
 use Cwd qw< abs_path >;
 use open qw<:encoding(UTF-8)>;
@@ -26,11 +27,19 @@ BEGIN {
     require Exporter;
     our $VERSION = 0.01;
     our @ISA = qw(Exporter);
-    our @EXPORT_OK = qw( control meta web init );
+    our @EXPORT_OK = qw( control meta web init digest );
 }
 
 our $VERSION = '1.0';
 
+sub digest {
+    my $file = shift;
+    my( $data ) = ();
+    open(my $fh,"<:raw :bytes",$file) || die "cant open $file: $!";
+    while(<$fh>){ $data .= $_ }
+
+    return  md5_hex($data);
+};
 
 #my $dpp = "$env{home}/dpp";
 #my $dir = {

@@ -19,6 +19,7 @@ amd64
 LINKS
 - [Debian Perl Group](https://pkg-perl.alioth.debian.org/)
 - [stackoverflow](http://stackoverflow.com/questions/4564434/why-does-my-hand-created-deb-package-fails-at-install-with-unable-to-create-on)
+- [Debian control info](https://debian-handbook.info/browse/stable/sect.package-meta-information.html)
 
 DONE
 - exclude core modules from including into Depends field of control file except if it dependes on newer version
