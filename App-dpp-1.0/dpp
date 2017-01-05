@@ -49,16 +49,29 @@ sub parse_packlist {
         # make module($pm) name from packlist($path)
         $module =~ s/(auto.*?\/)(.*?)(\/\.packlist)/$2/;
         $module = $2;
+        $module_first_dir = $2;
+        $module_first_dir =~ s/(.*?)(\/.*)/$1/;
+        $module_first_dir = $1;
         $module =~ s/\//\:\:/g;
 
+        my $module_root_dir = $_;
+        $module_root_dir =~ s/(.*?$module_first_dir)(\/.*)/$1/;
 
-        system("tar -cz -T $path -f $tmp_pack_file && cd $dir->{build} && tar -xvf $tmp_pack_file && rm -rf $tmp_pack_file && find . > ../packlist");
-        open(my $fh,'<', "$dir->{dpp}/packlist") || die "cant open $dir->{dpp}/packlist: $!";
-        while( <$fh> ){ chomp; push @pack, $_ unless $_ =~ /^\.$/ }; close $fh;
-        open($fh,'>', "$dir->{dpp}/packlist") || die "cant open $dir->{dpp}/packlist: $!";
-        for( @pack ){ 
-            print $fh $_ . "\n" ;
-        }
+        #system("tar -cz -T $path -f $tmp_pack_file && cd $dir->{build} && tar -xf $tmp_pack_file && rm -rf $tmp_pack_file && find . > ../packlist");
+        open(my $fh,'<', $path) || die "cant open $path:$!";
+        while( <$fh> ){ 
+            chomp; 
+            push @pack, $_ 
+        }; 
+        close $fh;
+
+
+#        open($fh,'>', "$dir->{dpp}/packlist") || die "cant open $dir->{dpp}/packlist: $!";
+        #for( @pack ){ 
+        #   s/^\.//;
+        #   print $fh $_ . "\n" ;
+        #}
+        close $fh;
 
 
         
@@ -104,8 +117,8 @@ sub pack_packlist {
     mkpath("$path->{build}/$meta_pack->{pkg}");
 
     # tar packlist content into data.tar.gz
-    system("tar -pzcf $dir->{build}/data.tar.gz $dir->{dpp}/packlist && cd $dir->{build} && mv data.tar.gz .. && rm -rf * && mv ../data.tar.gz . && cd -");
-    #system("tar pcz -T $meta_pack->{path} -f $build_path/data.tar.gz && cd $build_path  && mv data.tar.gz .. && rm -rf * && mv ../data.tar.gz . && cd -");
+    #system("tar -pzcf $dir->{build}/data.tar.gz $dir->{dpp}/packlist && cd $dir->{build} && mv data.tar.gz .. && rm -rf * && mv ../data.tar.gz . && cd -");
+    system("tar pcz -T $meta_pack->{path} -f $dir->{build}/data.tar.gz && cd $dir->{build} && mv data.tar.gz .. && rm -rf * && mv ../data.tar.gz . && cd -");
 
     #system("mkdir $path->{build} && tar cz -T $meta_pack->{path} -f $path->{build}/data.tar.gz && cd $path->{build} && tar -xvf data.tar.gz && rm -rf data.tar.gz && rm -rf $pack_path  && tar -zcvf data.tar.gz * && mv data.tar.gz .. && rm -rf * && mv ../data.tar.gz . && cd -");
     mkpath("$pack_path/DEBIAN");
