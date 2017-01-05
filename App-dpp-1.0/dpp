@@ -53,8 +53,14 @@ sub parse_packlist {
 
 
         system("tar -cz -T $path -f $tmp_pack_file && cd $dir->{build} && tar -xvf $tmp_pack_file && rm -rf $tmp_pack_file && find . > ../packlist");
+        open(my $fh,'<', "$dir->{dpp}/packlist") || die "cant open $dir->{dpp}/packlist: $!";
+        while( <$fh> ){ chomp; push @pack, $_ unless $_ =~ /^\.$/ }; close $fh;
+        open($fh,'>', "$dir->{dpp}/packlist") || die "cant open $dir->{dpp}/packlist: $!";
+        for( @pack ){ 
+            print $fh $_ . "\n" ;
         }
-        #print "$_\n" for @pack;
+
+
         
 
         #open(my $pipe,'-|', "tar -xvf $tmp_pack_file") || die "cant open $pipe: $!";
@@ -96,7 +102,6 @@ sub pack_packlist {
     my $pack_path = $path->{build} . "/$meta_pack->{pkg}";
     #my $path->{deb} = init('deb');
     mkpath("$path->{build}/$meta_pack->{pkg}");
-    my $data_paths = join(' ', @{$meta_pack->{packlist}});
 
     # tar packlist content into data.tar.gz
     system("tar -pzcf $dir->{build}/data.tar.gz $dir->{dpp}/packlist && cd $dir->{build} && mv data.tar.gz .. && rm -rf * && mv ../data.tar.gz . && cd -");
