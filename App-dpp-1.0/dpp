@@ -58,12 +58,19 @@ sub parse_packlist {
         $module_root_dir =~ s/(.*?$module_first_dir)(\/.*)/$1/;
 
         #system("tar -cz -T $path -f $tmp_pack_file && cd $dir->{build} && tar -xf $tmp_pack_file && rm -rf $tmp_pack_file && find . > ../packlist");
+	my @preinst =  ('#!/bin/sh');
         open(my $fh,'<', $path) || die "cant open $path:$!";
         while( <$fh> ){ 
-            chomp; 
-            push @pack, $_ 
+            chomp;
+            push @pack, $_;
+	s/(.*)(\/.*)/$1/;
+	push @preinst, qq|mkdir -p '$_';|;
         }; 
         close $fh;
+
+        #    uniq
+        my %dir_seen = ();
+        @preinst = grep { ! $dir_seen{"$_"} ++ } @preinst;
 
 
 #        open($fh,'>', "$dir->{dpp}/packlist") || die "cant open $dir->{dpp}/packlist: $!";
@@ -85,9 +92,6 @@ sub parse_packlist {
         #    }
         #}
            #       s/(.*)(\/.*)/$1/; push @pack, $1; # risky; wont work if there is directory with nothing else but another directory todo
-        #    uniq
-        #my %pack_seen  = ( );
-        #@pack = grep { ! $pack_seen{"$_"} ++ } @pack;
 
         my $meta = meta($module);
         my $pkg = $meta->{pkg};
@@ -96,6 +100,7 @@ sub parse_packlist {
             module     =>  $module,
             path       =>  $path,
             packlist   =>  \@pack,
+            preinst    =>  \@preinst,
             control    =>  control($module),
         };         
         push @{$pack->{packlist}}, $pack->{$path};
@@ -123,8 +128,13 @@ sub pack_packlist {
     #system("mkdir $path->{build} && tar cz -T $meta_pack->{path} -f $path->{build}/data.tar.gz && cd $path->{build} && tar -xvf data.tar.gz && rm -rf data.tar.gz && rm -rf $pack_path  && tar -zcvf data.tar.gz * && mv data.tar.gz .. && rm -rf * && mv ../data.tar.gz . && cd -");
     mkpath("$pack_path/DEBIAN");
 
+    # write preinst script
+    open(my $fh,">", "$pack_path/DEBIAN/preinst") || die "cant open $pack_path/DEBIAN/preinst$!";
+    print $fh $_ . "\n" for @{$meta_pack->{preinst}};
+    close $fh;
+    
     # write control file
-    open(my $fh,">", "$pack_path/DEBIAN/control") || die "cant open $pack_path/DEBIAN/control: $!";
+    open($fh,">", "$pack_path/DEBIAN/control") || die "cant open $pack_path/DEBIAN/control: $!";
     print $fh $meta_pack->{control};
     close $fh;
 
@@ -132,6 +142,7 @@ sub pack_packlist {
     my $packer = <<"_DEB";
 
     cd $pack_path/DEBIAN;
+    chmod 0755 preinst;
     tar pczf ../../control.tar.gz *;
     cd ../..;
     echo 2.0 > debian-binary;
