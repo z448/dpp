@@ -5,6 +5,7 @@ use HTTP::Tiny;
 use JSON::PP;
 use Data::Dumper;
 use File::Path;
+#use open qw<:encoding(UTF-8)>;
 
 #my $dpp_home = "$ENV{HOME}/dpp.conf";
 #my %conf = ();
@@ -135,7 +136,7 @@ $c = {
                                       '<div class="dpp"> </div>',
                                       '<div class="dpp"><a href="deb/' . "$module" . '" target="_blank"><i class="fa fa-download" aria-hidden="true"></i> &nbsp;</a>',
                                       '<a href="https://widgets.stratopan.com/wheel?q=HTTP-Tiny-0.058" target="_blank"><i class="fa fa-asterisk" aria-hidden="true"></i>&nbsp;</a><a href="http://api.metacpan.org/v0/pod/HTTP::Tiny?content-type=text/plain" target="_blank"><i class="fa fa-file" aria-hidden="true"></i></a></div>',
-                                      '<div class="module">HTTP::Tiny</div>',
+                                      '<div class="module">' . "$module" . '</div>',
                                       '<div class="description">A small, simple, correct HTTP/1.1 client</br></div>'
                                     ],
                           'foot' => [
