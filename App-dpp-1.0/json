@@ -1,0 +1,35 @@
+{
+  "deb_name": "http-tiny-0.070.deb",
+  "meta_api_url": "http://api.metacpan.org/v0/module/HTTP::Tiny?join=release",
+  "Section": "perl",
+  "Maintainer": "$z",
+  "www": "load.sh/cydia/index.html",
+  "build_path": "build/HTTP-Tiny-0.070/usr/local/lib/perl5/lib",
+  "Version": "0.070",
+  "prefix": "lib",
+  "module_name": "HTTP::Tiny",
+  "Package": "libhttp-tiny-p5220",
+  "div": [
+    "<div class=\"dpp\"><a href=\"http://load.sh/cydia/deb/libhttp-tiny-p5220.deb\" target=\"_blank\"><i class=\"fa fa-download\" aria-hidden=\"true\">&nbsp;&nbsp;&nbsp;</i></a>",
+    "<a href=\"https://widgets.stratopan.com/wheel?q=HTTP-Tiny-0.070\" target=\"_blank\"><i class=\"fa fa-asterisk\" aria-hidden=\"true\">&nbsp;&nbsp;&nbsp;</i></a><a href=\"http://api.metacpan.org/v0/pod/HTTP::Tiny?content-type=text/plain\" target=\"_blank\"><i class=\"fa fa-file\" aria-hidden=\"true\">&nbsp;&nbsp;&nbsp;</i></a></div>",
+    "<div class=\"module\">HTTP::Tiny</div>",
+    "<div class=\"description\">A small, simple, correct HTTP/1.1 client</br></div>"
+  ],
+  "Name": "HTTP-Tiny",
+  "control_path": "build/HTTP-Tiny-0.070/DEBIAN/control",
+  "install_path": "/usr/share/perl/5.22",
+  "source_url": "https://cpan.metacpan.org/authors/id/D/DA/DAGOLDEN/HTTP-Tiny-0.070.tar.gz",
+  "Author": "DAGOLDEN",
+  "deps_graph": "https://widgets.stratopan.com/wheel?q=HTTP-Tiny-0.070",
+  "description": "This is a very simple HTTP/1.1 client, designed for doing simple requests without the overhead of a large framework like LWP::UserAgent. It is more correct and more complete than HTTP::Lite. It supports proxies and redirection. It also correctly resumes after EINTR. If IO::Socket::IP 0.25 or later is installed, HTTP::Tiny will use it instead of IO::Socket::INET for transparent support for both IPv4 and IPv6. Cookie support requires HTTP::CookieJar or an equivalent class.",
+  "Architecture": "all",
+  "Homepage": "https://metacpan.org/pod/HTTP::Tiny",
+  "Depends": {
+    "module": [],
+    "distribution": [],
+    "control": "perl"
+  },
+  "release_date": "2016-10-10T03:25:33",
+  "Description": "A small, simple, correct HTTP/1.1 client",
+  "pkg": "libhttp-tiny-p5220"
+}

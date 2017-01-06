@@ -1,0 +1,49 @@
+
+use JSON::PP;
+use Data::Dumper;
+
+my %conf = ();
+
+
+    
+sub user_conf {
+    my %user_conf = ();
+
+    open(my $fh,'<',"$ENV{HOME}/dpp.conf");
+    while( <$fh> ){
+        s/(.*?)(\=)(.*)/$1$3/;
+        $user_conf{$1} = $3;
+    }
+    return \%user_conf
+}
+
+sub config {
+    local $/;
+    open(my $fh,'<','json');
+    return scalar decode_json <$fh>;
+}
+
+my $c = config();
+my $d = user_conf();
+
+for( keys %{$d} ){
+    $c->{$_} = $d->{$_} if defined $d->{$_};
+}
+
+{
+    open(my $fh,'>','json2');
+    print $fh encode_json $c;
+}
+
+
+__DATA__
+my $z = $c->{Section}; # takes value from json
+$c->{}${$z}= ''; # create value based on $z
+
+$c->{"${$z}"} = 'ZDENEK'; # create value based on $z
+print $perl;
+
+
+print Dumper($c);
+
+
