@@ -1,42 +1,29 @@
+#!/usr/bin/env perl
 
+use HTTP::Tiny;
 use JSON::PP;
 use Data::Dumper;
+use File::Path;
 
-my %conf = ();
+#my $dpp_home = "$ENV{HOME}/dpp.conf";
+#my %conf = ();
 
+my $init = sub {
+    my $dpp_home = shift || "$ENV{HOME}/dpp";
+    my %dir = (
+        dpp             =>  $dpp_home,
+        deb             =>  $dpp_home . '/' . 'deb',
+        build           =>  $dpp_home . '/' . 'build',
+    );
+    for(keys %dir){ mkpath($dir{$_}) };
+    return \%dir;
+};
 
-    
-sub user_conf {
-    my %user_conf = ();
-
-    open(my $fh,'<',"$ENV{HOME}/dpp.conf");
-    while( <$fh> ){
-        s/(.*?)(\=)(.*)/$1$3/;
-        $user_conf{$1} = $3;
-    }
-    return \%user_conf
-}
-
-sub config {
-    local $/;
-    open(my $fh,'<','json');
-    return scalar decode_json <$fh>;
-}
-
-my $m = meta_conf();
-my $c = config();
-my $u = user_conf();
-
-for( keys %{$u} ){
-    $c->{$_} = $u->{$_} if defined $u->{$_};
-    $m->{$_} = $c->{$_};
-}
-
-sub meta_conf {
-		my $module = shift;
-		my $meta = '{}';
-    my $meta_url = '...';
-    my $response = HTTP::Tiny->new->get("$meta_url");
+my $meta_conf = sub {
+    my $module = shift;
+	my $meta = '{}';
+    my $url = 'http://api.metacpan.org/v0/module/'."$module".'?join=release';
+    my $response = HTTP::Tiny->new->get($url);
     #$response->{content} if length $response->{content};
 
     if($response->{success}){
@@ -45,26 +32,46 @@ sub meta_conf {
     return decode_json $meta;
 };
 
+my $user_conf = sub {
+    my $conf_file = shift;
+    my %user_conf = ();
 
+    open(my $fh,'<',$conf_file) || die "cant open $conf_file: $!";
+    while( <$fh> ){
+        s/(.*?)(\=)(.*)/$1$3/;
+        $user_conf{$1} = $3;
+    }
+    return \%user_conf
+};
 
+sub conf {
+    my( $module, $dpp_home ) = @_;
+    my $dir = $init->($dpp_home);
+    my %conf = ();
+    my $c = {};
 
+    {
+        local $/;
+        $c = scalar decode_json <DATA>;
+    }
+    for( keys %{$dir}){
+        $c->{dir} = $dir;
+    }
 
+    my $m = $meta_conf->($module);
+    my $u = $user_conf->("$ENV{HOME}/dpp.conf");
+    for( keys %{$u} ){
+        $c->{$_} = $u->{$_} if defined $u->{$_};
+    }
 
+    $conf{meta} = $m;
+    $conf{dpp} = $c;
 
-__DATA__
-{
-    open(my $fh,'>','json2');
-    print $fh encode_json $c;
+    return \%conf;
 }
 
-
-my $z = $c->{Section}; # takes value from json
-$c->{}${$z}= ''; # create value based on $z
-
-$c->{"${$z}"} = 'ZDENEK'; # create value based on $z
-print $perl;
-
-
-print Dumper($c);
-
-
+print Dumper( conf($ARGV[0]) );
+__DATA__
+{
+  "Package": "libhttp-tiny-p5220"
+}
