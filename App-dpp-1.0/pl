@@ -23,20 +23,41 @@ sub config {
     return scalar decode_json <$fh>;
 }
 
+my $m = meta_conf();
 my $c = config();
 my $d = user_conf();
 
 for( keys %{$d} ){
     $c->{$_} = $d->{$_} if defined $d->{$_};
+    $m->{$_} = $c->{$_};
 }
 
+sub meta_conf {
+		my $module = shift;
+		my $meta = '{}';
+    my $meta_url = '...';
+    my $response = HTTP::Tiny->new->get("$meta_url");
+    #$response->{content} if length $response->{content};
+
+    if($response->{success}){
+        	$meta = $response->{content} if length $response->{content};
+    } 
+    return decode_json $meta;
+};
+
+
+
+
+
+
+
+__DATA__
 {
     open(my $fh,'>','json2');
     print $fh encode_json $c;
 }
 
 
-__DATA__
 my $z = $c->{Section}; # takes value from json
 $c->{}${$z}= ''; # create value based on $z
 
