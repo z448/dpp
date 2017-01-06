@@ -1,5 +1,6 @@
 #!/usr/bin/env perl
 
+use 5.010;
 use HTTP::Tiny;
 use JSON::PP;
 use Data::Dumper;
@@ -8,6 +9,7 @@ use File::Path;
 #my $dpp_home = "$ENV{HOME}/dpp.conf";
 #my %conf = ();
 
+=head1
 my $init = sub {
     my $dpp_home = shift || "$ENV{HOME}/dpp";
     my %dir = (
@@ -18,6 +20,7 @@ my $init = sub {
     for(keys %dir){ mkpath($dir{$_}) };
     return \%dir;
 };
+=cut
 
 my $meta_conf = sub {
     my $module = shift;
@@ -46,17 +49,59 @@ my $user_conf = sub {
 
 sub conf {
     my( $module, $dpp_home ) = @_;
-    my $dir = $init->($dpp_home);
-    my %conf = ();
-    my $c = {};
+    $dpp_home = $dpp_home || "$ENV{HOME}/dpp";
 
+=head1
+    my $c = {};
     {
         local $/;
         $c = scalar decode_json <DATA>;
     }
-    for( keys %{$dir}){
-        $c->{dir} = $dir;
+    
+    my $dpp = $c->{dpp};
+
+    my %dir = %{$dpp->{dir}};
+    mkpath $dir{$_} for keys %dir;
+    say "creating: " . $dir{$_} for keys %dir;
+
+    my $dump = Data::Dumper->Dump([$c], ["c"]), $/;
+    open(my $fh,">",'datadumper');
+    print $fh $dump;
+    close $fh;
+
+    {
+        open(my $fh,"<","datadumper");
+        local $/;
+        $c = <$fh>;
+        close $fh;
     }
+=cut
+    my $c;
+    {
+        local $/;
+        $c = <DATA>;
+    }
+    eval $c;
+    #print Dumper $c;
+    say for @{$c->{html}->{head}};
+    say for @{$c->{html}->{style}};
+    say for @{$c->{html}->{body}};
+    say for @{$c->{html}->{foot}};
+    die;
+    #eval $c;
+    #say Dumper($c);
+    #say $c->{dpp}->{url};
+    #say "url: " . $dpp->{url};
+
+
+    #for( keys %{$dir}){
+    #   $c->{dir} = $dir;
+    #}
+
+    #return \%dir;
+
+    #my $dir = $init->($dpp_home);
+
 
     my $m = $meta_conf->($module);
     my $u = $user_conf->("$ENV{HOME}/dpp.conf");
@@ -64,14 +109,144 @@ sub conf {
         $c->{$_} = $u->{$_} if defined $u->{$_};
     }
 
+    my %conf = ();
     $conf{meta} = $m;
     $conf{dpp} = $c;
 
     return \%conf;
 }
 
+#print encode_json conf($ARGV[0]);
 print Dumper( conf($ARGV[0]) );
 __DATA__
-{
-  "Package": "libhttp-tiny-p5220"
-}
+$c = {
+                  'prefix' => 'library',
+                  'maintainer' => 'z448 <zed448@icloud.com>',
+                  'dir' => {
+                             'dpp' => '/Users/zdenek/dpp',
+                             'build' => '/Users/zdenek/dpp/build',
+                             'deb' => '/Users/zdenek/dpp/deb'
+                           },
+                  'url' => 'http://api.metacpan.org/v0/module/'."$module",
+                  'architecture' => 'iphoneos-arm',
+                  'section' => 'perl',
+                  'html' => {
+                          'body' => [
+                                      '<div class="dpp"> </div>',
+                                      '<div class="dpp"><a href="deb/' . "$module" . '" target="_blank"><i class="fa fa-download" aria-hidden="true"></i> &nbsp;</a>',
+                                      '<a href="https://widgets.stratopan.com/wheel?q=HTTP-Tiny-0.058" target="_blank"><i class="fa fa-asterisk" aria-hidden="true"></i>&nbsp;</a><a href="http://api.metacpan.org/v0/pod/HTTP::Tiny?content-type=text/plain" target="_blank"><i class="fa fa-file" aria-hidden="true"></i></a></div>',
+                                      '<div class="module">HTTP::Tiny</div>',
+                                      '<div class="description">A small, simple, correct HTTP/1.1 client</br></div>'
+                                    ],
+                          'foot' => [
+                                      '<div class="footer" align="center" >dpp<br></div>',
+                                      '</body>',
+                                      '</html>'
+                                    ],
+                          'head' => [
+                                      '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">',
+                                      '<html xmlns="http://www.w3.org/1999/xhtml">',
+                                      '<head>',
+                                      '<title>dpp</title>',
+                                      '<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />',
+                                      '<meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;"/>',
+                                      '<meta name="apple-mobile-web-app-capable" content="yes" />',
+                                      '<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>',
+                                      '<script src="https://code.jquery.com/jquery-2.2.3.min.js" integrity="sha256-a23g1Nt4dtEYOj7bR+vTu7+T8VP13humZFBJNIYoEJo=" crossorigin="anonymous"></script>',
+                                      '<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css" />',
+                                      '<link rel="stylesheet" href="//code.cdn.mozilla.net/fonts/fira.css">',
+                                      '<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootswatch/3.3.0/paper/bootstrap.min.css" />',
+                                      '<link rel="stylesheet" type="text/css" href="style.css">',
+                                      '</head>',
+                                      '',
+                                      '<body bgcolor="#090311">',
+                                      '<div align="center" >',
+                                      '<div class="headtext"><br><br><sub>This is APT repository index.</sub><br><br></div>'
+                                    ],
+                          'style' => [
+                                       '<style type="text/css"> ',
+                                       '',
+                                       '.slideshow-overlay {',
+                                       '    display: block;',
+                                       '    position: fixed;',
+                                       '    left: 0;',
+                                       '    top: 0;',
+                                       '    overflow: hidden;',
+                                       '    z-index: -99;',
+                                       '    height: 100%;',
+                                       '    width: 100%;',
+                                       '}',
+                                       '',
+                                       '.fa-download {',
+                                       '    background: #090311;',
+                                       '}',
+                                       '',
+                                       '.dpp {',
+                                       '    background: #090311;',
+                                       '}',
+                                       '',
+                                       '.headtext {',
+                                       '	font-family: \'Fira Mono\';',
+                                       '	font-size: 11px;',
+                                       '    text-align = "center";',
+                                       '	background : #090311;',
+                                       '    color: #8E8E8E;',
+                                       '    top: 2px;',
+                                       '    left: 0;',
+                                       '    right: 0;',
+                                       '}',
+                                       '',
+                                       '.description {',
+                                       '	font-family: \'Fira Mono\';',
+                                       '	font-size: 11px;',
+                                       '    text-align = "center";',
+                                       '	background : #090311;',
+                                       '    color: #4F4F50;',
+                                       '}',
+                                       '',
+                                       '.code{',
+                                       '    font-size: 10px;',
+                                       '    bottom: 5px;',
+                                       '',
+                                       '}',
+                                       '',
+                                       '.module {',
+                                       '    font-family: \'Open Sans\', sans-serif;',
+                                       '    text-align = "center";',
+                                       '	font-size: 12px;',
+                                       '	background : #090311;',
+                                       '	color: #fefefe;',
+                                       '}',
+                                       '',
+                                       '.header{',
+                                       '	font-family: \'Fira Mono\';',
+                                       '	font-size: 0;',
+                                       '	color: white;',
+                                       '    -webkit-overflow-scrolling: touch;',
+                                       '    text-align: center;',
+                                       '    background: black;',
+                                       '    position: fixed;',
+                                       '    left: 0;',
+                                       '    right: 0;',
+                                       '    top: 0;',
+                                       '    height: 10px;',
+                                       '}    ',
+                                       '.footer {',
+                                       '    font-family: \'Open Sans\', sans-serif;',
+                                       '    font-weight: 600;',
+                                       '	font-size: 8px;',
+                                       '    border: 0;',
+                                       '    -webkit-overflow-scrolling: touch;',
+                                       '	color: #4F4F50;',
+                                       '    text-align: center;',
+                                       '	background : #1e1d20;',
+                                       '    position: fixed;',
+                                       '    left: 0;',
+                                       '    right: 0;',
+                                       '    bottom: 0;',
+                                       '    height: 13px;',
+                                       '}    ',
+                                       '</style> '
+                                     ]
+                        }
+            };
