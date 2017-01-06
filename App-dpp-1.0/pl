@@ -25,10 +25,10 @@ sub config {
 
 my $m = meta_conf();
 my $c = config();
-my $d = user_conf();
+my $u = user_conf();
 
-for( keys %{$d} ){
-    $c->{$_} = $d->{$_} if defined $d->{$_};
+for( keys %{$u} ){
+    $c->{$_} = $u->{$_} if defined $u->{$_};
     $m->{$_} = $c->{$_};
 }
 
