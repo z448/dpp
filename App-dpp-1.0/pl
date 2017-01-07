@@ -47,12 +47,15 @@ my $depends = sub {
     return \@depends;
 };
 
+# get archname
 my $arch = sub {
-    my $path = shift;
-    open my $pipe,"-|",'uname -a';
-    while(<$pipe>){
-        if(/iPhone/){ return 'iphoneos-arm' }
-        else { return $^O }
+    unless( $^O eq 'darwin' ){
+    		return $^O;
+    } else {
+    		open my $pipe,"-|",'uname -a';
+    		while(<$pipe>){
+       		 if(/iPhone/){ return 'iphoneos-arm' }
+       			else { return $^O }
     }
 };
 
