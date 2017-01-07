@@ -2,6 +2,7 @@
 
 use 5.010;
 use HTTP::Tiny;
+use Config;
 use JSON::PP;
 use Data::Dumper;
 use File::Path;
@@ -84,12 +85,20 @@ sub conf {
         $c->{$_} = $u->{$_} if defined $u->{$_} and exists $c->{$_};
     }
 
+    # add meta config from metacpan API
     my $m  = $meta_conf->($module, $c->{url});
     $c->{meta} = $m;
+
+    # create dump and html index
+    unless( -f $c->{htmlconf}->{dump} ){
+        open($fh,'>',$c->{htmlconf}->{dump}) || die "cant open $c->{htmlconf}->{dump}: $!";
+        print $fh Data::Dumper->Dump([$c->{html}], ["html"]), $/;
+        close $fh;
+    }
+
     return $c;
 
 =head1
-    #print Dumper $c;
     say for @{$c->{html}->{head}};
     say for @{$c->{html}->{style}};
     say for @{$c->{html}->{body}};
@@ -97,14 +106,22 @@ sub conf {
 =cut
 
 }
-print Dumper( conf($ARGV[0]) );
+#print Dumper( conf($ARGV[0]) );
+conf($ARGV[0]);
 
 __DATA__
 $c = {
                   'package_prefix' => 'library',
+                  'perl' => {
+                        'version' => '5.18.2'
+                   },
                   'gitconfig' => "$ENV{HOME}/.gitconfig",
                   'conf_file' => "$ENV{HOME}/dpp.conf",
                   'maintainer' => 'Your Name <your@email.com>',
+                  'htmlconf' => {
+                             'dump' => "$dpp_home/.index",
+                             'html' => "$dpp_home/index.html",
+                           },
                   'dir' => {
                              'dpp' => '/Users/zdenek/dpp',
                              'build' => '/Users/zdenek/dpp/build',
