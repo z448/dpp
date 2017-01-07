@@ -82,6 +82,28 @@ sub core_module {
     }
 }
 
+    # get name email from gitconfig if exist
+my $gitconfig = sub {
+    my $config = shift;
+    if( -f $config ){
+        #if(-f $c->{gitconfig}){
+        my($name, $email, $user) = ();
+        open(my $fh,'<', $config);
+        #open(my $fh,'<', $c->{gitconfig});
+        while( <$fh> ){
+            chomp;
+            if( /\[.*\]/ ){ $user = 0 }
+            if( /\[user\]/ ){ $user = 1 }
+            if( $user ){
+                if( /name = (.*)/ ){ $name = $1 }
+                if( /email = (.*)/ ){ $email = $1 }
+            }
+        }; 
+        close $fh;
+        my $maintainer = $name . ' ' . $email;
+        #$c->{maintainer} = $name . ' ' . $email;
+    }
+}; 
 
 sub conf {
     my( $module, $dpp_home ) = @_;
@@ -99,24 +121,10 @@ sub conf {
     my $dir = $c->{dir};
     for( keys %{$dir}){ mkpath( $dir->{$_} ) }
 
-    # get name email from gitconfig if exist
-    my $gitconfig = sub {
-        if(-f $c->{gitconfig}){
-            my($name, $email, $user) = ();
-            open(my $fh,'<', $c->{gitconfig});
-            while(<$fh>){
-                chomp;
-                if(/\[.*\]/){ $user = 0 }
-                if(/\[user\]/){ $user = 1 }
-                if($user){
-                    if(/name = (.*)/){ $name = $1 }
-                    if(/email = (.*)/){ $email = $1 }
-                }
-            }; 
-            close $fh;
-            $c->{maintainer} = $name . ' ' . $email;
-        }
-    }; $gitconfig->();
+    
+    if( $gitconfig->($c->{gitconfig}) ){
+            $c->{maintainer} = $gitconfig->($c->{gitconfig});
+    }
 
     # create default dpp.conf file if doesnt exist
     unless(-f $c->{conf_file}){
