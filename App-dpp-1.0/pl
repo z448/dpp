@@ -8,9 +8,10 @@ use File::Path;
 #use open qw<:encoding(UTF-8)>;
 
 my $meta_conf = sub {
-    my $module = shift;
+    my( $module, $url ) = @_;
 	my $meta = '{}';
-    my $url = 'http://api.metacpan.org/v0/module/'."$module".'?join=release';
+    #my $url = 'http://api.metacpan.org/v0/module/'."$module".'?join=release';
+    #say $url;
     my $response = HTTP::Tiny->new->get($url);
     #$response->{content} if length $response->{content};
     if($response->{success}){
@@ -23,12 +24,12 @@ my $user_conf = sub {
     my $conf_file = shift;
     my %user_conf = ();
 
-    open(my $fh,'<',$conf_file) || die "cant open $conf_file: $!";
+    open(my $fh,'<',"$conf_file") || die "cant open $conf_file: $!";
     while( <$fh> ){
         s/(.*?)(\=)(.*)/$1$3/;
-        $user_conf{$1} = $3;
+        $user_conf{$1} = "$3";
     }
-    return \%user_conf
+    return \%user_conf;
 };
 
 
@@ -69,27 +70,23 @@ sub conf {
     }; $gitconfig->();
 
     # create config file if doesnt exist
-#=head1
     unless(-f $c->{conf_file}){
         open(my $fh,'>',$c->{conf_file}) || die "cant open $c->{conf_file}";
         for( qw< architecture package_prefix section maintainer > ){
-            say $fh $_ . ':' . $c->{$_};
+            say $fh $_ . '=' . $c->{$_};
         }
+        close $fh;
     }
-#=cut
-    print $c->{maintainer};
 
-    die;
-    #
-    return $c;
-
-    my $u = $user_conf->($c->{conf_file});
+    # add user conf from config file
+    my $u = $user_conf->("$c->{conf_file}");
     for( keys %{$u} ){
-        $c->{$_} = $u->{$_} if defined $u->{$_};
+        $c->{$_} = $u->{$_} if defined $u->{$_} and exists $c->{$_};
     }
 
-    
-
+    my $m  = $meta_conf->($module, $c->{url});
+    $c->{meta} = $m;
+    return $c;
 
 =head1
     #print Dumper $c;
@@ -99,19 +96,9 @@ sub conf {
     say for @{$c->{html}->{foot}};
 =cut
 
-#return $c;
-
-    #my $m = $meta_conf->($module);
-
-    my %conf = ();
-    $conf{meta} = $m;
-    $conf{dpp} = $c;
-
-    return \%conf;
 }
-
-#print encode_json conf($ARGV[0]);
 print Dumper( conf($ARGV[0]) );
+
 __DATA__
 $c = {
                   'package_prefix' => 'library',
@@ -123,7 +110,7 @@ $c = {
                              'build' => '/Users/zdenek/dpp/build',
                              'deb' => '/Users/zdenek/dpp/deb'
                            },
-                  'url' => 'http://api.metacpan.org/v0/module/'."$module",
+                  'url' => 'http://api.metacpan.org/v0/module/'."$module".'?join=release',
                   'architecture' => 'all',
                   'section' => 'perl',
                   'html' => {
