@@ -161,9 +161,6 @@ $c = {
                         'corepath' => [
                             'installarchlib', 'installprivlib', 'installextrasarch', 'installextraslib', 'installupdatesarch', 'installupdateslib', 'installvendorarch', 'installvendorlib'
                         ],
-                        'corepathosx' => [ 
-                            'installsitearch', 'installsitelib',
-                            ],
                         'version' => '5.18.2'
                    },
                   'gitconfig' => "$ENV{HOME}/.gitconfig",
