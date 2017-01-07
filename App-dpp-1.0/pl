@@ -1,6 +1,10 @@
 #!/usr/bin/env perl
 
 use 5.010;
+
+use warnings;
+use strict;
+
 use HTTP::Tiny;
 use Config;
 use JSON::PP;
@@ -34,15 +38,15 @@ my $user_conf = sub {
 };
 
 # module name to distribution name
-my $dist_name = sub {
-    my $modules = shift;
-    my @dist_name = ();
-    for( @$modules ){ 
-        my $dist = $meta_conf->( $_ );
-        push @dist_name, $dist->{release}->{_source}->{distribution};
-    }
-    return \@dist_name;
-};
+#my $dist_name = sub {
+#    my $modules = shift;
+#    my @dist_name = ();
+#   for( @$modules ){ 
+#       my $dist = $meta_conf->( $_ );
+#       push @dist_name, $dist->{release}->{_source}->{distribution};
+#   }
+#    return \@dist_name;
+#};
 
 
 
@@ -51,13 +55,14 @@ my $depends = sub {
     my $c = shift;
     my( @module_dep, @dist_dep ) = ();
     for my $module( keys %{ $c->{meta}->{release}->{_source}->{metadata}->{prereqs}->{runtime}->{requires}} ){
-             @module_dep, $module if core_module($module, $c->{perl}->{corepath}, $c->{arch});
+             push @module_dep, $module unless core_module($module, $c->{perl}->{corepath}, $c->{arch});
     }
     for(@module_dep){
-            my $dist = $meta_conf->($module);
+            my $dist = $meta_conf->($_);
             push @dist_dep, $dist->{release}->{_source}->{distribution};
     }
     
+    my %d = ();
     $d{modules} = \@module_dep;
     $d{dist} = \@dist_dep;
     return \%d;
@@ -124,7 +129,12 @@ sub conf {
     eval $c;
 
     # add module to conf
-    $c->{module} = $module;
+    #$c->{module} = $module;
+    $c->{module}->{name} = $module;
+    
+    # get meta conf from metacpan API
+    #$c->{meta} = $meta_conf->($c->{module});;
+    $c->{meta} = $meta_conf->($module);
     
     # create dpp home dir
     my $dir = $c->{dir};
@@ -158,28 +168,25 @@ sub conf {
 
     # create default .dump html conf
     unless( -f $c->{htmlconf}->{dump} ){
-        open($fh,'>',$c->{htmlconf}->{dump}) || die "cant open $c->{htmlconf}->{dump}: $!";
+        open(my $fh,'>',$c->{htmlconf}->{dump}) || die "cant open $c->{htmlconf}->{dump}: $!";
         print $fh Data::Dumper->Dump([$c->{html}], ["html"]), $/;
         close $fh;
     }
 
-    # get meta conf from metacpan API
-    #$c->{meta} = $meta_conf->($c->{module});;
-    my $c->{meta} = $meta_conf->($c->{module});
 
     # module distribution name
-    $c->{module}->{distribution} = $c->{release}->{_source}->{distribution};
+    $c->{module}->{distribution} = $c->{meta}->{release}->{_source}->{distribution};
 
     # module non-core module dependencies
-    my $d = $depends->( $c );
-    print Dumper($d);
-    die
-
-    $c->{module}->{depends} = $d->{module};
-
+    $c->{module}->{depends} = $depends->( $c );
+    #print Dumper($d);
     return $c;
+    die;
+
+    #$c->{module}->{depends} = $d->{module};
+
     # module non-core distribution dependencies
-    $c->{module}->{depends} = $depends->($module, $c);
+    #$c->{module}->{depends} = $depends->($module, $c);
 
     #depends->($module, $c->{url});
 
@@ -207,6 +214,9 @@ $c = {
                   'gitconfig' => "$ENV{HOME}/.gitconfig",
                   'conf_file' => "$ENV{HOME}/dpp.conf",
                   'maintainer' => 'Your Name <your@email.com>',
+                  'module' => {
+                             'name' => '',
+                           },
                   'htmlconf' => {
                              'dump' => "$dpp_home/.dump",
                              'html' => "$dpp_home/index.html",
