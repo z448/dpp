@@ -7,29 +7,12 @@ use Data::Dumper;
 use File::Path;
 #use open qw<:encoding(UTF-8)>;
 
-#my $dpp_home = "$ENV{HOME}/dpp.conf";
-#my %conf = ();
-
-=head1
-my $init = sub {
-    my $dpp_home = shift || "$ENV{HOME}/dpp";
-    my %dir = (
-        dpp             =>  $dpp_home,
-        deb             =>  $dpp_home . '/' . 'deb',
-        build           =>  $dpp_home . '/' . 'build',
-    );
-    for(keys %dir){ mkpath($dir{$_}) };
-    return \%dir;
-};
-=cut
-
 my $meta_conf = sub {
     my $module = shift;
 	my $meta = '{}';
     my $url = 'http://api.metacpan.org/v0/module/'."$module".'?join=release';
     my $response = HTTP::Tiny->new->get($url);
     #$response->{content} if length $response->{content};
-
     if($response->{success}){
         	$meta = $response->{content} if length $response->{content};
     } 
@@ -48,67 +31,77 @@ my $user_conf = sub {
     return \%user_conf
 };
 
+
+
 sub conf {
     my( $module, $dpp_home ) = @_;
     $dpp_home = $dpp_home || "$ENV{HOME}/dpp";
-
-=head1
-    my $c = {};
-    {
-        local $/;
-        $c = scalar decode_json <DATA>;
-    }
-    
-    my $dpp = $c->{dpp};
-
-    my %dir = %{$dpp->{dir}};
-    mkpath $dir{$_} for keys %dir;
-    say "creating: " . $dir{$_} for keys %dir;
-
-    my $dump = Data::Dumper->Dump([$c], ["c"]), $/;
-    open(my $fh,">",'datadumper');
-    print $fh $dump;
-    close $fh;
-
-    {
-        open(my $fh,"<","datadumper");
-        local $/;
-        $c = <$fh>;
-        close $fh;
-    }
-=cut
     my $c;
     {
         local $/;
         $c = <DATA>;
     }
+    # load DATA config
+    say 'starting eval';
     eval $c;
+    
+    # create dpp home dir
+    my $dir = $c->{dir};
+    for( keys %{$dir}){ mkpath( $dir->{$_} ) }
+
+    # get name email from gitconfig if exist
+    my $gitconfig = sub {
+        if(-f $c->{gitconfig}){
+            my($name, $email, $user) = ();
+            open(my $fh,'<', $c->{gitconfig});
+            while(<$fh>){
+                chomp;
+                if(/\[.*\]/){ $user = 0 }
+                if(/\[user\]/){ $user = 1 }
+                if($user){
+                    if(/name = (.*)/){ $name = $1 }
+                    if(/email = (.*)/){ $email = $1 }
+                }
+            }; 
+            close $fh;
+            $c->{maintainer} = $name . ' ' . $email;
+        }
+    }; $gitconfig->();
+
+    # create config file if doesnt exist
+#=head1
+    unless(-f $c->{conf_file}){
+        open(my $fh,'>',$c->{conf_file}) || die "cant open $c->{conf_file}";
+        for( qw< architecture package_prefix section maintainer > ){
+            say $fh $_ . ':' . $c->{$_};
+        }
+    }
+#=cut
+    print $c->{maintainer};
+
+    die;
+    #
+    return $c;
+
+    my $u = $user_conf->($c->{conf_file});
+    for( keys %{$u} ){
+        $c->{$_} = $u->{$_} if defined $u->{$_};
+    }
+
+    
+
+
+=head1
     #print Dumper $c;
     say for @{$c->{html}->{head}};
     say for @{$c->{html}->{style}};
     say for @{$c->{html}->{body}};
     say for @{$c->{html}->{foot}};
-    die;
-    #eval $c;
-    #say Dumper($c);
-    #say $c->{dpp}->{url};
-    #say "url: " . $dpp->{url};
+=cut
 
+#return $c;
 
-    #for( keys %{$dir}){
-    #   $c->{dir} = $dir;
-    #}
-
-    #return \%dir;
-
-    #my $dir = $init->($dpp_home);
-
-
-    my $m = $meta_conf->($module);
-    my $u = $user_conf->("$ENV{HOME}/dpp.conf");
-    for( keys %{$u} ){
-        $c->{$_} = $u->{$_} if defined $u->{$_};
-    }
+    #my $m = $meta_conf->($module);
 
     my %conf = ();
     $conf{meta} = $m;
@@ -121,15 +114,17 @@ sub conf {
 print Dumper( conf($ARGV[0]) );
 __DATA__
 $c = {
-                  'prefix' => 'library',
-                  'maintainer' => 'z448 <zed448@icloud.com>',
+                  'package_prefix' => 'library',
+                  'gitconfig' => "$ENV{HOME}/.gitconfig",
+                  'conf_file' => "$ENV{HOME}/dpp.conf",
+                  'maintainer' => 'Your Name <your@email.com>',
                   'dir' => {
                              'dpp' => '/Users/zdenek/dpp',
                              'build' => '/Users/zdenek/dpp/build',
                              'deb' => '/Users/zdenek/dpp/deb'
                            },
                   'url' => 'http://api.metacpan.org/v0/module/'."$module",
-                  'architecture' => 'iphoneos-arm',
+                  'architecture' => 'all',
                   'section' => 'perl',
                   'html' => {
                           'body' => [
