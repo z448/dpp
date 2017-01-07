@@ -9,7 +9,9 @@ use File::Path;
 #use open qw<:encoding(UTF-8)>;
 
 my $meta_conf = sub {
-    my( $module, $url ) = @_;
+    my $module = shift;
+    #my( $module, $url ) = @_;
+    my $url = 'http://api.metacpan.org/v0/module/'."$module".'?join=release';
 	my $meta = '{}';
     my $response = HTTP::Tiny->new->get($url);
     #$response->{content} if length $response->{content};
@@ -31,10 +33,16 @@ my $user_conf = sub {
     return \%user_conf;
 };
 
-#my $dis_name = sub {
-#    my $m = $meta_conf->($module);
-#    return $c->{meta}->{release}->{_source}->{distribution};
-#};
+# module name to distribution name
+my $dist_name = sub {
+    my $modules = shift;
+    my @dist_name = ();
+    for( @$modules ){ 
+        my $dist = $meta_conf->( $_ );
+        push @dist_name, $dist->{release}->{_source}->{distribution};
+    }
+    return \@dist_name;
+};
 
 # module dependencies
 my $depends = sub {
@@ -42,20 +50,20 @@ my $depends = sub {
     my @depends = ();
     for( keys %{ $c->{meta}->{release}->{_source}->{metadata}->{prereqs}->{runtime}->{requires}} ){
         push @depends, $_ unless (core_module($_, $c->{perl}->{corepath}));
-        #push @{$c->{module}->{depends}}, $d unless (core_module($d, $c->{perl}->{corepath}));
     }
-    return \@depends;
+    #return \@depends;
+    return $dist_name->(\@depends);
 };
 
 # get archname
 my $arch = sub {
-    unless( $^O eq 'darwin' ){
-    		return $^O;
-    } else {
-    		open my $pipe,"-|",'uname -a';
-    		while(<$pipe>){
+    unless( $^O eq 'darwin' ){ return $^O }
+    else { 
+        open my $pipe,"-|",'uname -a';
+        while(<$pipe>){
        		 if(/iPhone/){ return 'iphoneos-arm' }
-       			else { return $^O }
+             else { return $^O }
+         }
     }
 };
 
@@ -126,7 +134,8 @@ sub conf {
     }
 
     # get meta conf from metacpan API
-    my $m  = $meta_conf->($module, $c->{url});
+    my $m  = $meta_conf->($module);
+    #my $m  = $meta_conf->($module, $c->{url});
     $c->{meta} = $m;
 
     # create default .dump html conf
@@ -139,8 +148,11 @@ sub conf {
     # module distribution name
     $c->{module}->{distribution} = $c->{meta}->{release}->{_source}->{distribution};
 
-    # module non-core dependencies
-    $c->{module}->{depends} = $depends->( $module, $c );
+    # module non-core module dependencies
+    #$c->{module}->{depends}->{modules} = $depends->( $module, $c );
+
+    # module non-core distribution dependencies
+    $c->{module}->{depends} = $depends->($module, $c);
 
     #depends->($module, $c->{url});
 
