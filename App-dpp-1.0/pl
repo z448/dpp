@@ -11,8 +11,6 @@ use File::Path;
 my $meta_conf = sub {
     my( $module, $url ) = @_;
 	my $meta = '{}';
-    #my $url = 'http://api.metacpan.org/v0/module/'."$module".'?join=release';
-    #say $url;
     my $response = HTTP::Tiny->new->get($url);
     #$response->{content} if length $response->{content};
     if($response->{success}){
@@ -70,7 +68,7 @@ sub conf {
         }
     }; $gitconfig->();
 
-    # create config file if doesnt exist
+    # create default dpp.conf file if doesnt exist
     unless(-f $c->{conf_file}){
         open(my $fh,'>',$c->{conf_file}) || die "cant open $c->{conf_file}";
         for( qw< architecture package_prefix section maintainer > ){
@@ -79,17 +77,17 @@ sub conf {
         close $fh;
     }
 
-    # add user conf from config file
+    # read user conf from dpp.conf file
     my $u = $user_conf->("$c->{conf_file}");
     for( keys %{$u} ){
         $c->{$_} = $u->{$_} if defined $u->{$_} and exists $c->{$_};
     }
 
-    # add meta config from metacpan API
+    # get meta conf from metacpan API
     my $m  = $meta_conf->($module, $c->{url});
     $c->{meta} = $m;
 
-    # create dump and html index
+    # create default .dump html conf
     unless( -f $c->{htmlconf}->{dump} ){
         open($fh,'>',$c->{htmlconf}->{dump}) || die "cant open $c->{htmlconf}->{dump}: $!";
         print $fh Data::Dumper->Dump([$c->{html}], ["html"]), $/;
@@ -106,8 +104,8 @@ sub conf {
 =cut
 
 }
-#print Dumper( conf($ARGV[0]) );
-conf($ARGV[0]);
+print Dumper( conf($ARGV[0]) );
+#conf($ARGV[0]);
 
 __DATA__
 $c = {
