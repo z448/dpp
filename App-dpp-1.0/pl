@@ -44,15 +44,23 @@ my $dist_name = sub {
     return \@dist_name;
 };
 
+
+
 # module dependencies
 my $depends = sub {
-    my( $module, $c ) = @_;
-    my @depends = ();
-    for( keys %{ $c->{meta}->{release}->{_source}->{metadata}->{prereqs}->{runtime}->{requires}} ){
-        push @depends, $_ unless (core_module($_, $c->{perl}->{corepath}));
+    my $c = shift;
+    my( @module_dep, @dist_dep ) = ();
+    for my $module( keys %{ $c->{meta}->{release}->{_source}->{metadata}->{prereqs}->{runtime}->{requires}} ){
+             @module_dep, $module if core_module($module, $c->{perl}->{corepath}, $c->{arch});
     }
-    #return \@depends;
-    return $dist_name->(\@depends);
+    for(@module_dep){
+            my $dist = $meta_conf->($module);
+            push @dist_dep, $dist->{release}->{_source}->{distribution};
+    }
+    
+    $d{modules} = \@module_dep;
+    $d{dist} = \@dist_dep;
+    return \%d;
 };
 
 # get archname
@@ -68,16 +76,17 @@ my $arch = sub {
 };
 
 sub core_module {
-    my( $module, $corepaths ) = @_;
+    my( $module, $corepaths, $arch ) = @_;
+
     my( %core_path ) = ();
-
-    push @{$corepaths}, (qw< /System/installsitearch /System/installsitelib >) if $arch eq 'darwin';
-
+    #push @{$corepaths}, (qw< /System/installsitearch /System/installsitelib >) if $arch eq 'darwin';
     for( @{$corepaths} ){
         next unless defined $Config{$_};
         $core_path{$_} = $Config{$_} . '/' . "$module" . '.pm';
-        $core_path{$_} = '/System' . $core_path{$_} if /installsite/;
+        $core_path{$_} = '/System' . $core_path{$_} if $arch eq 'darwin';
+        #$core_path{$_} = '/System' . $core_path{$_} if /installsite/;
         $core_path{$_} =~ s/::/\//g;
+        #return $core_path{$_} if -f $core_path{$_};
         return $core_path{$_} if -f $core_path{$_};
     }
 }
@@ -113,6 +122,9 @@ sub conf {
     # load DATA config
     say 'starting eval';
     eval $c;
+
+    # add module to conf
+    $c->{module} = $module;
     
     # create dpp home dir
     my $dir = $c->{dir};
@@ -141,11 +153,8 @@ sub conf {
     # add core paths on darwin
     $c->{arch} = $arch->();
     #push @{$corepaths}, (qw< /System/installsitearch /System/installsitelib >) if $arch eq 'darwin';
-    push @{$c->{perl}->{corepath}}, ( "/System/$Config{installsitearch}", "/System/$Config{installsitelib}" ) if $c->{arch} eq 'darwin';
+    push @{$c->{perl}->{corepath}}, ( "installsitearch", "installsitelib" ) if $c->{arch} eq 'darwin';
 
-    # get meta conf from metacpan API
-    my $m  = $meta_conf->($module);
-    $c->{meta} = $m;
 
     # create default .dump html conf
     unless( -f $c->{htmlconf}->{dump} ){
@@ -154,19 +163,26 @@ sub conf {
         close $fh;
     }
 
-    return $c;
+    # get meta conf from metacpan API
+    #$c->{meta} = $meta_conf->($c->{module});;
+    my $c->{meta} = $meta_conf->($c->{module});
+
     # module distribution name
-    $c->{module}->{distribution} = $c->{meta}->{release}->{_source}->{distribution};
+    $c->{module}->{distribution} = $c->{release}->{_source}->{distribution};
 
     # module non-core module dependencies
-    #$c->{module}->{depends}->{modules} = $depends->( $module, $c );
+    my $d = $depends->( $c );
+    print Dumper($d);
+    die
 
+    $c->{module}->{depends} = $d->{module};
+
+    return $c;
     # module non-core distribution dependencies
     $c->{module}->{depends} = $depends->($module, $c);
 
     #depends->($module, $c->{url});
 
-    return $c;
 
 =head1
     say for @{$c->{html}->{head}};
