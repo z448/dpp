@@ -69,9 +69,9 @@ my $arch = sub {
 
 sub core_module {
     my( $module, $corepaths ) = @_;
-    my %core_path = ();
+    my( %core_path ) = ();
 
-    push @{$corepaths}, (qw< installsitearch installsitelib >) if $^O eq 'darwin';
+    push @{$corepaths}, (qw< /System/installsitearch /System/installsitelib >) if $arch eq 'darwin';
 
     for( @{$corepaths} ){
         next unless defined $Config{$_};
@@ -86,10 +86,8 @@ sub core_module {
 my $gitconfig = sub {
     my $config = shift;
     if( -f $config ){
-        #if(-f $c->{gitconfig}){
         my($name, $email, $user) = ();
         open(my $fh,'<', $config);
-        #open(my $fh,'<', $c->{gitconfig});
         while( <$fh> ){
             chomp;
             if( /\[.*\]/ ){ $user = 0 }
@@ -101,7 +99,6 @@ my $gitconfig = sub {
         }; 
         close $fh;
         my $maintainer = $name . ' ' . $email;
-        #$c->{maintainer} = $name . ' ' . $email;
     }
 }; 
 
@@ -141,9 +138,13 @@ sub conf {
         $c->{$_} = $u->{$_} if defined $u->{$_} and exists $c->{$_};
     }
 
+    # add core paths on darwin
+    $c->{arch} = $arch->();
+    #push @{$corepaths}, (qw< /System/installsitearch /System/installsitelib >) if $arch eq 'darwin';
+    push @{$c->{perl}->{corepath}}, ( "/System/$Config{installsitearch}", "/System/$Config{installsitelib}" ) if $c->{arch} eq 'darwin';
+
     # get meta conf from metacpan API
     my $m  = $meta_conf->($module);
-    #my $m  = $meta_conf->($module, $c->{url});
     $c->{meta} = $m;
 
     # create default .dump html conf
@@ -153,6 +154,7 @@ sub conf {
         close $fh;
     }
 
+    return $c;
     # module distribution name
     $c->{module}->{distribution} = $c->{meta}->{release}->{_source}->{distribution};
 
