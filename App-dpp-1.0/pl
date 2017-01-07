@@ -60,12 +60,12 @@ sub core_module {
     my( $module, $corepaths ) = @_;
     my %core_path = ();
 
-    push @{$corepaths}, (qw< installsitearch installsitelib >) if $^O eq 'darwin';
+    push @{$corepaths}, ( "/System/$Config{installsitearch}", "$Config{installsitelib}" ) if $^O eq 'darwin';
 
     for( @{$corepaths} ){
         next unless defined $Config{$_};
         $core_path{$_} = $Config{$_} . '/' . "$module" . '.pm';
-        $core_path{$_} = '/System' . $core_path{$_} if /installsite/;
+        #$core_path{$_} = '/System' . $core_path{$_} if /installsite/;
         $core_path{$_} =~ s/::/\//g;
         return $core_path{$_} if -f $core_path{$_};
     }
