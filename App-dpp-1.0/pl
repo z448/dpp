@@ -31,6 +31,45 @@ my $user_conf = sub {
     return \%user_conf;
 };
 
+#my $dis_name = sub {
+#    my $m = $meta_conf->($module);
+#    return $c->{meta}->{release}->{_source}->{distribution};
+#};
+
+# module dependencies
+my $depends = sub {
+    my( $module, $c ) = @_;
+    my @depends = ();
+    for( keys %{ $c->{meta}->{release}->{_source}->{metadata}->{prereqs}->{runtime}->{requires}} ){
+        push @depends, $_ unless (core_module($_, $c->{perl}->{corepath}));
+        #push @{$c->{module}->{depends}}, $d unless (core_module($d, $c->{perl}->{corepath}));
+    }
+    return \@depends;
+};
+
+my $arch = sub {
+    my $path = shift;
+    open my $pipe,"-|",'uname -a';
+    while(<$pipe>){
+        if(/iPhone/){ return 'iphoneos-arm' }
+        else { return $^O }
+    }
+};
+
+sub core_module {
+    my( $module, $corepaths ) = @_;
+    my %core_path = ();
+
+    push @{$corepaths}, (qw< installsitearch installsitelib >) if $^O eq 'darwin';
+
+    for( @{$corepaths} ){
+        next unless defined $Config{$_};
+        $core_path{$_} = $Config{$_} . '/' . "$module" . '.pm';
+        $core_path{$_} = '/System' . $core_path{$_} if /installsite/;
+        $core_path{$_} =~ s/::/\//g;
+        return $core_path{$_} if -f $core_path{$_};
+    }
+}
 
 
 sub conf {
@@ -94,6 +133,14 @@ sub conf {
         close $fh;
     }
 
+    # module distribution name
+    $c->{module}->{distribution} = $c->{meta}->{release}->{_source}->{distribution};
+
+    # module non-core dependencies
+    $c->{module}->{depends} = $depends->( $module, $c );
+
+    #depends->($module, $c->{url});
+
     return $c;
 
 =head1
@@ -111,13 +158,19 @@ __DATA__
 $c = {
                   'package_prefix' => 'library',
                   'perl' => {
+                        'corepath' => [
+                            'installarchlib', 'installprivlib', 'installextrasarch', 'installextraslib', 'installupdatesarch', 'installupdateslib', 'installvendorarch', 'installvendorlib'
+                        ],
+                        'corepathosx' => [ 
+                            'installsitearch', 'installsitelib',
+                            ],
                         'version' => '5.18.2'
                    },
                   'gitconfig' => "$ENV{HOME}/.gitconfig",
                   'conf_file' => "$ENV{HOME}/dpp.conf",
                   'maintainer' => 'Your Name <your@email.com>',
                   'htmlconf' => {
-                             'dump' => "$dpp_home/.index",
+                             'dump' => "$dpp_home/.dump",
                              'html' => "$dpp_home/index.html",
                            },
                   'dir' => {
