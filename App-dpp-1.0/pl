@@ -12,6 +12,14 @@ use Data::Dumper;
 use File::Path;
 #use open qw<:encoding(UTF-8)>;
 
+# get archname
+my $arch = sub {
+    open my $p, '-|', "dpkg --print-architecture";
+    my $r = <$p>; close $p;
+    if( $r ){ return $r }
+    else { return $^O }
+};
+
 my $meta_conf = sub {
     my $module = shift;
     #my( $module, $url ) = @_;
@@ -53,42 +61,28 @@ my $user_conf = sub {
 # module dependencies
 my $depends = sub {
     my $c = shift;
-    my( @module_dep, @dist_dep ) = ();
-    for my $module( keys %{ $c->{meta}->{release}->{_source}->{metadata}->{prereqs}->{runtime}->{requires}} ){
-             push @module_dep, $module unless core_module($module, $c->{perl}->{corepath}, $c->{arch});
-    }
-    for(@module_dep){
-            my $dist = $meta_conf->($_);
-            push @dist_dep, $dist->{release}->{_source}->{distribution};
-    }
-    
-    my %d = ();
-    $d{modules} = \@module_dep;
-    $d{dist} = \@dist_dep;
-    return \%d;
-};
-
-# get archname
-my $arch = sub {
-    unless( $^O eq 'darwin' ){ return $^O }
-    else { 
-        open my $pipe,"-|",'uname -a';
-        while(<$pipe>){
-       		 if(/iPhone/){ return 'iphoneos-arm' }
-             else { return $^O }
+    my( @depends, %d) = ();
+    my $dep = $c->{meta}->{release}->{_source}->{metadata}->{prereqs}->{runtime}->{requires};
+    for( keys %{$dep} ){
+         unless( core_module($_, $c->{perl}->{corepath}, $c->{arch}) ){
+             my $m = $meta_conf->($_);
+             $d{module} = $_; 
+             $d{version} = $dep->{$_};
+             $d{dist} = $m->{release}->{_source}->{distribution};
          }
+             push @depends,{%d};
     }
+    return \@depends;
 };
 
 sub core_module {
     my( $module, $corepaths, $arch ) = @_;
-
     my( %core_path ) = ();
     #push @{$corepaths}, (qw< /System/installsitearch /System/installsitelib >) if $arch eq 'darwin';
     for( @{$corepaths} ){
         next unless defined $Config{$_};
         $core_path{$_} = $Config{$_} . '/' . "$module" . '.pm';
-        $core_path{$_} = '/System' . $core_path{$_} if $arch eq 'darwin';
+        #$core_path{$_} = '/System' . $core_path{$_} if $arch eq 'darwin';
         #$core_path{$_} = '/System' . $core_path{$_} if /installsite/;
         $core_path{$_} =~ s/::/\//g;
         #return $core_path{$_} if -f $core_path{$_};
@@ -130,6 +124,7 @@ sub conf {
 
     # add module to conf
     #$c->{module} = $module;
+    $c->{arch} = $arch->();
     $c->{module}->{name} = $module;
     
     # get meta conf from metacpan API
@@ -161,10 +156,7 @@ sub conf {
     }
 
     # add core paths on darwin
-    $c->{arch} = $arch->();
-    #push @{$corepaths}, (qw< /System/installsitearch /System/installsitelib >) if $arch eq 'darwin';
     push @{$c->{perl}->{corepath}}, ( "installsitearch", "installsitelib" ) if $c->{arch} eq 'darwin';
-
 
     # create default .dump html conf
     unless( -f $c->{htmlconf}->{dump} ){
