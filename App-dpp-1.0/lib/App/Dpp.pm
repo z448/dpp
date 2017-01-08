@@ -120,27 +120,26 @@ my $gitconfig = sub {
 sub control {
     my $c = shift;
 
-    my $control = (
+    my %control = (
         Name    =>  $c->{module}->{name},
         Version =>  $c->{meta}->{version},
         Author  =>  $c->{meta}->{author},
         Architecture    =>  $c->{arch},
         Section =>  'perl',
         Maintainer  =>  $c->{maintainer},
-        Homepage    =>  
+        Homepage    => 'http://api.metacpan.org/v0/module/' . $c->{module}->{name} . '?join=release',
     );
+
 =head1
-    my $dep = $m->{Depends};
-    my @c = qw( Name Version Author Architecture Package Section Maintainer Homepage Description );
-    
     my $c= '';
     for( @c ){
         $c = $c . $_.': '.$m->{$_}."\n";
     }
     $c = $c . 'Depends: ' . $dep->{control} . "\n";
     return $c;
+    );
 =cut
-}
+};
 
 
 sub conf {
@@ -213,7 +212,7 @@ $c = {
                         'corepath' => [
                             'installarchlib', 'installprivlib', 'installextrasarch', 'installextraslib', 'installupdatesarch', 'installupdateslib', 'installvendorarch', 'installvendorlib'
                         ],
-                        'version' => "$Config{PERL_REVISION} . '.' . $Config{PERL_VERSION} . '.' . $Config{PERL_SUBVERSION}",
+                        'version' => '(= ' . "$Config{PERL_REVISION}" . '.' . "$Config{PERL_VERSION}" . '.' . "$Config{PERL_SUBVERSION}" . ')',
                    },
                   'gitconfig' => "$ENV{HOME}/.gitconfig",
                   'conf_file' => "$ENV{HOME}/dpp.conf",
