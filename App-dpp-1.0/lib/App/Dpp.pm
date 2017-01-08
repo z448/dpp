@@ -193,7 +193,11 @@ sub conf {
     # create default .index conf
     unless( -f $c->{htmlconf}->{conf} ){
         open(my $fh,'>',$c->{htmlconf}->{conf}) || die "cant open $c->{htmlconf}->{conf}: $!";
-        print $fh Data::Dumper->Dump([$c->{html}], ["html"]), $/;
+        print $fh encode_json $c->{html}->{head};
+        print $fh encode_json $c->{html}->{style};
+        print $fh encode_json $c->{html}->{body};
+        print $fh encode_json $c->{html}->{foot};
+        #print $fh Data::Dumper->Dump([$c->{html}], ["html"]), $/;
         close $fh;
     }
     # module version
