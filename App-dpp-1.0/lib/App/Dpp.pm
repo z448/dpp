@@ -5,6 +5,7 @@ use 5.010;
 use warnings;
 use strict;
 
+use Sys::Hostname;
 use HTTP::Tiny;
 use Config;
 use JSON::PP;
@@ -117,18 +118,32 @@ my $gitconfig = sub {
     }
 }; 
 
-sub control {
+my $control = sub {
     my $c = shift;
+
+    my $depends = sub {
+        my $deps = $c->{module}->{depends};
+        my $d = 'perl' . ' ' .$c->{perl}->{version};
+        for( @{$deps} ){
+            $d .= ', ' . 'lib' . lc $_->{dist} . '-' . 'perl-' . lc $c->{package_prefix};
+        }
+        return $d;
+    };
 
     my %control = (
         Name    =>  $c->{module}->{name},
+        Package =>  'lib' . lc $c->{module}->{distribution} . '-' . 'perl-' . lc $c->{package_prefix},
         Version =>  $c->{meta}->{version},
         Author  =>  $c->{meta}->{author},
         Architecture    =>  $c->{arch},
         Section =>  'perl',
         Maintainer  =>  $c->{maintainer},
         Homepage    => 'http://api.metacpan.org/v0/module/' . $c->{module}->{name} . '?join=release',
+        Description => $c->{meta}->{abstract},
+        Depends => $depends->(),
     );
+    return \%control;
+};
 
 =head1
     my $c= '';
@@ -139,7 +154,6 @@ sub control {
     return $c;
     );
 =cut
-};
 
 
 sub conf {
@@ -163,6 +177,9 @@ sub conf {
     my $dir = $c->{dir};
     for( keys %{$dir}){ mkpath( $dir->{$_} ) }
 
+    $c->{package_prefix} = hostname;
+
+    # get name/email from gitconfig if exist
     if( $gitconfig->($c->{gitconfig}) ){
             $c->{maintainer} = $gitconfig->($c->{gitconfig});
     }
@@ -191,6 +208,8 @@ sub conf {
         print $fh Data::Dumper->Dump([$c->{html}], ["html"]), $/;
         close $fh;
     }
+    # module version
+    #$c->{meta}->{version};
 
     # module distribution name
     $c->{module}->{distribution} = $c->{meta}->{release}->{_source}->{distribution};
@@ -198,6 +217,8 @@ sub conf {
     # module non-core module dependencies
     $c->{module}->{depends} = $depends->( $c );
 
+    # control file
+    $c->{module}->{control} = $control->($c);
 
     return $c;
 }

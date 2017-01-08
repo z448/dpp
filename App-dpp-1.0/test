@@ -4,5 +4,5 @@ use Data::Dumper;
 use lib 'lib';
 use App::Dpp qw< conf digest >;
 
-my $c = conf("App::Trrr");
+my $c = conf("$ARGV[0]");
 print Dumper($c);
