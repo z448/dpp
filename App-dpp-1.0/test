@@ -1,0 +1,8 @@
+#!/usr/bin/env perl
+
+use Data::Dumper;
+use lib 'lib';
+use App::Dpp qw< conf digest >;
+
+my $c = conf("App::Trrr");
+print Dumper($c);
