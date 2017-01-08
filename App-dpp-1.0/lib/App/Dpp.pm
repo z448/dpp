@@ -163,6 +163,7 @@ sub conf {
     {
         local $/;
         $c = <DATA>;
+        close DATA;
     }
     # load DATA config
     eval $c;
