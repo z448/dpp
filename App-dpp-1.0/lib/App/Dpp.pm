@@ -2,15 +2,15 @@ package App::Dpp;
 
 use 5.010;
 
-use warnings;
-use strict;
-
 use Sys::Hostname;
 use HTTP::Tiny;
 use Config;
 use JSON::PP;
 use Data::Dumper;
 use File::Path;
+
+use warnings;
+use strict;
 
 =head1 NAME
 
@@ -26,7 +26,7 @@ BEGIN {
 }
 
 
-# get archname
+# architecture
 my $arch = sub {
     open my $p, '-|', "dpkg --print-architecture";
     my $r = <$p>; chomp($r); close $p;
@@ -45,11 +45,9 @@ sub digest {
 
 my $meta_conf = sub {
     my $module = shift;
-    #my( $module, $url ) = @_;
     my $url = 'http://api.metacpan.org/v0/module/'."$module".'?join=release';
 	my $meta = '{}';
     my $response = HTTP::Tiny->new->get($url);
-    #$response->{content} if length $response->{content};
     if($response->{success}){
         	$meta = $response->{content} if length $response->{content};
     } 
@@ -145,17 +143,6 @@ my $control = sub {
     return \%control;
 };
 
-=head1
-    my $c= '';
-    for( @c ){
-        $c = $c . $_.': '.$m->{$_}."\n";
-    }
-    $c = $c . 'Depends: ' . $dep->{control} . "\n";
-    return $c;
-    );
-=cut
-
-
 sub conf {
     my( $module, $dpp_home ) = @_;
     $dpp_home = $dpp_home || "$ENV{HOME}/dpp";
@@ -181,21 +168,21 @@ sub conf {
     $c->{package_prefix} = hostname;
 
     # get name/email from gitconfig if exist
-    if( $gitconfig->($c->{gitconfig}) ){
-            $c->{maintainer} = $gitconfig->($c->{gitconfig});
+    if( $gitconfig->("$ENV{HOME}/.gitconfig") ){
+            $c->{maintainer} = $gitconfig->("$ENV{HOME}/.gitconfig");
     }
 
     # create default dpp.conf file if doesnt exist
-    unless(-f $c->{conf_file}){
-        open(my $fh,'>',$c->{conf_file}) || die "cant open $c->{conf_file}";
-        for( qw< architecture package_prefix section maintainer > ){
+    unless(-f $c->{config}){
+        open(my $fh,'>',$c->{config}) || die "cant open $c->{config}";
+        for( qw< architecture package_prefix maintainer > ){
             say $fh $_ . '=' . $c->{$_};
         }
         close $fh;
     }
 
-    # read user conf from dpp.conf file
-    my $u = $user_conf->("$c->{conf_file}");
+    # read dpp.conf file
+    my $u = $user_conf->("$c->{config}");
     for( keys %{$u} ){
         $c->{$_} = $u->{$_} if defined $u->{$_} and exists $c->{$_};
     }
@@ -203,14 +190,14 @@ sub conf {
     # add core paths on darwin
     push @{$c->{perl}->{corepath}}, ( "installsitearch", "installsitelib" ) if $c->{arch} eq 'darwin';
 
-    # create default .dump html conf
-    unless( -f $c->{htmlconf}->{dump} ){
-        open(my $fh,'>',$c->{htmlconf}->{dump}) || die "cant open $c->{htmlconf}->{dump}: $!";
+    # create default .index conf
+    unless( -f $c->{htmlconf}->{conf} ){
+        open(my $fh,'>',$c->{htmlconf}->{conf}) || die "cant open $c->{htmlconf}->{conf}: $!";
         print $fh Data::Dumper->Dump([$c->{html}], ["html"]), $/;
         close $fh;
     }
     # module version
-    #$c->{meta}->{version};
+    $c->{module}->{version} = $c->{meta}->{version};
 
     # module distribution name
     $c->{module}->{distribution} = $c->{meta}->{release}->{_source}->{distribution};
@@ -220,6 +207,10 @@ sub conf {
 
     # control file
     $c->{module}->{control} = $control->($c);
+
+    # remove meta
+    delete $c->{html};
+    delete $c->{meta};
 
     return $c;
 }
@@ -236,24 +227,22 @@ $c = {
                         ],
                         'version' => '(= ' . "$Config{PERL_REVISION}" . '.' . "$Config{PERL_VERSION}" . '.' . "$Config{PERL_SUBVERSION}" . ')',
                    },
-                  'gitconfig' => "$ENV{HOME}/.gitconfig",
-                  'conf_file' => "$ENV{HOME}/dpp.conf",
+                  'config' => "$ENV{HOME}/.dpp",
                   'maintainer' => 'Your Name <your@email.com>',
                   'module' => {
                              'name' => '',
                            },
                   'htmlconf' => {
-                             'dump' => "$dpp_home/.dump",
+                             'conf' => "$dpp_home/.index",
                              'html' => "$dpp_home/index.html",
                            },
                   'dir' => {
-                             'dpp' => '/Users/zdenek/dpp',
-                             'build' => '/Users/zdenek/dpp/build',
-                             'deb' => '/Users/zdenek/dpp/deb'
+                             'dpp' => "$dpp_home",
+                             'build' => "$dpp_home/build",
+                             'deb' => "$dpp_home/deb"
                            },
                   'url' => 'http://api.metacpan.org/v0/module/'."$module".'?join=release',
                   'architecture' => 'all',
-                  'section' => 'perl',
                   'html' => {
                           'body' => [
                                       '<div class="dpp"> </div>',
