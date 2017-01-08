@@ -69,8 +69,8 @@ my $depends = sub {
              $d{module} = $_; 
              $d{version} = $dep->{$_};
              $d{dist} = $m->{release}->{_source}->{distribution};
-         }
              push @depends,{%d};
+         }
     }
     return \@depends;
 };
