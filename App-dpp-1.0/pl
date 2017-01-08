@@ -15,7 +15,7 @@ use File::Path;
 # get archname
 my $arch = sub {
     open my $p, '-|', "dpkg --print-architecture";
-    my $r = <$p>; close $p;
+    my $r = <$p>; chomp($r); close $p;
     if( $r ){ return $r }
     else { return $^O }
 };
