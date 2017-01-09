@@ -61,27 +61,18 @@ sub parse_packlist {
         open(my $fh,'<', $path) || die "cant open $path:$!";
         while( <$fh> ){ 
             chomp;
+            push @pack, $_;
             my $md5 = $_; $md5 = digest($md5) . '  ' . $md5;
             push @md5sums, $md5;
             my $dir = $_; $dir =~ s/(.*)(\/.*)/$1/;
-            push @preinst, qq|mkdir -p '$dir';|;
-            push @pack, $_;
+            $dir = $1;
+            print $dir;
+            push @preinst, qq|mkdir -p $dir;|;
         }; 
         close $fh;
         #    uniq
         my %dir_seen = ();
         @preinst = grep { ! $dir_seen{"$_"} ++ } @preinst;
-
-
-#        open($fh,'>', "$dir->{dpp}/packlist") || die "cant open $dir->{dpp}/packlist: $!";
-        #for( @pack ){ 
-        #   s/^\.//;
-        #   print $fh $_ . "\n" ;
-        #}
-        #close $fh;
-
-
-        
 
         #open(my $pipe,'-|', "tar -xvf $tmp_pack_file") || die "cant open $pipe: $!";
         #while( <$pipe> ){ chomp and push @pack, '/' . $_ }
@@ -94,22 +85,23 @@ sub parse_packlist {
            #       s/(.*)(\/.*)/$1/; push @pack, $1; # risky; wont work if there is directory with nothing else but another directory todo
 
         my $c = conf($module);
+        $c->{package} = $c->{module}->{package};
         $c->{path} = $path;
         $c->{packlist} = \@pack;
         $c->{md5sums} = \@md5sums;
         $c->{preinst} = \@preinst;
 =head1
-        my $meta = meta($module);
-        my $pkg = $meta->{pkg};
-        my $pack = {
-            pkg        =>  $pkg,
-            module     =>  $module,
-            path       =>  $path,
-            packlist   =>  \@pack,
-            md5sums    =>  \@md5sums,
-            preinst    =>  \@preinst,
-            control    =>  control($module),
-        };         
+       # my $meta = meta($module);
+       # my $pkg = $meta->{pkg};
+       # my $pack = {
+        #    pkg        =>  $pkg,
+         #   module     =>  $module,
+          #  path       =>  $path,
+           # packlist   =>  \@pack,
+           # md5sums    =>  \@md5sums,
+           # preinst    =>  \@preinst,
+           # control    =>  control($module),
+        #};         
 =cut
 #push @{$pack->{packlist}}, $pack->{$path};
         #push @pack, $path;
@@ -119,7 +111,7 @@ sub parse_packlist {
         #print "packing $pack->{module}\t" . ' <--> ' . "$pack->{pkg}\t\n";
     pack_packlist($c);
     #pack_packlist($pack);
-    }
+}
 };
 
 sub pack_packlist {
@@ -144,7 +136,7 @@ sub pack_packlist {
 
     # write preinst script
     open(my $fh,">", "$pack_path/DEBIAN/preinst") || die "cant open $pack_path/DEBIAN/preinst$!";
-    print $fh $_ . "\n" for @{$c->{preinst}};
+    print $fh "$_\n" for @{$c->{preinst}};
     close $fh;
     
     # write control file
