@@ -14,8 +14,8 @@ use File::Find;
 use File::Path;
 use open qw< :encoding(UTF-8) >;
 
-my $options = {};
-getopts('d:', $options);
+my $opt = {};
+getopts('d:', $opt);
 
 # takes path to site_perl dir; returns array ref with all .packlist paths
 sub find_packlist {
@@ -47,13 +47,13 @@ sub parse_packlist {
         my $module = $path;
         $module =~ s/(auto.*?\/)(.*?)(\/\.packlist)/$2/;
         $module = $2;
-        my $module_first_dir = $2;
-        $module_first_dir =~ s/(.*?)(\/.*)/$1/;
-        $module_first_dir = $1;
+        #my $module_first_dir = $2;
+        #$module_first_dir =~ s/(.*?)(\/.*)/$1/;
+        #$module_first_dir = $1;
         $module =~ s/\//\:\:/g;
 
-        my $module_root_dir = $_;
-        $module_root_dir =~ s/(.*?$module_first_dir)(\/.*)/$1/;
+        # my $module_root_dir = $_;
+        #$module_root_dir =~ s/(.*?$module_first_dir)(\/.*)/$1/;
 
         #system("tar -cz -T $path -f $tmp_pack_file && cd $dir->{build} && tar -xf $tmp_pack_file && rm -rf $tmp_pack_file && find . > ../packlist");
 	my @preinst =  ('#!/bin/sh');
@@ -68,7 +68,6 @@ sub parse_packlist {
             push @pack, $_;
         }; 
         close $fh;
-
         #    uniq
         my %dir_seen = ();
         @preinst = grep { ! $dir_seen{"$_"} ++ } @preinst;
@@ -79,7 +78,7 @@ sub parse_packlist {
         #   s/^\.//;
         #   print $fh $_ . "\n" ;
         #}
-        close $fh;
+        #close $fh;
 
 
         
@@ -94,6 +93,12 @@ sub parse_packlist {
         #}
            #       s/(.*)(\/.*)/$1/; push @pack, $1; # risky; wont work if there is directory with nothing else but another directory todo
 
+        my $c = conf($module);
+        $c->{path} = $path;
+        $c->{packlist} = \@pack;
+        $c->{md5sums} = \@md5sums;
+        $c->{preinst} = \@preinst;
+=head1
         my $meta = meta($module);
         my $pkg = $meta->{pkg};
         my $pack = {
@@ -105,44 +110,56 @@ sub parse_packlist {
             preinst    =>  \@preinst,
             control    =>  control($module),
         };         
-        push @{$pack->{packlist}}, $pack->{$path};
+=cut
+#push @{$pack->{packlist}}, $pack->{$path};
+        #push @pack, $path;
 
 #   push @meta, $pack;
         #close $fh;
-    print "packing $pack->{module}\t" . ' <--> ' . "$pack->{pkg}\t\n";
-    pack_packlist($pack);
+        #print "packing $pack->{module}\t" . ' <--> ' . "$pack->{pkg}\t\n";
+    pack_packlist($c);
+    #pack_packlist($pack);
     }
 };
 
 sub pack_packlist {
-    my $meta_pack = shift;
-    my $path = init();
+    #my $meta_pack = shift;
+    my $c = shift;
+    #my $path = init();
 
     #my $build_path = init('build');
-    my $pack_path = $path->{build} . "/$meta_pack->{pkg}";
+    my $pack_path = $c->{dir}->{build} . "/$c->{module}->{package}";
+    #my $pack_path = $path->{build} . "/$meta_pack->{pkg}";
     #my $path->{deb} = init('deb');
-    mkpath("$path->{build}/$meta_pack->{pkg}");
+    mkpath("$pack_path");
+    #mkpath("$path->{build}/$meta_pack->{pkg}");
 
     # tar packlist content into data.tar.gz
     #system("tar -pzcf $dir->{build}/data.tar.gz $dir->{dpp}/packlist && cd $dir->{build} && mv data.tar.gz .. && rm -rf * && mv ../data.tar.gz . && cd -");
-    system("tar pcz -T $meta_pack->{path} -f $dir->{build}/data.tar.gz && cd $dir->{build} && mv data.tar.gz .. && rm -rf * && mv ../data.tar.gz . && cd -");
+    system("tar pcz -T $c->{path} -f $c->{dir}->{build}/data.tar.gz && cd $c->{dir}->{build} && mv data.tar.gz .. && rm -rf * && mv ../data.tar.gz . && cd -");
+    #system("tar pcz -T $meta_pack->{path} -f $dir->{build}/data.tar.gz && cd $dir->{build} && mv data.tar.gz .. && rm -rf * && mv ../data.tar.gz . && cd -");
 
     #system("mkdir $path->{build} && tar cz -T $meta_pack->{path} -f $path->{build}/data.tar.gz && cd $path->{build} && tar -xvf data.tar.gz && rm -rf data.tar.gz && rm -rf $pack_path  && tar -zcvf data.tar.gz * && mv data.tar.gz .. && rm -rf * && mv ../data.tar.gz . && cd -");
     mkpath("$pack_path/DEBIAN");
 
     # write preinst script
     open(my $fh,">", "$pack_path/DEBIAN/preinst") || die "cant open $pack_path/DEBIAN/preinst$!";
-    print $fh $_ . "\n" for @{$meta_pack->{preinst}};
+    print $fh $_ . "\n" for @{$c->{preinst}};
     close $fh;
     
     # write control file
+    my %control = %{$c->{module}->{control}};
+    my $control = ();
+    for( keys %control ){
+        $control .= $_ . ': ' . $control{$_} . "\n"; 
+    }
     open($fh,">", "$pack_path/DEBIAN/control") || die "cant open $pack_path/DEBIAN/control: $!";
-    print $fh $meta_pack->{control};
+    print $fh $control;
     close $fh;
 
     # write md5sums file
     open($fh,">", "$pack_path/DEBIAN/md5sums") || die "cant open $pack_path/DEBIAN/md5sums: $!";
-    print $fh $_ . "\n" for @{$meta_pack->{md5sums}};
+    print $fh $_ . "\n" for @{$c->{md5sums}};
     close $fh;
 
     # make .deb
@@ -153,21 +170,25 @@ sub pack_packlist {
     tar pczf ../../control.tar.gz *;
     cd ../..;
     echo 2.0 > debian-binary;
-    ar r $meta_pack->{pkg}.deb debian-binary control.tar.gz data.tar.gz;
-    mv $meta_pack->{pkg}.deb $path->{deb};
-    rm -rf $meta_pack->{pkg};
+    ar r $c->{module}->{package}.deb debian-binary control.tar.gz data.tar.gz;
+    mv $c->{module}->{package}.deb $c->{dir}->{deb};
+    rm -rf $c->{module}->{package};
     rm -rf debian-binary control.tar.gz data.tar.gz DEBIAN;
 _DEB
     system("$packer");
-    eval { web("$meta_pack->{module}") };
-    make_html();
+    #eval { web("$meta_pack->{module}") };
+#    make_html($c);
     #die;
+        print Dumper($c);
+        die;
 }
 
 sub make_html {
-    my $json_file = "$ENV{HOME}/dpp/index.json";
-    #my $json_file = init('assets') . "/index.json";
-    my $html_file = "$ENV{HOME}/dpp/index.html";
+    my $c = shift;
+    my $json_file = $c->{htmlconf}->{conf};
+    #my $json_file = "$ENV{HOME}/dpp/index.json";
+    my $html_file = "$c->{htmlconf}->{html}";
+    #my $html_file = "$ENV{HOME}/dpp/index.html";
 
     open(my $fh,"<",$json_file) || die "cant open $json_file: $!";
     my $index_json = <$fh>;
@@ -186,8 +207,8 @@ sub make_html {
 
 
 
-
-die "add path to perl modules dir" unless $ARGV[0];
-parse_packlist(find_packlist("$ARGV[0]"));
+my $p = $ARGV[0] || $Config{installsitearch};
+#die "add path to perl modules dir" unless $p;
+parse_packlist(find_packlist($p));
 
 

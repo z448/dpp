@@ -3,6 +3,7 @@ package App::Dpp;
 use 5.010;
 
 use Sys::Hostname;
+use Digest::MD5 qw< md5_hex >;
 use HTTP::Tiny;
 use Config;
 use JSON::PP;
@@ -130,7 +131,8 @@ my $control = sub {
 
     my %control = (
         Name    =>  $c->{module}->{name},
-        Package =>  'lib' . lc $c->{module}->{distribution} . '-' . 'perl-' . lc $c->{package_prefix},
+        Package =>  $c->{module}->{package},
+        #Package =>  'lib' . lc $c->{module}->{distribution} . '-' . 'perl-' . lc $c->{package_prefix},
         Version =>  $c->{meta}->{version},
         Author  =>  $c->{meta}->{author},
         Architecture    =>  $c->{arch},
@@ -150,7 +152,7 @@ sub conf {
     {
         local $/;
         $c = <DATA>;
-        close DATA;
+        #close DATA;
     }
     # load DATA config
     eval $c;
@@ -205,6 +207,9 @@ sub conf {
 
     # module distribution name
     $c->{module}->{distribution} = $c->{meta}->{release}->{_source}->{distribution};
+
+    # module package name
+    $c->{module}->{package} = 'lib' . lc $c->{module}->{distribution} . '-' . 'perl-' . lc $c->{package_prefix};
 
     # module non-core module dependencies
     $c->{module}->{depends} = $depends->( $c );
