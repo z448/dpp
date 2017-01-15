@@ -8,6 +8,7 @@ use HTTP::Tiny;
 use Config;
 use JSON::PP;
 use Data::Dumper;
+use Data::Printer;
 use File::Path;
 
 use warnings;
@@ -26,76 +27,7 @@ BEGIN {
     our @EXPORT_OK = qw( conf digest );
 }
 
-
-# architecture
-my $arch = sub {
-    open my $p, '-|', "dpkg --print-architecture";
-    my $r = <$p>; chomp($r); close $p;
-    if( $r ){ return $r }
-    else { return $^O }
-};
-
-sub digest {
-    my $file = shift;
-    my( $data ) = ();
-    open(my $fh,"<:raw :bytes",$file) || die "cant open $file: $!";
-    while(<$fh>){ $data .= $_ }
-
-    return  md5_hex($data);
-};
-
-my $meta_conf = sub {
-    my $module = shift;
-    my $url = 'http://api.metacpan.org/v0/module/'."$module".'?join=release';
-	my $meta = '{}';
-    my $response = HTTP::Tiny->new->get($url);
-    if($response->{success}){
-        	$meta = $response->{content} if length $response->{content};
-    } 
-    return decode_json $meta;
-};
-
-my $user_conf = sub {
-    my $conf_file = shift;
-    my %user_conf = ();
-
-    open(my $fh,'<',"$conf_file") || die "cant open $conf_file: $!";
-    while( <$fh> ){
-        s/(.*?)(\=)(.*)/$1$3/;
-        $user_conf{$1} = "$3";
-    }
-    return \%user_conf;
-};
-
-# module dependencies
-my $depends = sub {
-    my $c = shift;
-    my( @depends, %d) = ();
-    my $dep = $c->{meta}->{release}->{_source}->{metadata}->{prereqs}->{runtime}->{requires};
-    for( keys %{$dep} ){
-         unless( core_module($_, $c->{perl}->{corepath}, $c->{arch}) ){
-             my $m = $meta_conf->($_);
-             $d{module} = $_; 
-             $d{version} = $dep->{$_};
-             $d{dist} = $m->{release}->{_source}->{distribution};
-             push @depends,{%d};
-         }
-    }
-    return \@depends;
-};
-
-# check if module is a core module
-sub core_module {
-    my( $module, $corepaths, $arch ) = @_;
-    my( %core_path ) = ();
-    for( @{$corepaths} ){
-        next unless defined $Config{$_};
-        $core_path{$_} = $Config{$_} . '/' . "$module" . '.pm';
-        $core_path{$_} = '/System' . $core_path{$_} if $arch eq 'darwin';
-        $core_path{$_} =~ s/::/\//g;
-        return $core_path{$_} if -f $core_path{$_};
-    }
-}
+my $dpp_home = "$ENV{HOME}/dpp";
 
 # get name email from gitconfig if exist
 my $gitconfig = sub {
@@ -117,14 +49,158 @@ my $gitconfig = sub {
     }
 }; 
 
+my $d;
+{ local $/; $d = <DATA>; close DATA }
+
+# create ~/.dpp config if doesnt exist and set dpp_home
+unless(-f "$ENV{HOME}/.dpp"){
+    my %init = (
+        dpp_home        =>  "$ENV{HOME}/dpp",
+        package_prefix  =>  hostname,
+        maintainer      =>  'Your Name <name@email.com>',
+    );
+    # get name/email from gitconfig if exist
+    $init{maintainer} = $gitconfig->("$ENV{HOME}/.gitconfig") if $gitconfig->("$ENV{HOME}/.gitconfig");
+    open(my $CONF,'>',"$ENV{HOME}/.dpp") || die "cant open $ENV{HOME}/.dpp: $!";
+    print $CONF "$_=$init{$_}\n" for keys %init;
+    close $CONF;
+}
+
+# read ~/.dpp conf file and get $dpp_home;
+open(my $CONF,'<',"$ENV{HOME}/.dpp") || die "cant open $ENV{HOME}/.dpp: $!";
+while( <$CONF> ){
+    if(/(.*dpp_home)(\=)(.*)/){ $dpp_home=$3; chomp $dpp_home }
+}
+close $CONF;
+
+sub init {
+    return $dpp_home;
+}
+
+# architecture
+my $arch = sub {
+    open my $p, '-|', "dpkg --print-architecture";
+    my $r = <$p>; chomp($r); close $p;
+    if( $r ){ return $r }
+    else { return $^O }
+};
+
+sub digest {
+    my $file = shift;
+    my( $data ) = ();
+    open(my $fh,"<:raw :bytes",$file) || die "cant open $file: $!";
+    while(<$fh>){ $data .= $_ }
+
+    return md5_hex($data);
+};
+
+my $meta_conf = sub {
+    my $mod = shift;
+
+    my $m = {};
+    my $get = sub {
+        my $url = shift;
+        my $response = HTTP::Tiny->new->get($url);
+        sleep 1;
+        if($response->{success}){
+            return decode_json $response->{content};
+        } else { return 0 }
+    }; 
+
+    unless( ref $mod ){
+        say "https://fastapi.metacpan.org/v1/module/$mod?join=release";
+        return $get->("https://fastapi.metacpan.org/v1/module/$mod?join=release");
+    } else {
+
+        $mod->{module} =~ s/::/\//g;
+        #https://fastapi.metacpan.org/v1/release/ZDENEK/App-Trrr-v8
+        my $try = $get->("https://fastapi.metacpan.org/v1/module/$mod->{author}/$mod->{distribution}-$mod->{version}?join=release");
+        #my $try = $get->("https://fastapi.metacpan.org/v1/module/$mod->{author}/$mod->{distribution}-$mod->{version}/lib/$mod->{module}.pm?join=release");
+
+        unless( $try ){
+            say "https://fastapi.metacpan.org/v1/module/$mod->{author}/$mod->{distribution}-v$mod->{version}?join=release";
+            return $get->("https://fastapi.metacpan.org/v1/module/$mod->{author}/$mod->{distribution}-v$mod->{version}?join=release");
+            #return $get->("https://fastapi.metacpan.org/v1/module/$mod->{author}/$mod->{distribution}-v$mod->{version}/lib/$mod->{module}.pm?join=release");
+        } else { return $try }
+    }
+};
+
+my $user_conf = sub {
+    my $conf_file = shift;
+    my %user_conf = ();
+
+    open(my $fh,'<',"$conf_file") || die "cant open $conf_file: $!";
+    while( <$fh> ){
+        s/(.*?)(\=)(.*)/$1$3/;
+        $user_conf{$1} = "$3";
+    }
+    return \%user_conf;
+};
+
+# module dependencies
+my $depends = sub {
+    my $c = shift;
+    my( @depends, %d) = ();
+    my $dep = $c->{meta}->{release}->{_source}->{metadata}->{prereqs}->{runtime}->{requires};
+    for( keys %{$dep} ){
+         unless( $_ eq 'perl' or core_module($_, $c->{perl}->{corepath}, $c->{arch}) ){
+             my $m = $meta_conf->($_);
+             #my $m = $meta_conf->($_, $c->{module}->{version});
+             $d{module} = $_; 
+             $d{version} = $dep->{$_}; $d{version} =~ s/[A-Za-z]//g;
+             $d{dist} = $m->{release}->{_source}->{distribution};
+             $d{package} = 'lib' . lc $m->{release}->{_source}->{distribution} . "-perl$c->{perl}->{version}.$c->{perl}->{subversion}-" . lc $c->{package_prefix}; 
+             push @depends,{%d};
+         }
+    }
+    return \@depends;
+};
+
+# check if module is a core module
+sub core_module {
+    my( $module, $corepaths, $arch ) = @_;
+    my( %core_path ) = ();
+    for( @{$corepaths} ){
+        next unless defined $Config{$_};
+        $core_path{$_} = $Config{$_} . '/' . "$module" . '.pm';
+        $core_path{$_} = '/System' . $core_path{$_} if $arch eq 'darwin';
+        $core_path{$_} =~ s/::/\//g;
+        return $core_path{$_} if -f $core_path{$_};
+    }
+}
+
+# check local distribution version from main module
+my $version = sub {
+    my $module = shift;
+    for my $instpath( qw< installsitelib installsitearch > ){
+        #my $module = $c->{module}->{main};
+        $module =~ s/\:\:/\//g; 
+        next unless -f "$Config{$instpath}/$module.pm";
+        open(my $fh,'<',"$Config{$instpath}/$module.pm") || die "cant open: $!";
+        while( <$fh> ){
+                if(/(\:|\$)(VERSION)(.*?\=)(.*?)([0-9].*?)(\s|'|"|;)(.*)/){ 
+                say "VERSION IS $5";#test
+                my $v = $5; 
+                #my $v = $5; 
+#$v =~ s/[A-Za-z]//g;
+                return $v;
+            }
+        }
+        return "0?";
+    }
+};
+
 my $control = sub {
     my $c = shift;
+    my $perl_dep = "perl (>= $c->{perl}->{version}.$c->{perl}->{subversion}), perl (<< $c->{perl}->{version}.".(int($c->{perl}->{subversion}) +1) .")";
 
     my $depends = sub {
         my $deps = $c->{module}->{depends};
-        my $d = 'perl' . ' ' .$c->{perl}->{version};
+        my $d = $perl_dep;
         for( @{$deps} ){
-            $d .= ', ' . 'lib' . lc $_->{dist} . '-' . 'perl-' . lc $c->{package_prefix};
+            $_->{version} =~ s/[A-Za-z]//g;
+            $d .= ', ' . "$_->{package} (>= $_->{version})";
+            ##$d .= ', ' . 'lib' . lc $_->{dist} . '-' . 'perl-' . lc $c->{package_prefix};
         }
         return $d;
     };
@@ -132,65 +208,67 @@ my $control = sub {
     my %control = (
         Name    =>  $c->{module}->{name},
         Package =>  $c->{module}->{package},
-        #Package =>  'lib' . lc $c->{module}->{distribution} . '-' . 'perl-' . lc $c->{package_prefix},
-        Version =>  $c->{meta}->{version},
+        Version =>  $c->{module}->{version},
         Author  =>  $c->{meta}->{author},
         Architecture    =>  $c->{arch},
         Section =>  'perl',
         Maintainer  =>  $c->{maintainer},
         Homepage    => 'http://api.metacpan.org/v0/module/' . $c->{module}->{name} . '?join=release',
-        Description => $c->{meta}->{abstract},
+        Description => $c->{meta}->{release}->{_source}->{abstract},
         Depends => $depends->(),
     );
     return \%control;
 };
 
 sub conf {
-    my( $module, $dpp_home ) = @_;
-    $dpp_home = $dpp_home || "$ENV{HOME}/dpp";
-    my $c;
-    {
-        local $/;
-        $c = <DATA>;
-        #close DATA;
-    }
+    my $module = shift;
+    my $dpp_home = init();
+
     # load DATA config
-    eval $c;
+    my $c = {};
+    eval $d;
 
     $c->{arch} = $arch->();
     $c->{module}->{name} = $module;
     
-    # get meta conf from metacpan API
-    $c->{meta} = $meta_conf->($module);
-    
+    # module version
+    #$c->{module}->{version} = $version->($module); #dont
+
     # create dpp home dir
     my $dir = $c->{dir};
     for( keys %{$dir}){ mkpath( $dir->{$_} ) }
 
     $c->{package_prefix} = hostname;
 
-    # get name/email from gitconfig if exist
-    if( $gitconfig->("$ENV{HOME}/.gitconfig") ){
-            $c->{maintainer} = $gitconfig->("$ENV{HOME}/.gitconfig");
-    }
-
-    # create default dpp.conf file if doesnt exist
-    unless(-f $c->{config}){
-        open(my $fh,'>',$c->{config}) || die "cant open $c->{config}";
-        for( qw< architecture package_prefix maintainer > ){
-            say $fh $_ . '=' . $c->{$_};
-        }
-        close $fh;
-    }
-
-    # read dpp.conf file
-    my $u = $user_conf->("$c->{config}");
+    # read .dpp conf file
+    my $u = $user_conf->("$ENV{HOME}/.dpp");
     for( keys %{$u} ){
         $c->{$_} = $u->{$_} if defined $u->{$_} and exists $c->{$_};
     }
 
-    # add core paths on darwin
+    # add core paths on osx
     push @{$c->{perl}->{corepath}}, ( "installsitearch", "installsitelib" ) if $c->{arch} eq 'darwin';
+
+    # get meta conf from metacpan API
+    #my $m = $meta_conf->($module); #dont
+    $c->{meta} = $meta_conf->($module);
+
+    # main module
+    #$c->{module}->{main} = $m->{release}->{_source}->{main_module}; #dont
+    $c->{module}->{main} = $c->{meta}->{release}->{_source}->{main_module};
+    # module distribution name
+    #$c->{module}->{distribution} = $m->{release}->{_source}->{distribution};#dont
+    $c->{module}->{distribution} = $c->{meta}->{release}->{_source}->{distribution};
+
+=head1
+    my %z = (
+        module  =>  $m->{release}->{_source}->{main_module},
+        version =>  $c->{module}->{version},
+        author  =>  $m->{release}->{_source}->{author},
+        distribution    =>  $m->{release}->{_source}->{distribution},
+    );
+    $c->{meta} = $meta_conf->(\%z); 
+
 
     # create default .index conf
     unless( -f $c->{htmlconf}->{conf} ){
@@ -202,30 +280,27 @@ sub conf {
         #print $fh Data::Dumper->Dump([$c->{html}], ["html"]), $/;
         close $fh;
     }
+    #$c->{module}->{version} = $c->{meta}->{version}; 
+=cut
+    
     # module version
     $c->{module}->{version} = $c->{meta}->{version};
-
-    # module distribution name
-    $c->{module}->{distribution} = $c->{meta}->{release}->{_source}->{distribution};
-
     # module package name
-    $c->{module}->{package} = 'lib' . lc $c->{module}->{distribution} . '-' . 'perl-' . lc $c->{package_prefix};
-
+    $c->{module}->{package} = 'lib' . lc $c->{module}->{distribution} . '-perl' . "$c->{perl}->{version}.$c->{perl}->{subversion}-" . lc $c->{package_prefix};
+    # module .deb file name
+    $c->{module}->{debfile} = 'lib'.lc $c->{module}->{distribution}."$c->{module}->{version}-$c->{arch}".'-perl'."$c->{perl}->{version}.$c->{perl}->{subversion}-" . lc $c->{package_prefix}.'.deb';
     # module non-core module dependencies
-    $c->{module}->{depends} = $depends->( $c );
-
+    $c->{module}->{depends} = $depends->($c);
     # control file
     $c->{module}->{control} = $control->($c);
 
-    # remove meta
     delete $c->{html};
-    delete $c->{meta};
+    #delete $c->{meta};
 
+    #p $c;
+    #print Dumper $c;
     return $c;
 }
-
-#print Dumper( conf($ARGV[0]) );
-#conf($ARGV[0]);
 
 __DATA__
 $c = {
@@ -234,7 +309,8 @@ $c = {
                         'corepath' => [
                             'installarchlib', 'installprivlib', 'installextrasarch', 'installextraslib', 'installupdatesarch', 'installupdateslib', 'installvendorarch', 'installvendorlib'
                         ],
-                        'version' => '(= ' . "$Config{PERL_REVISION}" . '.' . "$Config{PERL_VERSION}" . '.' . "$Config{PERL_SUBVERSION}" . ')',
+                        'version' => "$Config{PERL_REVISION}" . '.' . "$Config{PERL_VERSION}",
+                        'subversion' => "$Config{PERL_SUBVERSION}",
                    },
                   'config' => "$ENV{HOME}/.dpp",
                   'maintainer' => 'Your Name <your@email.com>',
@@ -242,12 +318,12 @@ $c = {
                              'name' => '',
                            },
                   'htmlconf' => {
-                             'conf' => "$dpp_home/.index",
+                             'conf' => "$dpp_home" . '/.index',
                              'html' => "$dpp_home/index.html",
                            },
                   'dir' => {
                              'dpp' => "$dpp_home",
-                             'build' => "$dpp_home/build",
+                             'build' => "$dpp_home/.build",
                              'deb' => "$dpp_home/deb"
                            },
                   'url' => 'http://api.metacpan.org/v0/module/'."$module".'?join=release',

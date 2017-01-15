@@ -11,17 +11,22 @@ use Data::Dumper;
 use JSON::PP;
 use Config;
 use File::Find;
-use File::Path;
+use File::Path qw< remove_tree mkpath >;
 use open qw< :encoding(UTF-8) >;
 
 my $opt = {};
 getopts('d:', $opt);
 
+my $conf = sub {
+    my $module = shift;
+    my $c = conf($module);
+    return $c;
+};
+
 # takes path to site_perl dir; returns array ref with all .packlist paths
 sub find_packlist {
     my $siteperl_path = shift;
     my @packlist_file = ();
-
     find( sub {
             if(/\.packlist/){
                 push @packlist_file, "$File::Find::dir/$_";
@@ -34,115 +39,95 @@ sub find_packlist {
 # makes hash ref containing { pkg => package name, module => module name, path => .packlist path, packlist => .packlist contents, control => control file }
 sub parse_packlist {
     my $packlist_path = shift;
-    my( @meta )= ();
 
-    #mkpath("$dir->{build}");
-    #my $tmp_pack_file = "$dir->{build}/tmp_pack_file.tar.gz";
- 
+    my $md5sums = sub {
+        my $file = shift;
+        my $md5 = digest($file) . '  ' . $file;
+        return $md5;
+    };
+
+    my %dir_seen = (); # remember processed dirs 
+
+    my $preinst = sub {
+        my $file = shift;
+        my $dir = $file; $dir =~ s/(.*)(\/.*)/$1/; 
+
+        # return sub for dir unless it has been aleady processed
+        if( grep { $dir_seen{"$dir"} ++ } ($dir) ){ return }
+        else {
+            $dir_seen{"$dir"} = 1;
+            my $mode = (stat($dir))[2];
+            $mode = $mode & 07777;
+            return sub{
+                my $fh = shift;
+                print $fh "if [ ! -d $dir ]; then mkdir -p $dir && chmod "; printf $fh ("%04o", $mode); print $fh " $dir; fi\n";
+                #print $fh "mkdir -p $dir && chmod "; printf $fh ("%04o", $mode); print $fh " $dir\n";
+            };
+        }
+    };
+
     for my $path( @$packlist_path ){
-        my @pack = ();
         chomp($path);
+        my( @pack, @preinst, @md5sums ) = (); # add packlist path into pack so installed packages can be managed by cpanm
+        push @preinst, $preinst->($path);
+        push @md5sums, $md5sums->($path);
 
-        # make module($pm) name from packlist($path)
+
+        # module name from packlist($path)
         my $module = $path;
         $module =~ s/(auto.*?\/)(.*?)(\/\.packlist)/$2/;
         $module = $2;
-        #my $module_first_dir = $2;
-        #$module_first_dir =~ s/(.*?)(\/.*)/$1/;
-        #$module_first_dir = $1;
         $module =~ s/\//\:\:/g;
+        say "\$module:[$module] _______________________________"; ###test
+        #say colored(['blue'], `./version2.pl $module`);###test
+        #do { "version.pl $module" }; ###test
+        my $c = $conf->("$module");
+        #print Dumper $c->{module}->{control}; ###test
 
-        # my $module_root_dir = $_;
-        #$module_root_dir =~ s/(.*?$module_first_dir)(\/.*)/$1/;
-
-        #system("tar -cz -T $path -f $tmp_pack_file && cd $dir->{build} && tar -xf $tmp_pack_file && rm -rf $tmp_pack_file && find . > ../packlist");
-	my @preinst =  ('#!/bin/sh');
-    my @md5sums = ();
+        # read content of packlist
         open(my $fh,'<', $path) || die "cant open $path:$!";
         while( <$fh> ){ 
-            chomp;
+            chomp($_);
             push @pack, $_;
-            my $md5 = $_; $md5 = digest($md5) . '  ' . $md5;
-            push @md5sums, $md5;
-            my $dir = $_; $dir =~ s/(.*)(\/.*)/$1/;
-            $dir = $1;
-            print $dir;
-            push @preinst, qq|mkdir -p $dir;|;
-        }; 
+            push @preinst, $preinst->($_);
+            push @md5sums, $md5sums->($_);
+        }
         close $fh;
-        #    uniq
-        my %dir_seen = ();
-        @preinst = grep { ! $dir_seen{"$_"} ++ } @preinst;
 
-        #open(my $pipe,'-|', "tar -xvf $tmp_pack_file") || die "cant open $pipe: $!";
-        #while( <$pipe> ){ chomp and push @pack, '/' . $_ }
-
-        #open( my $fh, "<", "$dir->{dpp}/packlist");
-        #    while( <$fh>){ 
-        #        chomp and push @pack, $_ ;
-        #    }
-        #}
-           #       s/(.*)(\/.*)/$1/; push @pack, $1; # risky; wont work if there is directory with nothing else but another directory todo
-
-        my $c = conf($module);
         $c->{package} = $c->{module}->{package};
         $c->{path} = $path;
         $c->{packlist} = \@pack;
         $c->{md5sums} = \@md5sums;
         $c->{preinst} = \@preinst;
-=head1
-       # my $meta = meta($module);
-       # my $pkg = $meta->{pkg};
-       # my $pack = {
-        #    pkg        =>  $pkg,
-         #   module     =>  $module,
-          #  path       =>  $path,
-           # packlist   =>  \@pack,
-           # md5sums    =>  \@md5sums,
-           # preinst    =>  \@preinst,
-           # control    =>  control($module),
-        #};         
-=cut
-#push @{$pack->{packlist}}, $pack->{$path};
-        #push @pack, $path;
 
-#   push @meta, $pack;
-        #close $fh;
-        #print "packing $pack->{module}\t" . ' <--> ' . "$pack->{pkg}\t\n";
-    pack_packlist($c);
-    #pack_packlist($pack);
-}
+        pack_packlist($c);
+        %dir_seen = (); # reset uniq packlist directories for next package
+    }
 };
 
 sub pack_packlist {
-    #my $meta_pack = shift;
     my $c = shift;
-    #my $path = init();
-
-    #my $build_path = init('build');
     my $pack_path = $c->{dir}->{build} . "/$c->{module}->{package}";
-    #my $pack_path = $path->{build} . "/$meta_pack->{pkg}";
-    #my $path->{deb} = init('deb');
-    mkpath("$pack_path");
-    #mkpath("$path->{build}/$meta_pack->{pkg}");
 
-    # tar packlist content into data.tar.gz
-    #system("tar -pzcf $dir->{build}/data.tar.gz $dir->{dpp}/packlist && cd $dir->{build} && mv data.tar.gz .. && rm -rf * && mv ../data.tar.gz . && cd -");
-    system("tar pcz -T $c->{path} -f $c->{dir}->{build}/data.tar.gz && cd $c->{dir}->{build} && mv data.tar.gz .. && rm -rf * && mv ../data.tar.gz . && cd -");
-    #system("tar pcz -T $meta_pack->{path} -f $dir->{build}/data.tar.gz && cd $dir->{build} && mv data.tar.gz .. && rm -rf * && mv ../data.tar.gz . && cd -");
+    say colored(['red'], $c->{module}->{name} . " $c->{module}->{version}");###test
 
-    #system("mkdir $path->{build} && tar cz -T $meta_pack->{path} -f $path->{build}/data.tar.gz && cd $path->{build} && tar -xvf data.tar.gz && rm -rf data.tar.gz && rm -rf $pack_path  && tar -zcvf data.tar.gz * && mv data.tar.gz .. && rm -rf * && mv ../data.tar.gz . && cd -");
+    #system("rm -rf $c->{dir}->{build}");
+    remove_tree( $c->{dir}->{build} ); mkpath("$pack_path");
+
+    system("tar pcz '$c->{path}' -T $c->{path} -f $c->{dir}->{build}/data.tar.gz && cd $c->{dir}->{build} && mv data.tar.gz .. && rm -rf * && mv ../data.tar.gz . && cd -");
     mkpath("$pack_path/DEBIAN");
 
     # write preinst script
     open(my $fh,">", "$pack_path/DEBIAN/preinst") || die "cant open $pack_path/DEBIAN/preinst$!";
-    print $fh "$_\n" for @{$c->{preinst}};
+    print $fh "#!/bin/sh\n\n";
+    $_->($fh) for @{$c->{preinst}};
     close $fh;
     
     # write control file
     my %control = %{$c->{module}->{control}};
     my $control = ();
     for( keys %control ){
+        next unless defined $control{$_};
         $control .= $_ . ': ' . $control{$_} . "\n"; 
     }
     open($fh,">", "$pack_path/DEBIAN/control") || die "cant open $pack_path/DEBIAN/control: $!";
@@ -155,6 +140,7 @@ sub pack_packlist {
     close $fh;
 
     # make .deb
+    #my $deb_file = "$c->{module}->{package}
     my $packer = <<"_DEB";
 
     cd $pack_path/DEBIAN;
@@ -162,17 +148,18 @@ sub pack_packlist {
     tar pczf ../../control.tar.gz *;
     cd ../..;
     echo 2.0 > debian-binary;
-    ar r $c->{module}->{package}.deb debian-binary control.tar.gz data.tar.gz;
-    mv $c->{module}->{package}.deb $c->{dir}->{deb};
+    ar r $c->{module}->{debfile} debian-binary control.tar.gz data.tar.gz;
+    mv $c->{module}->{debfile} $c->{dir}->{deb};
     rm -rf $c->{module}->{package};
     rm -rf debian-binary control.tar.gz data.tar.gz DEBIAN;
 _DEB
     system("$packer");
+    remove_tree( $c->{dir}->{build} );
+    #sleep 1;
+
     #eval { web("$meta_pack->{module}") };
 #    make_html($c);
-    #die;
-        print Dumper($c);
-        die;
+    print "###:" . Dumper($c); ###test
 }
 
 sub make_html {
