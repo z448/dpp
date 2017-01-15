@@ -7,5 +7,7 @@
 
 # perl -MMoose -e 'print $Moose::VERSION ."\n";'
 
+# cpan-outdated -p | cpanm
+
 bind '"\C-p":"cd /home/zdenek/dpp/deb && pwd\n"';
 bind '"\C-g":"cd /home/zdenek/Documents/dpp/App-dpp-1.0 && pwd;\n"';
