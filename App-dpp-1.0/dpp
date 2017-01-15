@@ -109,7 +109,7 @@ sub pack_packlist {
     my $c = shift;
     my $pack_path = $c->{dir}->{build} . "/$c->{module}->{package}";
 
-    say colored(['red'], $c->{module}->{name} . " $c->{module}->{version}");###test
+    #say colored(['red'], $c->{module}->{name} . " $c->{module}->{version}");###test
 
     #system("rm -rf $c->{dir}->{build}");
     remove_tree( $c->{dir}->{build} ); mkpath("$pack_path");
@@ -159,7 +159,6 @@ _DEB
 
     #eval { web("$meta_pack->{module}") };
 #    make_html($c);
-    print "###:" . Dumper($c); ###test
 }
 
 sub make_html {

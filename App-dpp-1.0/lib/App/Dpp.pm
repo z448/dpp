@@ -3,6 +3,7 @@ package App::Dpp;
 use 5.010;
 
 use Sys::Hostname;
+use Term::ANSIColor;
 use Digest::MD5 qw< md5_hex >;
 use HTTP::Tiny;
 use Config;
@@ -101,7 +102,6 @@ my $meta_conf = sub {
     my $get = sub {
         my $url = shift;
         my $response = HTTP::Tiny->new->get($url);
-        sleep 1;
         if($response->{success}){
             return decode_json $response->{content};
         } else { return 0 }
@@ -285,6 +285,14 @@ sub conf {
     
     # module version
     $c->{module}->{version} = $c->{meta}->{version};
+    $c->{module}->{version} =~ s/[a-zA-Z]//g;
+    my $v = $version->($c->{module}->{name});
+    if( $c->{module}->{version} eq $v ){
+           say colored(['green'], "match $c->{meta}->{version}");
+       } else { 
+           say colored(['red'], "doesnt match $c->{meta}->{version}") . " setting version to local"; 
+           $c->{module}->{version} = $v;
+       }
     # module package name
     $c->{module}->{package} = 'lib' . lc $c->{module}->{distribution} . '-perl' . "$c->{perl}->{version}.$c->{perl}->{subversion}-" . lc $c->{package_prefix};
     # module .deb file name
@@ -295,7 +303,7 @@ sub conf {
     $c->{module}->{control} = $control->($c);
 
     delete $c->{html};
-    #delete $c->{meta};
+    delete $c->{meta};
 
     #p $c;
     #print Dumper $c;
