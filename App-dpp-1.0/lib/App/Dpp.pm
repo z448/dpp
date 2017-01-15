@@ -9,7 +9,6 @@ use HTTP::Tiny;
 use Config;
 use JSON::PP;
 use Data::Dumper;
-use Data::Printer;
 use File::Path;
 
 use warnings;
@@ -305,7 +304,6 @@ sub conf {
     delete $c->{html};
     delete $c->{meta};
 
-    #p $c;
     #print Dumper $c;
     return $c;
 }
