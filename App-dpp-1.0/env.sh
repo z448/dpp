@@ -9,5 +9,7 @@
 
 # cpan-outdated -p | cpanm
 
+# dpkg-scanpackages . /dev/null | gzip -9c > Packages.gz
+
 bind '"\C-p":"cd /home/zdenek/dpp/deb && pwd\n"';
 bind '"\C-g":"cd /home/zdenek/Documents/dpp/App-dpp-1.0 && pwd;\n"';
