@@ -148,7 +148,8 @@ my $depends = sub {
              $d{module} = $_; 
              $d{version} = $dep->{$_}; $d{version} =~ s/[A-Za-z]//g;
              $d{dist} = $m->{release}->{_source}->{distribution};
-             $d{package} = 'lib' . lc $m->{release}->{_source}->{distribution} . "-perl$c->{perl}->{version}.$c->{perl}->{subversion}-" . lc $c->{package_prefix}; 
+             $d{package} = 'lib' . lc $m->{release}->{_source}->{distribution} . "-perl$c->{perl}->{version}$c->{perl}->{subversion}-" . lc $c->{package_prefix}; 
+             $d{package} =~ s/\./\-/g;
              push @depends,{%d};
          }
     }
