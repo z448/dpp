@@ -293,7 +293,8 @@ sub conf {
            $c->{module}->{version} = $v;
        }
     # module package name
-    $c->{module}->{package} = 'lib' . lc $c->{module}->{distribution} . '-perl' . "$c->{perl}->{version}.$c->{perl}->{subversion}-" . lc $c->{package_prefix};
+    $c->{module}->{package} = 'lib' . lc $c->{module}->{distribution} . '-perl' . "$c->{perl}->{version}-$c->{perl}->{subversion}-" . lc $c->{package_prefix};
+    $c->{module}->{package} =~ s/\./\-/g;
     # module .deb file name
     $c->{module}->{debfile} = 'lib'.lc $c->{module}->{distribution}."$c->{module}->{version}-$c->{arch}".'-perl'."$c->{perl}->{version}.$c->{perl}->{subversion}-" . lc $c->{package_prefix}.'.deb';
     # module non-core module dependencies
