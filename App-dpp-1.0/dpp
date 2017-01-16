@@ -107,15 +107,15 @@ sub parse_packlist {
 
 sub pack_packlist {
     my $c = shift;
-    my $pack_path = $c->{dir}->{build} . "/$c->{module}->{package}";
+    my $pack_path = "$c->{dir}->{build}/$c->{module}->{package}";
 
     #say colored(['red'], $c->{module}->{name} . " $c->{module}->{version}");###test
 
     #system("rm -rf $c->{dir}->{build}");
     remove_tree( $c->{dir}->{build} ); mkpath("$pack_path");
 
-    system("tar pcz '$c->{path}' -T $c->{path} -f $c->{dir}->{build}/data.tar.gz && cd $c->{dir}->{build} && mv data.tar.gz .. && rm -rf * && mv ../data.tar.gz . && cd -");
-    mkpath("$pack_path/DEBIAN");
+    system("tar pcz $c->{path} -T $c->{path} -f $c->{dir}->{build}/data.tar.gz && cd $c->{dir}->{build} && mv data.tar.gz .. && rm -rf * && mv ../data.tar.gz . && cd -");
+    system("mkdir -p $pack_path/DEBIAN");
 
     # write preinst script
     open(my $fh,">", "$pack_path/DEBIAN/preinst") || die "cant open $pack_path/DEBIAN/preinst$!";
@@ -141,20 +141,26 @@ sub pack_packlist {
 
     # make .deb
     #my $deb_file = "$c->{module}->{package}
-    my $packer = <<"_DEB";
+    system("cd $pack_path/DEBIAN && chmod 0755 preinst && tar czf ../../control.tar.gz * && cd ../.. && echo '2.0' > debian-binary && ar r $c->{module}->{debfile} 'debian-binary' 'control.tar.gz' 'data.tar.gz' && mv $c->{module}->{debfile} $c->{dir}->{deb}");
 
+    #&& rm -rf $c->{module}->{package} && rm -rf debian-binary control.tar.gz data.tar.gz DEBIAN");
+
+=head1
+my $packer = <<"_DEB";
     cd $pack_path/DEBIAN;
     chmod 0755 preinst;
     tar pczf ../../control.tar.gz *;
     cd ../..;
     echo 2.0 > debian-binary;
-    ar r $c->{module}->{debfile} debian-binary control.tar.gz data.tar.gz;
+    ar r "$c->{module}->{debfile}" 'debian-binary' 'control.tar.gz' 'data.tar.gz';
     mv $c->{module}->{debfile} $c->{dir}->{deb};
     rm -rf $c->{module}->{package};
     rm -rf debian-binary control.tar.gz data.tar.gz DEBIAN;
 _DEB
+    print "$packer"; 
     system("$packer");
-    remove_tree( $c->{dir}->{build} );
+=cut
+    remove_tree($c->{dir}->{build});
     #sleep 1;
 
     #eval { web("$meta_pack->{module}") };

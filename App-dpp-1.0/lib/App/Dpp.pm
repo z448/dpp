@@ -206,7 +206,7 @@ my $control = sub {
     };
 
     my %control = (
-        Name    =>  $c->{module}->{name},
+        Name    =>  $c->{module}->{distribution},
         Package =>  $c->{module}->{package},
         Version =>  $c->{module}->{version},
         Author  =>  $c->{meta}->{author},

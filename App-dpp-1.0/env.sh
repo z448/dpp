@@ -11,5 +11,5 @@
 
 # dpkg-scanpackages . /dev/null | gzip -9c > Packages.gz
 
-bind '"\C-p":"cd /home/zdenek/dpp/deb && pwd\n"';
-bind '"\C-g":"cd /home/zdenek/Documents/dpp/App-dpp-1.0 && pwd;\n"';
+bind '"\C-p":"cd ~/dpp/deb && pwd\n"';
+bind '"\C-g":"cd ~/Documents/dpp/App-dpp-1.0 && pwd;\n"';
