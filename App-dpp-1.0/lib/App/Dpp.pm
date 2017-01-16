@@ -45,7 +45,7 @@ my $gitconfig = sub {
             }
         }; 
         close $fh;
-        my $maintainer = $name . ' ' . $email;
+        my $maintainer = $name . ' ' . "<$email>";
     }
 }; 
 
