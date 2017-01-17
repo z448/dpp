@@ -10,6 +10,7 @@ use Config;
 use JSON::PP;
 use Data::Dumper;
 use File::Path;
+use App::Dpp::VersionPath qw< version_path >;
 
 use warnings;
 use strict;
@@ -95,6 +96,16 @@ sub digest {
 };
 
 my $meta_conf = sub {
+    my $path  = shift;
+    my $url = "https://fastapi.metacpan.org/v1/module/$path?join=release";
+    my $res = HTTP::Tiny->new->get($url);
+    my $j = decode_json $res->{content};
+};
+
+
+=head1
+
+my $meta_conf = sub {
     my $mod = shift;
 
     my $m = {};
@@ -123,6 +134,8 @@ my $meta_conf = sub {
         } else { return $try }
     }
 };
+
+=cut
 
 my $user_conf = sub {
     my $conf_file = shift;
@@ -289,9 +302,15 @@ sub conf {
     my $v = $version->($c->{module}->{name});
     if( $c->{module}->{version} eq $v ){
            say colored(['green'], "match $c->{meta}->{version}");
+           print Dumper $c->{meta};
        } else { 
            say colored(['red'], "doesnt match $c->{meta}->{version}") . " setting version to local"; 
            $c->{module}->{version} = $v;
+           $c->{meta} = $meta_conf->(version_path($c->{module}->{main}, "$v"));
+           $c->{module}->{distribution} = $c->{meta}->{release}->{_source}->{distribution};
+           print Dumper $c->{meta};
+           #my $url_path = "version_path $module $c->{module}->{version}";
+           
        }
     # module package name
     $c->{module}->{package} = 'lib' . lc $c->{module}->{distribution} . '-perl' . "$c->{perl}->{version}-$c->{perl}->{subversion}-" . lc $c->{package_prefix};
