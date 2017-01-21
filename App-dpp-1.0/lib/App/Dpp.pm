@@ -10,7 +10,7 @@ use Config;
 use JSON::PP;
 use Data::Dumper;
 use File::Path;
-use App::Dpp::VersionPath qw< version_path >;
+#use App::Dpp::VersionPath qw< version_path >;
 use App::Verm qw< verm verl >;
 
 use warnings;
@@ -211,28 +211,26 @@ sub conf {
     # module distribution name
     $c->{module}->{distribution} = $c->{meta}->{release}->{_source}->{distribution};
     # module version
-    $c->{module}->{version} = $c->{meta}->{version};
-    $c->{module}->{version} =~ s/[a-zA-Z]//g; #remove letters from meta version because local version doesnt have one (.pm files VERSION var doesnt have one either see URI::Encode 1.1.1)
-
-    #my $v = $version->($c->{module}->{name});
+    # $c->{module}->{version} = $c->{meta}->{version};
+    #$c->{module}->{version} =~ s/[a-zA-Z]//g; #remove letters from meta version because local version doesnt have one (.pm files VERSION var doesnt have one either see URI::Encode 1.1.1)
+    my $latest_ver = $c->{meta}->{version};
+    $latest_ver =~ s/[a-zA-Z]//g;
     my $local_ver = verl($c->{module}->{name});
     
-    if( $c->{module}->{version} eq $local_ver ){
-        #if( $c->{module}->{version} eq $v ){
-           say colored(['green'], "match [$c->{meta}->{version}]");
-       } else { 
-           my $meta_ver = verm($c->{module}->{name});
+    #if( $latest_ver eq $local_ver ){
+    $c->{module}->{version} = $c->{meta}->{version};
+    #say colored(['green'], "match [$c->{meta}->{version}]");
+    unless( $latest_ver eq $local_ver ){
+        #} else { 
+           my $meta_ver = verm($module);
+           #my $meta_ver = verm($c->{module}->{name});
            my( $m ) = grep{ $_->{version} =~ /.?$local_ver$/ } @{$meta_ver};
-           #$c->{module}->{version} = $local_ver;
-           #$c->{module}->{version} = $v;
-           say colored(['red'], "local:[$m->{version}] doesnt match meta version:[$c->{meta}->{version}]"); 
-           #say colored(['red'], "local:[$v] doesnt match meta version:[$c->{meta}->{version}]"); 
-           $c->{meta} = {}; 
-           $c->{meta} = $meta_conf->(version_path($c->{module}->{name}, "$m->{version}"));
-           #$c->{meta} = $meta_conf->(version_path($c->{module}->{name}, "$local_ver"));
-           #$c->{meta} = $meta_conf->(version_path($c->{module}->{name}, "$v"));
-           $c->{module}->{main} = $c->{meta}->{release}->{_source}->{main_module};
-           $c->{module}->{distribution} = $c->{meta}->{release}->{_source}->{distribution};
+           say colored(['red'], "local:[$m->{version}] latest:[$latest_ver]"); 
+           #$c->{meta} = {}; 
+           $c->{meta} = $meta_conf->("$m->{author}/$m->{dist}");
+           #$c->{meta} = $meta_conf->(version_path($module, "$m->{version}"));
+           #$c->{module}->{main} = $c->{meta}->{release}->{_source}->{main_module};
+           #$c->{module}->{distribution} = $c->{meta}->{release}->{_source}->{distribution};
            $c->{module}->{version} = $c->{meta}->{version}; # set version to meta version which has letters...
            
        }
