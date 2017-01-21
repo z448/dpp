@@ -10,7 +10,7 @@ use Config;
 use JSON::PP;
 use Data::Dumper;
 use File::Path;
-use App::Verm qw< verm verl >;
+use App::Dpp::Verm qw< verm verl >;
 
 use warnings;
 use strict;
