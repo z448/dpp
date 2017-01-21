@@ -80,7 +80,7 @@ sub parse_packlist {
         $module = $2;
         $module =~ s/\//\:\:/g;
         my $c = $conf->("$module");
-        #print Dumper $c->{module}->{control};
+        say Dumper $c->{module}->{control};
 
         # read content of packlist
         open(my $fh,'<', $path) || die "cant open $path:$!";
@@ -145,34 +145,15 @@ sub pack_packlist {
 
     binmode(STDOUT, ":utf8");
     my $pkg = "\N{U+1F4E6}";
-    print colored(['bright_white'],$pkg) . '  '  unless $deb;
+    say colored(['bright_white'],$pkg) . '  '  unless $deb;
+
+    # add to index.html
+    open($fh,'>>',"$c->{dir}->{dpp}/index.html") || die "cant open $c->{dir}->{dpp}/index.html:$!";
+    say $fh $c->{html}->{body};
+    close $fh;
 
     remove_tree($c->{dir}->{build});
 }
-
-sub make_html {
-    my $c = shift;
-    my $json_file = $c->{htmlconf}->{conf};
-    #my $json_file = "$ENV{HOME}/dpp/index.json";
-    my $html_file = "$c->{htmlconf}->{html}";
-    #my $html_file = "$ENV{HOME}/dpp/index.html";
-
-    open(my $fh,"<",$json_file) || die "cant open $json_file: $!";
-    my $index_json = <$fh>;
-    my $index_hash = decode_json $index_json;
-    close $fh;
-         
-    open($fh,">",$html_file) || die "cant open $html_file: $!";
-    for( @{$index_hash->{head}} ){ print $fh $_ }
-    for( @{$index_hash->{style}} ){ print $fh $_ }
-    for( @{$index_hash->{body}} ){ print $fh $_ }
-    for( @{$index_hash->{foot}} ){ print $fh $_ }
-
-}
-
-
-
-
 
 my $p = $ARGV[0] || $Config{installsitearch};
 #die "add path to perl modules dir" unless $p;

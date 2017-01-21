@@ -187,6 +187,7 @@ sub conf {
 
     # load DATA config
     my $c = {};
+    my $distribution;
     eval $d;
 
     $c->{arch} = $arch->();
@@ -204,6 +205,12 @@ sub conf {
         $c->{$_} = $u->{$_} if defined $u->{$_} and exists $c->{$_};
     }
 
+    # create head style for index.html
+    unless( -f "$c->{dir}->{dpp}/index.html" ){
+        open(my $fh,'>',"$c->{dir}->{dpp}/index.html") || die "cant open $c->{dir}->{dpp}/index.html:$!";
+        say $fh $_ for @{$c->{html}->{head}};
+        say $fh $_ for @{$c->{html}->{style}};
+    }
     # add core paths on osx
     push @{$c->{perl}->{corepath}}, ( "installsitearch", "installsitelib" ) if $c->{arch} eq 'darwin';
 
@@ -238,18 +245,9 @@ sub conf {
     $c->{module}->{depends} = $depends->($c);
     # control file
     $c->{module}->{control} = $control->($c);
-
-    say for @{$c->{html}->{head}};
-    say for @{$c->{html}->{style}};
-    my %body = %{$c->{html}->{body}};
-    for( keys %body ){
-        unless(/^empty/){
-            print $body{$_}.$c->{module}->{$_};
-        } else { print $body{$_} }
-    }
-    say " ";
-    say $_ for @{$c->{html}->{foot}};
-    die;
+    # create html body
+    my $b = $c->{html}->{body};
+    $c->{html}->{body} = $b->($c->{module});
 
     return $c;
 }
@@ -280,25 +278,15 @@ $c = {
                            },
                   'url' => 'http://api.metacpan.org/v0/module/'."$module".'?join=release',
                   'html' => {
-                              'body' => {
-                                      debfile  =>  '<div class="dpp"> </div><div class="dpp"><a href="deb/',
-                                      empty    =>  '" target="_blank"><i class="fa fa-download" aria-hidden="true"></i> &nbsp;</a>',
-                                      distribution =>  '<a href="https://widgets.stratopan.com/wheel?q=',
-                                      version   =>  '-',
-                                      empty2   =>  '" target="_blank"><i class="fa fa-asterisk" aria-hidden="true"></i>&nbsp;</a><a href="http://api.metacpan.org/v0/pod/'."$module".'?content-type=text/plain" target="_blank"><i class="fa fa-file" aria-hidden="true"></i></a></div>',
-                                      empty3   =>  ' <div class="module">' . "$module" . '</div>',
-                                      description   =>  '<div class="description">',
-                                      empty4    =>  ' </br></div>'
+                               'body' => sub{  
+                                        my $c = shift;
+                                        my $b = '<div class="dpp"> </div><div class="dpp"><a href="deb/'. $c->{debfile} . '" target="_blank"><i class="fa fa-download" aria-hidden="true"></i> &nbsp;</a><a href="https://widgets.stratopan.com/wheel?q='. $c->{distribution} .'-'. $c->{version} .
+                                      '" target="_blank"><i class="fa fa-asterisk" aria-hidden="true"></i>&nbsp;</a><a href="http://api.metacpan.org/v0/pod/'."$module".'?content-type=text/plain" target="_blank"><i class="fa fa-file" aria-hidden="true"></i></a></div>'.
+                                      '<div class="module">' . "$module" . '</div>'.
+                                      '<div class="description">'.$c->{description}.
+                                      '</br></div>';
+                                      return $b;
                               },
-                  #             'body' => [
-                  #                    '<div class="dpp"> </div><div class="dpp"><a href="deb/',
-                  #                    ' target="_blank"><i class="fa fa-download" aria-hidden="true"></i> &nbsp;</a>',
-                  #                    '<a href="https://widgets.stratopan.com/wheel?q=',
-                  #                    '" target="_blank"><i class="fa fa-asterisk" aria-hidden="true"></i>&nbsp;</a><a href="http://api.metacpan.org/v0/pod/'."$module".'?content-type=text/plain" target="_blank"><i class="fa fa-file" aria-hidden="true"></i></a></div>',
-                  #                    '<div class="module">' . "$module" . '</div>',
-                  #                    '<div class="description">',
-                  #                    '</br></div>'
-                  #            ],
                           'foot' => [
                                       '<div class="footer" align="center" >dpp<br></div>',
                                       '</body>',
@@ -320,13 +308,22 @@ $c = {
                                       '<link rel="stylesheet" type="text/css" href="style.css">',
                                       '</head>',
                                       '',
-                                      '<body bgcolor="#090311">',
+                                      '<body bgcolor="#090811">',
                                       '<div align="center" >',
                                       '<div class="headtext"><br><br><sub>This is APT repository index.</sub><br><br></div>'
                                     ],
                           'style' => [
                                        '<style type="text/css"> ',
                                        '',
+                                       '.fa-download {',
+                                       'color: #4F4F50;',
+                                       '}',
+                                       '.fa-asterisk {',
+                                       'color: #4F4F50;',
+                                       '}',
+                                       '.fa-file {',
+                                       'color: #4F4F50;',
+                                       '}',
                                        '.slideshow-overlay {',
                                        '    display: block;',
                                        '    position: fixed;',
@@ -339,18 +336,18 @@ $c = {
                                        '}',
                                        '',
                                        '.fa-download {',
-                                       '    background: #090311;',
+                                       '    background: #090811;',
                                        '}',
                                        '',
                                        '.dpp {',
-                                       '    background: #090311;',
+                                       '    background: #090811;',
                                        '}',
                                        '',
                                        '.headtext {',
                                        '	font-family: \'Fira Mono\';',
                                        '	font-size: 11px;',
                                        '    text-align = "center";',
-                                       '	background : #090311;',
+                                       '	background : #090811;',
                                        '    color: #8E8E8E;',
                                        '    top: 2px;',
                                        '    left: 0;',
@@ -361,7 +358,7 @@ $c = {
                                        '	font-family: \'Fira Mono\';',
                                        '	font-size: 11px;',
                                        '    text-align = "center";',
-                                       '	background : #090311;',
+                                       '	background : #090811;',
                                        '    color: #4F4F50;',
                                        '}',
                                        '',
@@ -375,7 +372,7 @@ $c = {
                                        '    font-family: \'Open Sans\', sans-serif;',
                                        '    text-align = "center";',
                                        '	font-size: 12px;',
-                                       '	background : #090311;',
+                                       '	background : #090811;',
                                        '	color: #fefefe;',
                                        '}',
                                        '',
