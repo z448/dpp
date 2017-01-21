@@ -217,7 +217,7 @@ sub conf {
            $c->{meta} = $meta_conf->("$m->{author}/$m->{dist}");
            $c->{module}->{version} = $c->{meta}->{version}; # set version to meta version which might have different format
        } 
-    say colored(['green'], "$c->{module}->{name} [$c->{module}->{version}]");
+#    say colored(['green'], "$c->{module}->{name} [$c->{module}->{version}]");
 
     # main module
     $c->{module}->{main} = $c->{meta}->{release}->{_source}->{main_module};

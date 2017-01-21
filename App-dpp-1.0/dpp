@@ -13,6 +13,7 @@ use Config;
 use File::Find;
 use File::Path qw< remove_tree mkpath >;
 use open qw< :encoding(UTF-8) >;
+STDOUT->autoflush(1);
 
 my $opt = {};
 getopts('d:', $opt);
@@ -103,11 +104,16 @@ sub parse_packlist {
 
 sub pack_packlist {
     my $c = shift;
+
+    open my $psss, '>&', STDERR;
+    open STDERR, '+>', undef;
+
+    my($a,$b) = split('::',$c->{module}->{name});
+    print $a . colored(['red'],'::') . $b . colored(['grey6']," [$c->{module}->{version}] -> ");
+
     my $pack_path = "$c->{dir}->{build}/$c->{module}->{package}";
 
     remove_tree( $c->{dir}->{build} ); mkpath("$pack_path");
-    open my $psss, '>&', STDERR;
-    open STDERR, '+>', undef;
     system("tar pcz $c->{path} -T $c->{path} -f $c->{dir}->{build}/data.tar.gz && cd $c->{dir}->{build} && mv data.tar.gz .. && rm -rf * && mv ../data.tar.gz . && mkdir -p $pack_path/DEBIAN");
 
     # write preinst script
@@ -133,8 +139,12 @@ sub pack_packlist {
     close $fh;
 
     # make .deb
-    system("cd $pack_path/DEBIAN && chmod 0755 preinst && tar czf ../../control.tar.gz * && cd ../.. && echo '2.0' > debian-binary && ar r $c->{module}->{debfile} 'debian-binary' 'control.tar.gz' 'data.tar.gz' && mv $c->{module}->{debfile} $c->{dir}->{deb}");
+    my $deb = system("cd $pack_path/DEBIAN && chmod 0755 preinst && tar czf ../../control.tar.gz * && cd ../.. && echo '2.0' > debian-binary && ar r $c->{module}->{debfile} 'debian-binary' 'control.tar.gz' 'data.tar.gz' && mv $c->{module}->{debfile} $c->{dir}->{deb}");
     open STDERR, '>&', $psss;
+
+    binmode(STDOUT, ":utf8");
+    my $pkg = "\N{U+1F4E6}";
+    print colored(['bright_white'],$pkg) . '  '  unless $deb;
 
     remove_tree($c->{dir}->{build});
 }
