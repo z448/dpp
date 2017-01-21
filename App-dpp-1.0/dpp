@@ -80,6 +80,7 @@ sub parse_packlist {
         $module = $2;
         $module =~ s/\//\:\:/g;
         my $c = $conf->("$module");
+        print Dumper $c->{module}->{control};
 
         # read content of packlist
         open(my $fh,'<', $path) || die "cant open $path:$!";

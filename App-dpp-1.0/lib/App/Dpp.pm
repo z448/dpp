@@ -99,7 +99,6 @@ sub digest {
 my $meta_conf = sub {
     my $path  = shift;
     my $url = "https://fastapi.metacpan.org/v1/module/$path?join=release";
-    #say colored(['blue'],$url); #test
     my $res = HTTP::Tiny->new->get($url);
     my $j = decode_json $res->{content};
 };
@@ -122,15 +121,16 @@ my $depends = sub {
     my( @depends, %d) = ();
     my $dep = $c->{meta}->{release}->{_source}->{metadata}->{prereqs}->{runtime}->{requires};
     for( keys %{$dep} ){
-        #unless( $_ eq 'perl' ){
-             unless( $_ eq 'perl' or core_module($_, $c->{perl}->{corepath}, $c->{arch}) ){
+        # unless( $_ eq 'perl' ){
+        unless( $_ eq 'perl' or core_module($_, $c->{perl}->{corepath}, $c->{arch}) ){
              my $m = $meta_conf->($_); # assumeing dist name is same for older version
              $d{module} = $_; 
              $d{version} = $dep->{$_};
              $d{dist} = $m->{release}->{_source}->{distribution};
              $d{package} = 'lib' . lc $m->{release}->{_source}->{distribution} . "-perl$c->{perl}->{version}.$c->{perl}->{subversion}-" . lc $c->{package_prefix}; 
+             #$d{package} = 'lib' . lc $m->{release}->{_source}->{distribution} . "-perl" if core_module($_, $c->{perl}->{corepath}, $c->{arch});
              $d{package} =~ s/\./\-/g;
-             push @depends,{%d};
+             push @depends,{%d} unless $d{dist} eq 'perl';
          }
     }
     return \@depends;
@@ -152,6 +152,7 @@ sub core_module {
 my $control = sub {
     my $c = shift;
     my $perl_dep = "perl (>= $c->{perl}->{version}.$c->{perl}->{subversion}), perl (<< $c->{perl}->{version}.".(int($c->{perl}->{subversion}) +1) .")";
+    my $module_version = $c->{module}->{version}; $module_version =~ s/[A-Za-z]//g;
 
     my $depends = sub {
         my $deps = $c->{module}->{depends};
@@ -166,15 +167,17 @@ my $control = sub {
     my %control = (
         Name    =>  $c->{module}->{name},
         Package =>  $c->{module}->{package},
-        Version =>  $c->{module}->{version},
+        Version =>  $module_version,
         Author  =>  $c->{meta}->{author},
         Architecture    =>  $c->{arch},
         Section =>  'perl',
         Maintainer  =>  $c->{maintainer},
-        Homepage    => 'http://api.metacpan.org/v0/module/' . $c->{module}->{name} . '?join=release',
+        Homepage    => $c->{module}->{homepage},
+        #Homepage    => 'http://api.metacpan.org/v0/module/' . $c->{module}->{name} . '?join=release',
         Description => $c->{meta}->{release}->{_source}->{abstract},
         Depends => $depends->(),
     );
+    $control{Depends} = $control{Depends} . 'perl-modules-' . 
     return \%control;
 };
 
@@ -209,11 +212,13 @@ sub conf {
     my $latest_ver = $c->{meta}->{version}; $latest_ver =~ s/[a-zA-Z]//g;
     my $local_ver = verl($c->{module}->{name});
     $c->{module}->{version} = $c->{meta}->{version};
+    $c->{module}->{homepage} = "https://metacpan.org/release/$module";
 
     unless( $latest_ver eq $local_ver ){
            my $meta_ver = verm($module);
            my( $m ) = grep{ $_->{version} =~ /.?$local_ver$/ } @{$meta_ver};
            $c->{meta} = {};
+           $c->{module}->{homepage} = "https://metacpan.org/release/$m->{author}/$m->{dist}";
            $c->{meta} = $meta_conf->("$m->{author}/$m->{dist}");
            $c->{module}->{version} = $c->{meta}->{version}; # set version to meta version which might have different format
        } 
