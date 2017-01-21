@@ -273,6 +273,38 @@ sub conf {
     #$c->{module}->{distribution} = $m->{release}->{_source}->{distribution};#dont
     $c->{module}->{distribution} = $c->{meta}->{release}->{_source}->{distribution};
 
+    # module version
+    $c->{module}->{version} = $c->{meta}->{version};
+    $c->{module}->{version} =~ s/[a-zA-Z]//g;
+    my $v = $version->($c->{module}->{name});
+    if( $c->{module}->{version} eq $v ){
+           say colored(['green'], "match $c->{meta}->{version}");
+       } else { 
+           $c->{module}->{version} = $v;
+           $c->{meta} = {};
+           $c->{meta} = $meta_conf->(version_path($c->{module}->{name}, "$v"));
+           #$c->{meta} = $meta_conf->(version_path($c->{module}->{main}, "$v"));
+           $c->{module}->{main} = $c->{meta}->{release}->{_source}->{main_module};
+           $c->{module}->{distribution} = $c->{meta}->{release}->{_source}->{distribution};
+           $c->{module}->{version} = $c->{meta}->{version};
+           say colored(['red'], "doesnt match $c->{meta}->{version}") . " ^--version specific dumper--^"; 
+           #my $url_path = "version_path $module $c->{module}->{version}";
+           
+       }
+    # module package name
+    $c->{module}->{package} = 'lib' . lc $c->{module}->{distribution} . '-perl' . "$c->{perl}->{version}-$c->{perl}->{subversion}-" . lc $c->{package_prefix};
+    $c->{module}->{package} =~ s/\./\-/g;
+    # module .deb file name
+    $c->{module}->{debfile} = 'lib'.lc $c->{module}->{distribution}."$c->{module}->{version}-$c->{arch}".'-perl'."$c->{perl}->{version}.$c->{perl}->{subversion}-" . lc $c->{package_prefix}.'.deb';
+    # module non-core module dependencies
+    $c->{module}->{depends} = $depends->($c);
+    # control file
+    $c->{module}->{control} = $control->($c);
+
+    delete $c->{html};
+    delete $c->{meta};
+    print Dumper $c;
+
 =head1
     my %z = (
         module  =>  $m->{release}->{_source}->{main_module},
@@ -296,35 +328,6 @@ sub conf {
     #$c->{module}->{version} = $c->{meta}->{version}; 
 =cut
     
-    # module version
-    $c->{module}->{version} = $c->{meta}->{version};
-    $c->{module}->{version} =~ s/[a-zA-Z]//g;
-    my $v = $version->($c->{module}->{name});
-    if( $c->{module}->{version} eq $v ){
-           say colored(['green'], "match $c->{meta}->{version}");
-           print Dumper $c->{meta};
-       } else { 
-           say colored(['red'], "doesnt match $c->{meta}->{version}") . " setting version to local"; 
-           $c->{module}->{version} = $v;
-           $c->{meta} = $meta_conf->(version_path($c->{module}->{main}, "$v"));
-           $c->{module}->{distribution} = $c->{meta}->{release}->{_source}->{distribution};
-           print Dumper $c->{meta};
-           #my $url_path = "version_path $module $c->{module}->{version}";
-           
-       }
-    # module package name
-    $c->{module}->{package} = 'lib' . lc $c->{module}->{distribution} . '-perl' . "$c->{perl}->{version}-$c->{perl}->{subversion}-" . lc $c->{package_prefix};
-    $c->{module}->{package} =~ s/\./\-/g;
-    # module .deb file name
-    $c->{module}->{debfile} = 'lib'.lc $c->{module}->{distribution}."$c->{module}->{version}-$c->{arch}".'-perl'."$c->{perl}->{version}.$c->{perl}->{subversion}-" . lc $c->{package_prefix}.'.deb';
-    # module non-core module dependencies
-    $c->{module}->{depends} = $depends->($c);
-    # control file
-    $c->{module}->{control} = $control->($c);
-
-    delete $c->{html};
-    delete $c->{meta};
-
     #print Dumper $c;
     return $c;
 }
