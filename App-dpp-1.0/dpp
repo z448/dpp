@@ -78,7 +78,7 @@ sub parse_packlist {
         $module =~ s/(auto.*?\/)(.*?)(\/\.packlist)/$2/;
         $module = $2;
         $module =~ s/\//\:\:/g;
-        say "\$module:[$module] _______________________________"; ###test
+        #say "\$module:[$module] _______________________________"; ###test
         #say colored(['blue'], `./version2.pl $module`);###test
         #do { "version.pl $module" }; ###test
         my $c = $conf->("$module");

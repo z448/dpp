@@ -10,7 +10,6 @@ use Config;
 use JSON::PP;
 use Data::Dumper;
 use File::Path;
-#use App::Dpp::VersionPath qw< version_path >;
 use App::Verm qw< verm verl >;
 
 use warnings;
@@ -89,7 +88,8 @@ my $arch = sub {
 
 sub digest {
     my $file = shift;
-    my( $data ) = ();
+    my $data = 0;
+    #my( $data ) = ();
     open(my $fh,"<:raw :bytes",$file) || die "cant open $file: $!";
     while(<$fh>){ $data .= $_ }
 
@@ -99,6 +99,7 @@ sub digest {
 my $meta_conf = sub {
     my $path  = shift;
     my $url = "https://fastapi.metacpan.org/v1/module/$path?join=release";
+    say colored(['blue'],$url);
     my $res = HTTP::Tiny->new->get($url);
     my $j = decode_json $res->{content};
 };
@@ -158,7 +159,6 @@ my $control = sub {
         for( @{$deps} ){
             $_->{version} =~ s/[A-Za-z]//g;
             $d .= ', ' . "$_->{package} (>= $_->{version})";
-            ##$d .= ', ' . 'lib' . lc $_->{dist} . '-' . 'perl-' . lc $c->{package_prefix};
         }
         return $d;
     };
@@ -181,6 +181,7 @@ my $control = sub {
 sub conf {
     my $module = shift;
     my $dpp_home = init();
+    system("clear"); #test
 
     # load DATA config
     my $c = {};
@@ -206,30 +207,19 @@ sub conf {
 
     # get meta conf from metacpan API
     $c->{meta} = $meta_conf->($module);
-    # module version
-    # $c->{module}->{version} = $c->{meta}->{version};
-    #$c->{module}->{version} =~ s/[a-zA-Z]//g; #remove letters from meta version because local version doesnt have one (.pm files VERSION var doesnt have one either see URI::Encode 1.1.1)
-    my $latest_ver = $c->{meta}->{version};
-    $latest_ver =~ s/[a-zA-Z]//g;
+    my $latest_ver = $c->{meta}->{version}; $latest_ver =~ s/[a-zA-Z]//g;
     my $local_ver = verl($c->{module}->{name});
-    
-    #if( $latest_ver eq $local_ver ){
     $c->{module}->{version} = $c->{meta}->{version};
-    #say colored(['green'], "match [$c->{meta}->{version}]");
+
     unless( $latest_ver eq $local_ver ){
-        #} else { 
            my $meta_ver = verm($module);
-           #my $meta_ver = verm($c->{module}->{name});
            my( $m ) = grep{ $_->{version} =~ /.?$local_ver$/ } @{$meta_ver};
-           say colored(['red'], "local:[$m->{version}] latest:[$latest_ver]"); 
-           #$c->{meta} = {}; 
+           $c->{meta} = {};
            $c->{meta} = $meta_conf->("$m->{author}/$m->{dist}");
-           #$c->{meta} = $meta_conf->(version_path($module, "$m->{version}"));
-           #$c->{module}->{main} = $c->{meta}->{release}->{_source}->{main_module};
-           #$c->{module}->{distribution} = $c->{meta}->{release}->{_source}->{distribution};
-           $c->{module}->{version} = $c->{meta}->{version}; # set version to meta version which has letters...
-           
-       }
+           $c->{module}->{version} = $c->{meta}->{version}; # set version to meta version which might have different format
+       } 
+    say colored(['green'], "$c->{module}->{name} [$c->{module}->{version}]");
+
     # main module
     $c->{module}->{main} = $c->{meta}->{release}->{_source}->{main_module};
     # module distribution name
@@ -244,8 +234,8 @@ sub conf {
     # control file
     $c->{module}->{control} = $control->($c);
 
-    delete $c->{html};
-    #delete $c->{meta};
+    #delete $c->{html};
+    delete $c->{meta}->{body};
 
 =head1
     # create default .index conf
@@ -258,7 +248,6 @@ sub conf {
         #print $fh Data::Dumper->Dump([$c->{html}], ["html"]), $/;
         close $fh;
     }
-    #$c->{module}->{version} = $c->{meta}->{version}; 
 =cut
     
     return $c;
@@ -293,7 +282,7 @@ $c = {
                           'body' => [
                                       '<div class="dpp"> </div>',
                                       '<div class="dpp"><a href="deb/' . "$module" . '" target="_blank"><i class="fa fa-download" aria-hidden="true"></i> &nbsp;</a>',
-                                      '<a href="https://widgets.stratopan.com/wheel?q=HTTP-Tiny-0.058" target="_blank"><i class="fa fa-asterisk" aria-hidden="true"></i>&nbsp;</a><a href="http://api.metacpan.org/v0/pod/HTTP::Tiny?content-type=text/plain" target="_blank"><i class="fa fa-file" aria-hidden="true"></i></a></div>',
+                                      '<a href="https://widgets.stratopan.com/wheel?q='."$module".' target="_blank"><i class="fa fa-asterisk" aria-hidden="true"></i>&nbsp;</a><a href="http://api.metacpan.org/v0/pod/HTTP::Tiny?content-type=text/plain" target="_blank"><i class="fa fa-file" aria-hidden="true"></i></a></div>',
                                       '<div class="module">' . "$module" . '</div>',
                                       '<div class="description">A small, simple, correct HTTP/1.1 client</br></div>'
                                     ],
