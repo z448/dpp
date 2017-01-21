@@ -122,7 +122,8 @@ my $depends = sub {
     my( @depends, %d) = ();
     my $dep = $c->{meta}->{release}->{_source}->{metadata}->{prereqs}->{runtime}->{requires};
     for( keys %{$dep} ){
-         unless( $_ eq 'perl' or core_module($_, $c->{perl}->{corepath}, $c->{arch}) ){
+        #unless( $_ eq 'perl' ){
+             unless( $_ eq 'perl' or core_module($_, $c->{perl}->{corepath}, $c->{arch}) ){
              my $m = $meta_conf->($_); # assumeing dist name is same for older version
              $d{module} = $_; 
              $d{version} = $dep->{$_};
@@ -235,21 +236,8 @@ sub conf {
     $c->{module}->{control} = $control->($c);
 
 
-=head1
-    # create default .index conf
-    unless( -f $c->{htmlconf}->{conf} ){
-        open(my $fh,'>',$c->{htmlconf}->{conf}) || die "cant open $c->{htmlconf}->{conf}: $!";
-        print $fh encode_json $c->{html}->{head};
-        print $fh encode_json $c->{html}->{style};
-        print $fh encode_json $c->{html}->{body};
-        print $fh encode_json $c->{html}->{foot};
-        #print $fh Data::Dumper->Dump([$c->{html}], ["html"]), $/;
-        close $fh;
-    }
-=cut
-    
-    my @body = @{$c->{html}->{body}};
-    print $body[0].$c->{module}->{debfile}.'"'.$body[1].$body[2].$c->{module}->{distribution}.'-'.$c->{module}->{version}.$body[3].$body[4].$body[5].$c->{module}->{description}.$body[6]."\n";
+#my @body = @{$c->{html}->{body}};
+    #  print $body[0].$c->{module}->{debfile}.'"'.$body[1].$body[2].$c->{module}->{distribution}.'-'.$c->{module}->{version}.$body[3].$body[4].$body[5].$c->{module}->{description}.$body[6]."\n";
 
     return $c;
 }
@@ -280,15 +268,15 @@ $c = {
                            },
                   'url' => 'http://api.metacpan.org/v0/module/'."$module".'?join=release',
                   'html' => {
-        'body' => [
-            '<div class="dpp"> </div><div class="dpp"><a href="deb/'."$c->{module}->{debfile}",
-            ' target="_blank"><i class="fa fa-download" aria-hidden="true"></i> &nbsp;</a>',
-            '<a href="https://widgets.stratopan.com/wheel?q=',
-            '" target="_blank"><i class="fa fa-asterisk" aria-hidden="true"></i>&nbsp;</a><a href="http://api.metacpan.org/v0/pod/'."$module".'?content-type=text/plain" target="_blank"><i class="fa fa-file" aria-hidden="true"></i></a></div>',
-            '<div class="module">' . "$module" . '</div>',
-            '<div class="description">',
-            '</br></div>'
-        ],
+                           'body' => [
+                                        '<div class="dpp"> </div><div class="dpp"><a href="deb/',
+                                        ' target="_blank"><i class="fa fa-download" aria-hidden="true"></i> &nbsp;</a>',
+                                        '<a href="https://widgets.stratopan.com/wheel?q=',
+                                        '" target="_blank"><i class="fa fa-asterisk" aria-hidden="true"></i>&nbsp;</a><a href="http://api.metacpan.org/v0/pod/'."$module".'?content-type=text/plain" target="_blank"><i class="fa fa-file" aria-hidden="true"></i></a></div>',
+                                        '<div class="module">' . "$module" . '</div>',
+                                        '<div class="description">',
+                                        '</br></div>'
+                                ],
                           'foot' => [
                                       '<div class="footer" align="center" >dpp<br></div>',
                                       '</body>',
