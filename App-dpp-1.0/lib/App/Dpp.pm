@@ -222,7 +222,6 @@ sub conf {
            $c->{meta} = $meta_conf->("$m->{author}/$m->{dist}");
            $c->{module}->{version} = $c->{meta}->{version}; # set version to meta version which might have different format
        } 
-#    say colored(['green'], "$c->{module}->{name} [$c->{module}->{version}]");
 
     # main module
     $c->{module}->{main} = $c->{meta}->{release}->{_source}->{main_module};
@@ -240,9 +239,17 @@ sub conf {
     # control file
     $c->{module}->{control} = $control->($c);
 
-
-#my @body = @{$c->{html}->{body}};
-    #  print $body[0].$c->{module}->{debfile}.'"'.$body[1].$body[2].$c->{module}->{distribution}.'-'.$c->{module}->{version}.$body[3].$body[4].$body[5].$c->{module}->{description}.$body[6]."\n";
+    say for @{$c->{html}->{head}};
+    say for @{$c->{html}->{style}};
+    my %body = %{$c->{html}->{body}};
+    for( keys %body ){
+        unless(/^empty/){
+            print $body{$_}.$c->{module}->{$_};
+        } else { print $body{$_} }
+    }
+    say " ";
+    say $_ for @{$c->{html}->{foot}};
+    die;
 
     return $c;
 }
@@ -273,15 +280,25 @@ $c = {
                            },
                   'url' => 'http://api.metacpan.org/v0/module/'."$module".'?join=release',
                   'html' => {
-                           'body' => [
-                                        '<div class="dpp"> </div><div class="dpp"><a href="deb/',
-                                        ' target="_blank"><i class="fa fa-download" aria-hidden="true"></i> &nbsp;</a>',
-                                        '<a href="https://widgets.stratopan.com/wheel?q=',
-                                        '" target="_blank"><i class="fa fa-asterisk" aria-hidden="true"></i>&nbsp;</a><a href="http://api.metacpan.org/v0/pod/'."$module".'?content-type=text/plain" target="_blank"><i class="fa fa-file" aria-hidden="true"></i></a></div>',
-                                        '<div class="module">' . "$module" . '</div>',
-                                        '<div class="description">',
-                                        '</br></div>'
-                                ],
+                              'body' => {
+                                      debfile  =>  '<div class="dpp"> </div><div class="dpp"><a href="deb/',
+                                      empty    =>  '" target="_blank"><i class="fa fa-download" aria-hidden="true"></i> &nbsp;</a>',
+                                      distribution =>  '<a href="https://widgets.stratopan.com/wheel?q=',
+                                      version   =>  '-',
+                                      empty2   =>  '" target="_blank"><i class="fa fa-asterisk" aria-hidden="true"></i>&nbsp;</a><a href="http://api.metacpan.org/v0/pod/'."$module".'?content-type=text/plain" target="_blank"><i class="fa fa-file" aria-hidden="true"></i></a></div>',
+                                      empty3   =>  ' <div class="module">' . "$module" . '</div>',
+                                      description   =>  '<div class="description">',
+                                      empty4    =>  ' </br></div>'
+                              },
+                  #             'body' => [
+                  #                    '<div class="dpp"> </div><div class="dpp"><a href="deb/',
+                  #                    ' target="_blank"><i class="fa fa-download" aria-hidden="true"></i> &nbsp;</a>',
+                  #                    '<a href="https://widgets.stratopan.com/wheel?q=',
+                  #                    '" target="_blank"><i class="fa fa-asterisk" aria-hidden="true"></i>&nbsp;</a><a href="http://api.metacpan.org/v0/pod/'."$module".'?content-type=text/plain" target="_blank"><i class="fa fa-file" aria-hidden="true"></i></a></div>',
+                  #                    '<div class="module">' . "$module" . '</div>',
+                  #                    '<div class="description">',
+                  #                    '</br></div>'
+                  #            ],
                           'foot' => [
                                       '<div class="footer" align="center" >dpp<br></div>',
                                       '</body>',
