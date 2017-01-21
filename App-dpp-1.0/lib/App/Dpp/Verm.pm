@@ -1,4 +1,4 @@
-package App::Verm;
+package App::Dpp::Verm;
 use Data::Dumper;
 use HTTP::Tiny;
 use Config;
