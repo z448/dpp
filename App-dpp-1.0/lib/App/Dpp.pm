@@ -125,7 +125,7 @@ my $depends = sub {
              my $m = $meta_conf->($_); # assumeing dist name is same for older version
              #my $m = $meta_conf->($_, $c->{module}->{version}); #assumeing dist name is NOT same for older version
              $d{module} = $_; 
-             $d{version} = $dep->{$_}; #$d{version} =~ s/[A-Za-z]//g;
+             $d{version} = $dep->{$_};
              $d{dist} = $m->{release}->{_source}->{distribution};
              $d{package} = 'lib' . lc $m->{release}->{_source}->{distribution} . "-perl$c->{perl}->{version}.$c->{perl}->{subversion}-" . lc $c->{package_prefix}; 
              $d{package} =~ s/\./\-/g;
@@ -135,7 +135,7 @@ my $depends = sub {
     return \@depends;
 };
 
-# check if module is a core module
+# check if module is already installed in non site path
 sub core_module {
     my( $module, $corepaths, $arch ) = @_;
     my( %core_path ) = ();
@@ -147,26 +147,6 @@ sub core_module {
         return $core_path{$_} if -f $core_path{$_};
     }
 }
-
-=head1
-# check local distribution version from main module
-my $version = sub {
-    my $module = shift;
-    for my $instpath( qw< installsitelib installsitearch > ){
-        $module =~ s/\:\:/\//g; 
-        next unless -f "$Config{$instpath}/$module.pm";
-        open(my $fh,'<',"$Config{$instpath}/$module.pm") || die "cant open: $!";
-        while( <$fh> ){
-                if(/(\:|\$)(VERSION)(.*?\=)(.*?)([0-9].*?)(\s|'|"|;)(.*)/){ 
-                say "VERSION IS $5";#test
-                my $v = $5; 
-                return $v;
-            }
-        }
-        return "0?";
-    }
-};
-=cut
 
 my $control = sub {
     my $c = shift;
@@ -209,9 +189,6 @@ sub conf {
     $c->{arch} = $arch->();
     $c->{module}->{name} = $module;
     
-    # module version
-    #$c->{module}->{version} = $version->($module); #dont
-
     # create dpp home dir
     my $dir = $c->{dir};
     for( keys %{$dir}){ mkpath( $dir->{$_} ) }
@@ -227,7 +204,7 @@ sub conf {
     # add core paths on osx
     push @{$c->{perl}->{corepath}}, ( "installsitearch", "installsitelib" ) if $c->{arch} eq 'darwin';
 
-    # get meta conf from metacpan API ---------------------------------
+    # get meta conf from metacpan API
     $c->{meta} = $meta_conf->($module);
     # main module
     $c->{module}->{main} = $c->{meta}->{release}->{_source}->{main_module};
@@ -235,17 +212,17 @@ sub conf {
     $c->{module}->{distribution} = $c->{meta}->{release}->{_source}->{distribution};
     # module version
     $c->{module}->{version} = $c->{meta}->{version};
-    #$c->{module}->{version} =~ s/[a-zA-Z]//g; #remove letters from meta version because local version doesnt have one (.pm files VERSION var doesnt have one either see URI::Encode 1.1.1)
+    $c->{module}->{version} =~ s/[a-zA-Z]//g; #remove letters from meta version because local version doesnt have one (.pm files VERSION var doesnt have one either see URI::Encode 1.1.1)
 
     #my $v = $version->($c->{module}->{name});
-    my $meta_ver = verm($c->{module}->{name});
     my $local_ver = verl($c->{module}->{name});
-    my( $m ) = grep{ $_->{version} =~ /.?$local_ver$/ } @{$meta_ver};
     
     if( $c->{module}->{version} eq $local_ver ){
         #if( $c->{module}->{version} eq $v ){
            say colored(['green'], "match [$c->{meta}->{version}]");
        } else { 
+           my $meta_ver = verm($c->{module}->{name});
+           my( $m ) = grep{ $_->{version} =~ /.?$local_ver$/ } @{$meta_ver};
            #$c->{module}->{version} = $local_ver;
            #$c->{module}->{version} = $v;
            say colored(['red'], "local:[$m->{version}] doesnt match meta version:[$c->{meta}->{version}]"); 
@@ -271,7 +248,6 @@ sub conf {
 
     delete $c->{html};
     #delete $c->{meta};
-    print Dumper $c;
 
 =head1
     # create default .index conf
