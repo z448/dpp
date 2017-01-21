@@ -99,7 +99,7 @@ sub digest {
 my $meta_conf = sub {
     my $path  = shift;
     my $url = "https://fastapi.metacpan.org/v1/module/$path?join=release";
-    say colored(['blue'],$url);
+    #say colored(['blue'],$url); #test
     my $res = HTTP::Tiny->new->get($url);
     my $j = decode_json $res->{content};
 };
@@ -124,7 +124,6 @@ my $depends = sub {
     for( keys %{$dep} ){
          unless( $_ eq 'perl' or core_module($_, $c->{perl}->{corepath}, $c->{arch}) ){
              my $m = $meta_conf->($_); # assumeing dist name is same for older version
-             #my $m = $meta_conf->($_, $c->{module}->{version}); #assumeing dist name is NOT same for older version
              $d{module} = $_; 
              $d{version} = $dep->{$_};
              $d{dist} = $m->{release}->{_source}->{distribution};
@@ -181,7 +180,6 @@ my $control = sub {
 sub conf {
     my $module = shift;
     my $dpp_home = init();
-    system("clear"); #test
 
     # load DATA config
     my $c = {};
@@ -224,6 +222,8 @@ sub conf {
     $c->{module}->{main} = $c->{meta}->{release}->{_source}->{main_module};
     # module distribution name
     $c->{module}->{distribution} = $c->{meta}->{release}->{_source}->{distribution};
+    # module description
+    $c->{module}->{description} = $c->{meta}->{release}->{_source}->{abstract};
     # module package name
     $c->{module}->{package} = 'lib' . lc $c->{module}->{distribution} . '-perl' . "$c->{perl}->{version}-$c->{perl}->{subversion}-" . lc $c->{package_prefix};
     $c->{module}->{package} =~ s/\./\-/g;
@@ -234,8 +234,6 @@ sub conf {
     # control file
     $c->{module}->{control} = $control->($c);
 
-    #delete $c->{html};
-    delete $c->{meta}->{body};
 
 =head1
     # create default .index conf
@@ -250,6 +248,9 @@ sub conf {
     }
 =cut
     
+    my @body = @{$c->{html}->{body}};
+    print $body[0].$c->{module}->{debfile}.'"'.$body[1].$body[2].$c->{module}->{distribution}.'-'.$c->{module}->{version}.$body[3].$body[4].$body[5].$c->{module}->{description}.$body[6]."\n";
+
     return $c;
 }
 
@@ -279,13 +280,15 @@ $c = {
                            },
                   'url' => 'http://api.metacpan.org/v0/module/'."$module".'?join=release',
                   'html' => {
-                          'body' => [
-                                      '<div class="dpp"> </div>',
-                                      '<div class="dpp"><a href="deb/' . "$module" . '" target="_blank"><i class="fa fa-download" aria-hidden="true"></i> &nbsp;</a>',
-                                      '<a href="https://widgets.stratopan.com/wheel?q='."$module".' target="_blank"><i class="fa fa-asterisk" aria-hidden="true"></i>&nbsp;</a><a href="http://api.metacpan.org/v0/pod/HTTP::Tiny?content-type=text/plain" target="_blank"><i class="fa fa-file" aria-hidden="true"></i></a></div>',
-                                      '<div class="module">' . "$module" . '</div>',
-                                      '<div class="description">A small, simple, correct HTTP/1.1 client</br></div>'
-                                    ],
+        'body' => [
+            '<div class="dpp"> </div><div class="dpp"><a href="deb/'."$c->{module}->{debfile}",
+            ' target="_blank"><i class="fa fa-download" aria-hidden="true"></i> &nbsp;</a>',
+            '<a href="https://widgets.stratopan.com/wheel?q=',
+            '" target="_blank"><i class="fa fa-asterisk" aria-hidden="true"></i>&nbsp;</a><a href="http://api.metacpan.org/v0/pod/'."$module".'?content-type=text/plain" target="_blank"><i class="fa fa-file" aria-hidden="true"></i></a></div>',
+            '<div class="module">' . "$module" . '</div>',
+            '<div class="description">',
+            '</br></div>'
+        ],
                           'foot' => [
                                       '<div class="footer" align="center" >dpp<br></div>',
                                       '</body>',

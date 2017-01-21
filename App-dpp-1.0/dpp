@@ -78,11 +78,7 @@ sub parse_packlist {
         $module =~ s/(auto.*?\/)(.*?)(\/\.packlist)/$2/;
         $module = $2;
         $module =~ s/\//\:\:/g;
-        #say "\$module:[$module] _______________________________"; ###test
-        #say colored(['blue'], `./version2.pl $module`);###test
-        #do { "version.pl $module" }; ###test
         my $c = $conf->("$module");
-        #print Dumper $c->{module}->{control}; ###test
 
         # read content of packlist
         open(my $fh,'<', $path) || die "cant open $path:$!";
@@ -109,13 +105,10 @@ sub pack_packlist {
     my $c = shift;
     my $pack_path = "$c->{dir}->{build}/$c->{module}->{package}";
 
-    #say colored(['red'], $c->{module}->{name} . " $c->{module}->{version}");###test
-
-    #system("rm -rf $c->{dir}->{build}");
     remove_tree( $c->{dir}->{build} ); mkpath("$pack_path");
-
-    system("tar pcz $c->{path} -T $c->{path} -f $c->{dir}->{build}/data.tar.gz && cd $c->{dir}->{build} && mv data.tar.gz .. && rm -rf * && mv ../data.tar.gz . && cd -");
-    system("mkdir -p $pack_path/DEBIAN");
+    open my $psss, '>&', STDERR;
+    open STDERR, '+>', undef;
+    system("tar pcz $c->{path} -T $c->{path} -f $c->{dir}->{build}/data.tar.gz && cd $c->{dir}->{build} && mv data.tar.gz .. && rm -rf * && mv ../data.tar.gz . && mkdir -p $pack_path/DEBIAN");
 
     # write preinst script
     open(my $fh,">", "$pack_path/DEBIAN/preinst") || die "cant open $pack_path/DEBIAN/preinst$!";
@@ -140,31 +133,10 @@ sub pack_packlist {
     close $fh;
 
     # make .deb
-    #my $deb_file = "$c->{module}->{package}
     system("cd $pack_path/DEBIAN && chmod 0755 preinst && tar czf ../../control.tar.gz * && cd ../.. && echo '2.0' > debian-binary && ar r $c->{module}->{debfile} 'debian-binary' 'control.tar.gz' 'data.tar.gz' && mv $c->{module}->{debfile} $c->{dir}->{deb}");
+    open STDERR, '>&', $psss;
 
-    #&& rm -rf $c->{module}->{package} && rm -rf debian-binary control.tar.gz data.tar.gz DEBIAN");
-
-=head1
-my $packer = <<"_DEB";
-    cd $pack_path/DEBIAN;
-    chmod 0755 preinst;
-    tar pczf ../../control.tar.gz *;
-    cd ../..;
-    echo 2.0 > debian-binary;
-    ar r "$c->{module}->{debfile}" 'debian-binary' 'control.tar.gz' 'data.tar.gz';
-    mv $c->{module}->{debfile} $c->{dir}->{deb};
-    rm -rf $c->{module}->{package};
-    rm -rf debian-binary control.tar.gz data.tar.gz DEBIAN;
-_DEB
-    print "$packer"; 
-    system("$packer");
-=cut
     remove_tree($c->{dir}->{build});
-    #sleep 1;
-
-    #eval { web("$meta_pack->{module}") };
-#    make_html($c);
 }
 
 sub make_html {
