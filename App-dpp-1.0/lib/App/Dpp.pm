@@ -206,10 +206,6 @@ sub conf {
 
     # get meta conf from metacpan API
     $c->{meta} = $meta_conf->($module);
-    # main module
-    $c->{module}->{main} = $c->{meta}->{release}->{_source}->{main_module};
-    # module distribution name
-    $c->{module}->{distribution} = $c->{meta}->{release}->{_source}->{distribution};
     # module version
     # $c->{module}->{version} = $c->{meta}->{version};
     #$c->{module}->{version} =~ s/[a-zA-Z]//g; #remove letters from meta version because local version doesnt have one (.pm files VERSION var doesnt have one either see URI::Encode 1.1.1)
@@ -234,6 +230,10 @@ sub conf {
            $c->{module}->{version} = $c->{meta}->{version}; # set version to meta version which has letters...
            
        }
+    # main module
+    $c->{module}->{main} = $c->{meta}->{release}->{_source}->{main_module};
+    # module distribution name
+    $c->{module}->{distribution} = $c->{meta}->{release}->{_source}->{distribution};
     # module package name
     $c->{module}->{package} = 'lib' . lc $c->{module}->{distribution} . '-perl' . "$c->{perl}->{version}-$c->{perl}->{subversion}-" . lc $c->{package_prefix};
     $c->{module}->{package} =~ s/\./\-/g;
