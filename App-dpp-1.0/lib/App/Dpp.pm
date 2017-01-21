@@ -11,6 +11,7 @@ use JSON::PP;
 use Data::Dumper;
 use File::Path;
 use App::Dpp::VersionPath qw< version_path >;
+use App::Verm qw< verm verl >;
 
 use warnings;
 use strict;
@@ -102,41 +103,6 @@ my $meta_conf = sub {
     my $j = decode_json $res->{content};
 };
 
-
-=head1
-
-my $meta_conf = sub {
-    my $mod = shift;
-
-    my $m = {};
-    my $get = sub {
-        my $url = shift;
-        my $response = HTTP::Tiny->new->get($url);
-        if($response->{success}){
-            return decode_json $response->{content};
-        } else { return 0 }
-    }; 
-
-    unless( ref $mod ){
-        say "https://fastapi.metacpan.org/v1/module/$mod?join=release";
-        return $get->("https://fastapi.metacpan.org/v1/module/$mod?join=release");
-    } else {
-
-        $mod->{module} =~ s/::/\//g;
-        #https://fastapi.metacpan.org/v1/release/ZDENEK/App-Trrr-v8
-        my $try = $get->("https://fastapi.metacpan.org/v1/module/$mod->{author}/$mod->{distribution}-$mod->{version}?join=release");
-        #my $try = $get->("https://fastapi.metacpan.org/v1/module/$mod->{author}/$mod->{distribution}-$mod->{version}/lib/$mod->{module}.pm?join=release");
-
-        unless( $try ){
-            say "https://fastapi.metacpan.org/v1/module/$mod->{author}/$mod->{distribution}-v$mod->{version}?join=release";
-            return $get->("https://fastapi.metacpan.org/v1/module/$mod->{author}/$mod->{distribution}-v$mod->{version}?join=release");
-            #return $get->("https://fastapi.metacpan.org/v1/module/$mod->{author}/$mod->{distribution}-v$mod->{version}/lib/$mod->{module}.pm?join=release");
-        } else { return $try }
-    }
-};
-
-=cut
-
 my $user_conf = sub {
     my $conf_file = shift;
     my %user_conf = ();
@@ -156,8 +122,8 @@ my $depends = sub {
     my $dep = $c->{meta}->{release}->{_source}->{metadata}->{prereqs}->{runtime}->{requires};
     for( keys %{$dep} ){
          unless( $_ eq 'perl' or core_module($_, $c->{perl}->{corepath}, $c->{arch}) ){
-             my $m = $meta_conf->($_);
-             #my $m = $meta_conf->($_, $c->{module}->{version});
+             my $m = $meta_conf->($_); # assumeing dist name is same for older version
+             #my $m = $meta_conf->($_, $c->{module}->{version}); #assumeing dist name is NOT same for older version
              $d{module} = $_; 
              $d{version} = $dep->{$_}; $d{version} =~ s/[A-Za-z]//g;
              $d{dist} = $m->{release}->{_source}->{distribution};
@@ -182,11 +148,11 @@ sub core_module {
     }
 }
 
+=head1
 # check local distribution version from main module
 my $version = sub {
     my $module = shift;
     for my $instpath( qw< installsitelib installsitearch > ){
-        #my $module = $c->{module}->{main};
         $module =~ s/\:\:/\//g; 
         next unless -f "$Config{$instpath}/$module.pm";
         open(my $fh,'<',"$Config{$instpath}/$module.pm") || die "cant open: $!";
@@ -194,14 +160,13 @@ my $version = sub {
                 if(/(\:|\$)(VERSION)(.*?\=)(.*?)([0-9].*?)(\s|'|"|;)(.*)/){ 
                 say "VERSION IS $5";#test
                 my $v = $5; 
-                #my $v = $5; 
-#$v =~ s/[A-Za-z]//g;
                 return $v;
             }
         }
         return "0?";
     }
 };
+=cut
 
 my $control = sub {
     my $c = shift;
@@ -262,33 +227,36 @@ sub conf {
     # add core paths on osx
     push @{$c->{perl}->{corepath}}, ( "installsitearch", "installsitelib" ) if $c->{arch} eq 'darwin';
 
-    # get meta conf from metacpan API
-    #my $m = $meta_conf->($module); #dont
+    # get meta conf from metacpan API ---------------------------------
     $c->{meta} = $meta_conf->($module);
-
     # main module
-    #$c->{module}->{main} = $m->{release}->{_source}->{main_module}; #dont
     $c->{module}->{main} = $c->{meta}->{release}->{_source}->{main_module};
     # module distribution name
-    #$c->{module}->{distribution} = $m->{release}->{_source}->{distribution};#dont
     $c->{module}->{distribution} = $c->{meta}->{release}->{_source}->{distribution};
-
     # module version
     $c->{module}->{version} = $c->{meta}->{version};
-    $c->{module}->{version} =~ s/[a-zA-Z]//g;
-    my $v = $version->($c->{module}->{name});
-    if( $c->{module}->{version} eq $v ){
-           say colored(['green'], "match $c->{meta}->{version}");
+    #$c->{module}->{version} =~ s/[a-zA-Z]//g; #remove letters from meta version because local version doesnt have one (.pm files VERSION var doesnt have one either see URI::Encode 1.1.1)
+
+    #my $v = $version->($c->{module}->{name});
+    my $meta_ver = verm($c->{module}->{name});
+    my $local_ver = verl($c->{module}->{name});
+    my( $m ) = grep{ $_->{version} =~ /.?$local_ver$/ } @{$meta_ver};
+    
+    if( $c->{module}->{version} eq $local_ver ){
+        #if( $c->{module}->{version} eq $v ){
+           say colored(['green'], "match [$c->{meta}->{version}]");
        } else { 
-           $c->{module}->{version} = $v;
-           $c->{meta} = {};
-           $c->{meta} = $meta_conf->(version_path($c->{module}->{name}, "$v"));
-           #$c->{meta} = $meta_conf->(version_path($c->{module}->{main}, "$v"));
+           #$c->{module}->{version} = $local_ver;
+           #$c->{module}->{version} = $v;
+           say colored(['red'], "local:[$m->{version}] doesnt match meta version:[$c->{meta}->{version}]"); 
+           #say colored(['red'], "local:[$v] doesnt match meta version:[$c->{meta}->{version}]"); 
+           $c->{meta} = {}; 
+           $c->{meta} = $meta_conf->(version_path($c->{module}->{name}, "$m->{version}"));
+           #$c->{meta} = $meta_conf->(version_path($c->{module}->{name}, "$local_ver"));
+           #$c->{meta} = $meta_conf->(version_path($c->{module}->{name}, "$v"));
            $c->{module}->{main} = $c->{meta}->{release}->{_source}->{main_module};
            $c->{module}->{distribution} = $c->{meta}->{release}->{_source}->{distribution};
-           $c->{module}->{version} = $c->{meta}->{version};
-           say colored(['red'], "doesnt match $c->{meta}->{version}") . " ^--version specific dumper--^"; 
-           #my $url_path = "version_path $module $c->{module}->{version}";
+           $c->{module}->{version} = $c->{meta}->{version}; # set version to meta version which has letters...
            
        }
     # module package name
@@ -302,19 +270,10 @@ sub conf {
     $c->{module}->{control} = $control->($c);
 
     delete $c->{html};
-    delete $c->{meta};
+    #delete $c->{meta};
     print Dumper $c;
 
 =head1
-    my %z = (
-        module  =>  $m->{release}->{_source}->{main_module},
-        version =>  $c->{module}->{version},
-        author  =>  $m->{release}->{_source}->{author},
-        distribution    =>  $m->{release}->{_source}->{distribution},
-    );
-    $c->{meta} = $meta_conf->(\%z); 
-
-
     # create default .index conf
     unless( -f $c->{htmlconf}->{conf} ){
         open(my $fh,'>',$c->{htmlconf}->{conf}) || die "cant open $c->{htmlconf}->{conf}: $!";
@@ -328,13 +287,12 @@ sub conf {
     #$c->{module}->{version} = $c->{meta}->{version}; 
 =cut
     
-    #print Dumper $c;
     return $c;
 }
 
 __DATA__
 $c = {
-                  'package_prefix' => 'library',
+                  'package_prefix' => '',
                   'perl' => {
                         'corepath' => [
                             'installarchlib', 'installprivlib', 'installextrasarch', 'installextraslib', 'installupdatesarch', 'installupdateslib', 'installvendorarch', 'installvendorlib'
@@ -357,7 +315,6 @@ $c = {
                              'deb' => "$dpp_home/deb"
                            },
                   'url' => 'http://api.metacpan.org/v0/module/'."$module".'?join=release',
-                  'architecture' => 'all',
                   'html' => {
                           'body' => [
                                       '<div class="dpp"> </div>',
