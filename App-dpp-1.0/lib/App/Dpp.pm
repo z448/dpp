@@ -125,7 +125,7 @@ my $depends = sub {
              my $m = $meta_conf->($_); # assumeing dist name is same for older version
              #my $m = $meta_conf->($_, $c->{module}->{version}); #assumeing dist name is NOT same for older version
              $d{module} = $_; 
-             $d{version} = $dep->{$_}; $d{version} =~ s/[A-Za-z]//g;
+             $d{version} = $dep->{$_}; #$d{version} =~ s/[A-Za-z]//g;
              $d{dist} = $m->{release}->{_source}->{distribution};
              $d{package} = 'lib' . lc $m->{release}->{_source}->{distribution} . "-perl$c->{perl}->{version}.$c->{perl}->{subversion}-" . lc $c->{package_prefix}; 
              $d{package} =~ s/\./\-/g;
