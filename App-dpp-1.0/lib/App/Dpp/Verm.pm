@@ -1,8 +1,10 @@
 package App::Dpp::Verm;
+use Term::ANSIColor;
 use Data::Dumper;
 use HTTP::Tiny;
 use Config;
 
+use 5.010;
 use warnings;
 use strict;
 
@@ -17,6 +19,10 @@ our @ISA = qw(Exporter);
 our @EXPORT_OK = qw< verm verl >;
 our $VERSION = '0.01';
 
+sub z{
+    my $color = shift;
+    return sub { say colored([$color], __PACKAGE__) . " " . shift if defined $ENV{app_dpp_debug} };
+};
 
 
 my $version_local = sub {
@@ -27,7 +33,7 @@ my $version_local = sub {
         next unless -f "$Config{$path}/$module.pm";
         open(my $fh,'<',"$Config{$path}/$module.pm") || die "cant open: $!";
         while( <$fh> ){
-            if(/(\:|\$)(VERSION)(.*?\=)(.*?)([0-9].*?)(\s|'|"|;)(.*)/){ return $5 }
+            if(/(\:|\$)(VERSION)(.*?\=)(.*?)([0-9].*?)(\s|'|"|;)(.*)/){ return "$5" }
         }
     }
     return "$ARGV[0] module is not installed in $Config{installsitelib} or $Config{installsitearch}";
@@ -100,8 +106,36 @@ sub verl {
 }
 
 sub verm {
-    return $version_path->(shift);
+        #my $c = shift;
+    my $c = {}; $c->{module}->{name} = "URI::Encode"; $c->{dir}->{cache} = "$ENV{HOME}/dpp/.cache";
+    my $cache = "$c->{dir}->{cache}/$c->{module}->{name}.verm"; # cache file
+
+    my $z = z('grey6');
+    $z->("Testing");
+# dumper read
+    my $data;
+    my $versions;
+    if( -f $cache ){
+        open(my $fh,"<", $cache) || die "cant open $cache: $!";
+        { local $/; $data = <$fh>; close $fh }
+
+        eval $data;
+        my $l = $version_local->($c->{module}->{name});
+        $z->("$l");
+        my( $v ) = grep{ $_->{version} eq $l } @{$versions};
+        $z->("get cache exist, version not in cache") unless $v->{version};
+        say "get cache exist, version is $v->{version}" if $v->{version};
+    } else {
+        $z->("cache doesnt exist");
+        my $versions = $version_path->($c->{module}->{name});
+# dumper write
+        open(my $fh,">", $cache) || die "cant open $cache:$!";
+        print $fh Data::Dumper->Dump([$versions], ["versions"]), $/;
+        close $fh;
+    }
 }
+
+
 
 
 

@@ -97,20 +97,25 @@ sub digest {
 };
 
 my $meta_conf = sub {
-    my $path  = shift;
-    my $path_cache = $path; $path_cache =~ s/\//-/g;
-    my $cache = "/tmp/.dpp_cache/$path_cache";
+    my( $path, $c )  = @_;
+    #my $path  = shift;
+    my $cache = $path; $cache =~ s/\//-/g;
+    $cache = "$c->{dir}->{cache}/$cache";
+    #my $path_cache = $path; $path_cache =~ s/\//-/g;
+    #my $cache = "/tmp/.dpp_cache/$path_cache";
 
     if( -f $cache ){ 
-        open(my $fh,'<',$cache);
+        open(my $fh,'<',$cache) || die "cant open $cache:$!";
         local $/; my $res = <$fh>; close $fh; 
         return decode_json $res;
+        #return decode_json $res;
     } else {
         my $url = "https://fastapi.metacpan.org/v1/module/$path?join=release";
         my $res = HTTP::Tiny->new->get($url);
-        open(my $fh,'>',$cache);
-        print $fh $res->{content} if length $res->{content};
-        return decode_json $res->{content};
+        my $j = decode_json $res->{content};
+        open(my $fh,'>',$cache) || die "cant open $cache:$!";
+        print $fh $res->{content}; close $fh;
+        return $j;
     }
 };
 
@@ -134,7 +139,7 @@ my $depends = sub {
     for( keys %{$dep} ){
         # unless( $_ eq 'perl' ){
         unless( $_ eq 'perl' or core_module($_, $c->{perl}->{corepath}, $c->{arch}) ){
-             my $m = $meta_conf->($_); # assumeing dist name is same for older version
+             my $m = $meta_conf->($_, $c); # assumeing dist name is same for older version
              $d{module} = $_; 
              $d{version} = $dep->{$_};
              $d{dist} = $m->{release}->{_source}->{distribution};
@@ -224,7 +229,8 @@ sub conf {
     push @{$c->{perl}->{corepath}}, ( "installsitearch", "installsitelib" ) if $c->{arch} eq 'darwin';
 
     # get meta conf from metacpan API
-    $c->{meta} = $meta_conf->($module);
+    $c->{meta} = $meta_conf->($module,$c);
+    #$c->{meta} = $meta_conf->($module);
     my $latest_ver = $c->{meta}->{version}; $latest_ver =~ s/[a-zA-Z]//g;
     my $local_ver = verl($c->{module}->{name});
     $c->{module}->{version} = $c->{meta}->{version};
@@ -236,7 +242,8 @@ sub conf {
            my( $m ) = grep{ $_->{version} =~ /.?$local_ver$/ } @{$meta_ver};
            $c->{meta} = {};
            $c->{module}->{homepage} = "https://metacpan.org/release/$m->{author}/$m->{dist}";
-           $c->{meta} = $meta_conf->("$m->{author}/$m->{dist}");
+           $c->{meta} = $meta_conf->("$m->{author}/$m->{dist}", $c);
+           #$c->{meta} = $meta_conf->("$m->{author}/$m->{dist}");
            $c->{module}->{version} = $c->{meta}->{version}; # set version to meta version which might have different format
        } 
 
