@@ -1,4 +1,5 @@
 package App::Dpp::Verm;
+
 use Term::ANSIColor;
 use Data::Dumper;
 use HTTP::Tiny;
@@ -66,27 +67,31 @@ my $version_path = sub {
 
     open(my $fh,'<',\$res->());
     while( <$fh> ){
+        my %m = ();
         if(/Jump to version/){ $field = 1 }
         if( /(value|label)\=\"(.*?)\/(.*?)\/.*">(.*?)\ / ){
                 return \%version if( $field == 1 and defined $version{"$4"});
                 unless( $field == 0 or defined $version{"$4"} ){ 
-                    my %m = ();
                     $m{version} = $4;
                     $m{author} = $2;
                     $m{dist} = $3;
-                    #my $version = $4;
-                    #my $author = "$2"; 
-                    #my $dist = $3;
                     $m{path} = $m{author}; $m{path} =~ s/(.)(.)(.*)/$1\/$1$2/;
-                    #my $path = $author; $path =~ s/(.)(.)(.*)/$1\/$1$2/;
-                    #$version{"$version"} = "$path/$author/$dist";
-                    #$version{"$version"} = $version;
                     push @m, {%m};
                 }
         }
+        if(/\=\"\/pod\/release\/(.*?)\/(.*?)\/.*This version/){
+            $m{author} = $1;
+            $m{dist} = $2; 
+
+            $m{dist} =~ /.*-(.*)/;
+            $m{version} = $1;
+
+            $m{path} = $m{author};
+            $m{path} =~ s/(.)(.)(.*)/$1\/$1$2/;
+            push @m, {%m};
+        }
     }
     return \@m;
-    #return \%version;
 };
 
 
@@ -106,33 +111,30 @@ sub verl {
 }
 
 sub verm {
-        #my $c = shift;
-    my $c = {}; $c->{module}->{name} = "URI::Encode"; $c->{dir}->{cache} = "$ENV{HOME}/dpp/.cache";
+    my $c = shift;
+    #my $c = {}; $c->{module}->{name} = "URI::Encode"; $c->{dir}->{cache} = "$ENV{HOME}/dpp/.cache";
     my $cache = "$c->{dir}->{cache}/$c->{module}->{name}.verm"; # cache file
+    my $z = z('grey4');
 
-    my $z = z('grey6');
-    $z->("Testing");
 # dumper read
     my $data;
     my $versions;
     if( -f $cache ){
+        $z->("cache file exist");
         open(my $fh,"<", $cache) || die "cant open $cache: $!";
         { local $/; $data = <$fh>; close $fh }
-
         eval $data;
-        my $l = $version_local->($c->{module}->{name});
-        $z->("$l");
-        my( $v ) = grep{ $_->{version} eq $l } @{$versions};
-        $z->("get cache exist, version not in cache") unless $v->{version};
-        say "get cache exist, version is $v->{version}" if $v->{version};
-    } else {
-        $z->("cache doesnt exist");
-        my $versions = $version_path->($c->{module}->{name});
+        my $verl = verl($c->{module}->{name});
+        my $contains_local = grep{ $_->{version} =~ /v?$verl$/ } @{$versions};
+        return $versions if $contains_local;
+    }
+        $z->("cache exist but has no local version");
+        $versions = $version_path->($c->{module}->{name});
 # dumper write
         open(my $fh,">", $cache) || die "cant open $cache:$!";
         print $fh Data::Dumper->Dump([$versions], ["versions"]), $/;
         close $fh;
-    }
+        return $versions;
 }
 
 

@@ -238,7 +238,8 @@ sub conf {
     $c->{module}->{homepage} = "https://metacpan.org/release/$c->{module}->{distribution}";
 
     unless( $latest_ver eq $local_ver ){
-           my $meta_ver = verm($module);
+           my $meta_ver = verm($c);
+           #my $meta_ver = verm($module);
            my( $m ) = grep{ $_->{version} =~ /.?$local_ver$/ } @{$meta_ver};
            $c->{meta} = {};
            $c->{module}->{homepage} = "https://metacpan.org/release/$m->{author}/$m->{dist}";
