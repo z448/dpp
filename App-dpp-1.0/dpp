@@ -100,6 +100,7 @@ sub parse_packlist {
 
         pack_packlist($c);
         %dir_seen = (); # reset uniq packlist directories for next package
+
     }
 };
 
@@ -153,10 +154,9 @@ sub pack_packlist {
     close $fh;
 
     remove_tree($c->{dir}->{build});
+    return $c;
 }
 
 my $p = $ARGV[0] || $Config{installsitearch};
 #die "add path to perl modules dir" unless $p;
 parse_packlist(find_packlist($p));
-
-

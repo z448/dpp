@@ -98,9 +98,24 @@ sub digest {
 
 my $meta_conf = sub {
     my $path  = shift;
-    my $url = "https://fastapi.metacpan.org/v1/module/$path?join=release";
-    my $res = HTTP::Tiny->new->get($url);
-    my $j = decode_json $res->{content};
+    my $path_cache = $path; $path_cache =~ s/\///g;
+    my $cache = "/tmp/.dpp_cache/$path_cache";
+
+    mkpath("/tmp/.dpp_cache");
+
+    if( -f $cache ){ 
+        open(my $fh,'<',"$cache");
+        local $/; my $res = <$fh>; close $fh; 
+        return decode_json $res;
+    } else {
+        my $url = "https://fastapi.metacpan.org/v1/module/$path?join=release";
+        my $res = HTTP::Tiny->new->get($url);
+        #unless( -f "$cache" ){
+            open(my $fh,'>',"$cache");
+            print $fh $res->{content} if length $res->{content};
+            return decode_json $res->{content};
+            #}
+    }
 };
 
 my $user_conf = sub {
@@ -226,6 +241,7 @@ sub conf {
            my( $m ) = grep{ $_->{version} =~ /.?$local_ver$/ } @{$meta_ver};
            $c->{meta} = {};
            $c->{module}->{homepage} = "https://metacpan.org/release/$m->{author}/$m->{dist}";
+           say "########"."$m->{author}/$m->{dist}";#test
            $c->{meta} = $meta_conf->("$m->{author}/$m->{dist}");
            $c->{module}->{version} = $c->{meta}->{version}; # set version to meta version which might have different format
        } 
