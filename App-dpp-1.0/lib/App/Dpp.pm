@@ -234,7 +234,8 @@ sub conf {
     my $latest_ver = $c->{meta}->{version}; $latest_ver =~ s/[a-zA-Z]//g;
     my $local_ver = verl($c->{module}->{name});
     $c->{module}->{version} = $c->{meta}->{version};
-    $c->{module}->{homepage} = "https://metacpan.org/release/$module";
+    $c->{module}->{distribution} = $c->{meta}->{release}->{_source}->{distribution};
+    $c->{module}->{homepage} = "https://metacpan.org/release/$c->{module}->{distribution}";
 
     unless( $latest_ver eq $local_ver ){
            my $meta_ver = verm($module);
