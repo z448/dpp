@@ -98,17 +98,17 @@ sub digest {
 
 my $meta_conf = sub {
     my $path  = shift;
-    my $path_cache = $path; $path_cache =~ s/\///g;
+    my $path_cache = $path; $path_cache =~ s/\//-/g;
     my $cache = "/tmp/.dpp_cache/$path_cache";
 
     if( -f $cache ){ 
-        open(my $fh,'<',"$cache");
+        open(my $fh,'<',$cache);
         local $/; my $res = <$fh>; close $fh; 
         return decode_json $res;
     } else {
         my $url = "https://fastapi.metacpan.org/v1/module/$path?join=release";
         my $res = HTTP::Tiny->new->get($url);
-        open(my $fh,'>',"$cache");
+        open(my $fh,'>',$cache);
         print $fh $res->{content} if length $res->{content};
         return decode_json $res->{content};
     }
