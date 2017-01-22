@@ -4,6 +4,7 @@ use 5.010;
 use warnings;
 use strict;
 
+use Sys::Hostname;
 use Term::ANSIColor;
 use Getopt::Std;
 use App::Dpp qw< conf digest >;
@@ -13,7 +14,7 @@ use Config;
 use File::Find;
 use File::Path qw< remove_tree mkpath >;
 use open qw< :encoding(UTF-8) >;
-STDOUT->autoflush(1);
+#STDOUT->autoflush(1);
 
 my $opt = {};
 getopts('d:', $opt);
@@ -145,7 +146,7 @@ sub pack_packlist {
     open STDERR, '>&', $psss;
 
     binmode(STDOUT, ":utf8");
-    my $pkg = "\N{U+1F4E6}";
+    my $pkg = "\N{U+1F4E6}" . ' ' . "\N{U+1F500}";
     say colored(['bright_white'],$pkg) . '  '  unless $deb;
 
     # add to index.html
@@ -160,3 +161,4 @@ sub pack_packlist {
 my $p = $ARGV[0] || $Config{installsitearch};
 #die "add path to perl modules dir" unless $p;
 parse_packlist(find_packlist($p));
+

@@ -25,7 +25,7 @@ BEGIN {
     require Exporter;
     our $VERSION = 0.01;
     our @ISA = qw(Exporter);
-    our @EXPORT_OK = qw( conf digest );
+    our @EXPORT_OK = qw( conf digest debug );
 }
 
 my $dpp_home = "$ENV{HOME}/dpp";
@@ -57,7 +57,7 @@ my $d;
 unless(-f "$ENV{HOME}/.dpp"){
     my %init = (
         dpp_home        =>  "$ENV{HOME}/dpp",
-        package_prefix  =>  hostname,
+        pkgid  =>  hostname,
         maintainer      =>  'Your Name <name@email.com>',
     );
     # get name/email from gitconfig if exist
@@ -77,6 +77,17 @@ close $CONF;
 sub init {
     return $dpp_home;
 }
+
+my $index = sub {
+    my $c = shift;
+    #unless $c->{pkgid} eq hostname
+    # create head style for index.html
+    unless( -f "$c->{dir}->{dpp}/index.html" ){
+        open(my $fh,'>',"$c->{dir}->{dpp}/index.html") || die "cant open $c->{dir}->{dpp}/index.html:$!";
+        say $fh $_ for @{$c->{html}->{head}};
+        say $fh $_ for @{$c->{html}->{style}};
+    }
+};
 
 # architecture
 my $arch = sub {
@@ -98,17 +109,13 @@ sub digest {
 
 my $meta_conf = sub {
     my( $path, $c )  = @_;
-    #my $path  = shift;
     my $cache = $path; $cache =~ s/\//-/g;
     $cache = "$c->{dir}->{cache}/$cache";
-    #my $path_cache = $path; $path_cache =~ s/\//-/g;
-    #my $cache = "/tmp/.dpp_cache/$path_cache";
 
     if( -f $cache ){ 
         open(my $fh,'<',$cache) || die "cant open $cache:$!";
         local $/; my $res = <$fh>; close $fh; 
         return decode_json $res;
-        #return decode_json $res;
     } else {
         my $url = "https://fastapi.metacpan.org/v1/module/$path?join=release";
         my $res = HTTP::Tiny->new->get($url);
@@ -143,7 +150,7 @@ my $depends = sub {
              $d{module} = $_; 
              $d{version} = $dep->{$_};
              $d{dist} = $m->{release}->{_source}->{distribution};
-             $d{package} = 'lib' . lc $m->{release}->{_source}->{distribution} . "-perl$c->{perl}->{version}.$c->{perl}->{subversion}-" . lc $c->{package_prefix}; 
+             $d{package} = 'lib' . lc $m->{release}->{_source}->{distribution} . "-perl$c->{perl}->{version}.$c->{perl}->{subversion}-" . lc $c->{pkgid}; 
              $d{package} =~ s/\./\-/g;
              push @depends,{%d} unless $d{dist} eq 'perl';
          }
@@ -211,7 +218,7 @@ sub conf {
     my $dir = $c->{dir};
     for( keys %{$dir}){ mkpath( $dir->{$_} ) }
 
-    $c->{package_prefix} = hostname;
+    $c->{pkgid} = hostname;
 
     # read .dpp conf file
     my $u = $user_conf->("$ENV{HOME}/.dpp");
@@ -219,18 +226,20 @@ sub conf {
         $c->{$_} = $u->{$_} if defined $u->{$_} and exists $c->{$_};
     }
 
+=head1
     # create head style for index.html
     unless( -f "$c->{dir}->{dpp}/index.html" ){
         open(my $fh,'>',"$c->{dir}->{dpp}/index.html") || die "cant open $c->{dir}->{dpp}/index.html:$!";
         say $fh $_ for @{$c->{html}->{head}};
         say $fh $_ for @{$c->{html}->{style}};
     }
+=cut
+
     # add core paths on osx
-    push @{$c->{perl}->{corepath}}, ( "installsitearch", "installsitelib" ) if $c->{arch} eq 'darwin';
+    #push @{$c->{perl}->{corepath}}, ( "installsitearch", "installsitelib" ) if $c->{arch} eq 'darwin';
 
     # get meta conf from metacpan API
     $c->{meta} = $meta_conf->($module,$c);
-    #$c->{meta} = $meta_conf->($module);
     my $latest_ver = $c->{meta}->{version}; $latest_ver =~ s/[a-zA-Z]//g;
     my $local_ver = verl($c->{module}->{name});
     $c->{module}->{version} = $c->{meta}->{version};
@@ -239,12 +248,10 @@ sub conf {
 
     unless( $latest_ver eq $local_ver ){
            my $meta_ver = verm($c);
-           #my $meta_ver = verm($module);
            my( $m ) = grep{ $_->{version} =~ /.?$local_ver$/ } @{$meta_ver};
            $c->{meta} = {};
            $c->{module}->{homepage} = "https://metacpan.org/release/$m->{author}/$m->{dist}";
            $c->{meta} = $meta_conf->("$m->{author}/$m->{dist}", $c);
-           #$c->{meta} = $meta_conf->("$m->{author}/$m->{dist}");
            $c->{module}->{version} = $c->{meta}->{version}; # set version to meta version which might have different format
        } 
 
@@ -255,10 +262,10 @@ sub conf {
     # module description
     $c->{module}->{description} = $c->{meta}->{release}->{_source}->{abstract};
     # module package name
-    $c->{module}->{package} = 'lib' . lc $c->{module}->{distribution} . '-perl' . "$c->{perl}->{version}-$c->{perl}->{subversion}-" . lc $c->{package_prefix};
+    $c->{module}->{package} = 'lib' . lc $c->{module}->{distribution} . '-perl' . "$c->{perl}->{version}-$c->{perl}->{subversion}-" . lc $c->{pkgid};
     $c->{module}->{package} =~ s/\./\-/g;
     # module .deb file name
-    $c->{module}->{debfile} = 'lib'.lc $c->{module}->{distribution}."$c->{module}->{version}-$c->{arch}".'-perl'."$c->{perl}->{version}.$c->{perl}->{subversion}-" . lc $c->{package_prefix}.'.deb';
+    $c->{module}->{debfile} = 'lib'.lc $c->{module}->{distribution}."$c->{module}->{version}-$c->{arch}".'-perl'."$c->{perl}->{version}.$c->{perl}->{subversion}-" . lc $c->{pkgid}.'.deb';
     # module non-core module dependencies
     $c->{module}->{depends} = $depends->($c);
     # control file
@@ -272,7 +279,7 @@ sub conf {
 
 __DATA__
 $c = {
-                  'package_prefix' => '',
+                  'pkgid' => '',
                   'perl' => {
                         'corepath' => [
                             'installarchlib', 'installprivlib', 'installextrasarch', 'installextraslib', 'installupdatesarch', 'installupdateslib', 'installvendorarch', 'installvendorlib'

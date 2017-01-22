@@ -17,12 +17,12 @@ App::Verm - get path to specific version of module
 
 require Exporter;
 our @ISA = qw(Exporter);
-our @EXPORT_OK = qw< verm verl >;
+our @EXPORT_OK = qw< verm verl get >;
 our $VERSION = '0.01';
 
 sub z{
     my $color = shift;
-    return sub { say colored([$color], __PACKAGE__) . " " . shift if defined $ENV{app_dpp_debug} };
+    return sub { say colored([$color], caller ) . " " . shift if defined $ENV{app_dpp_debug} };
 };
 
 
@@ -42,16 +42,11 @@ my $version_local = sub {
 
 # < module name > use Tiny or curl to get content
 my $get = sub {
-    my %g = (
-        url => 'https://metacpan.org/pod/',
-        name => shift,
-        agent => 'Mozilla/5.0',
-    );
-
+    my $url = shift;
     my $res;
-    return sub{ $res = HTTP::Tiny->new->get("$g{url}$g{name}"); return $res->{content} } if length $res->{content};
+    return sub{ $res = HTTP::Tiny->new->get("$url"); return $res->{content} }; 
     return sub{
-       open my $p,'-|',"curl --user-agent \"$g{agent}\" -skL '$g{url}$g{name}'";
+       open my $p,'-|',"curl --user-agent \"Mozilla/5.0\" -skL '$url'";
        while( <$p> ){ $res .= $_ }
        return $res;
     };
@@ -60,10 +55,15 @@ my $get = sub {
 # < module name > hash ref version => /path/to/version
 my $version_path = sub {
     my $module = shift;
-    my $res = $get->($module);
+
+    my $res = $get->("https://metacpan.org/pod/$module");
     my $field = 0;
     my %version = ();
     my @m = ();
+
+    my $z = z('magenta');
+    $z->("Test:\$version_path");
+
 
     open(my $fh,'<',\$res->());
     while( <$fh> ){
@@ -112,15 +112,14 @@ sub verl {
 
 sub verm {
     my $c = shift;
-    #my $c = {}; $c->{module}->{name} = "URI::Encode"; $c->{dir}->{cache} = "$ENV{HOME}/dpp/.cache";
     my $cache = "$c->{dir}->{cache}/$c->{module}->{name}.verm"; # cache file
-    my $z = z('grey4');
+    my $z = z('cyan');
 
 # dumper read
     my $data;
     my $versions;
     if( -f $cache ){
-        $z->("cache file exist");
+        $z->("verm(): cache file exist");
         open(my $fh,"<", $cache) || die "cant open $cache: $!";
         { local $/; $data = <$fh>; close $fh }
         eval $data;
@@ -128,8 +127,8 @@ sub verm {
         my $contains_local = grep{ $_->{version} =~ /v?$verl$/ } @{$versions};
         return $versions if $contains_local;
     }
-        $z->("cache exist but has no local version");
-        $versions = $version_path->($c->{module}->{name});
+    $z->("verm():cache exist but has no local version");
+        $versions = $version_path->("$c->{module}->{name}");
 # dumper write
         open(my $fh,">", $cache) || die "cant open $cache:$!";
         print $fh Data::Dumper->Dump([$versions], ["versions"]), $/;
@@ -137,29 +136,9 @@ sub verm {
         return $versions;
 }
 
-
-
-
-
-
-
-
-
-
-
-
-=head1 AUTHOR
-
-Zdenek Bohunek, C<< <zdenek@cpan.org> >>
-
-=head1 COPYRIGHT & LICENSE
-
-Copyright 2017 Zdenek Bohunek, All Rights Reserved.
-
-This program is free software; you can redistribute it and/or modify it
-under the same terms as Perl itself.
-
-=cut
-
- 
+sub get {
+    my $g = $get->(shift);
+    open(my $fh,'<',\$g->());
+    return $fh;
+}
 
