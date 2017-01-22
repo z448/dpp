@@ -101,8 +101,6 @@ my $meta_conf = sub {
     my $path_cache = $path; $path_cache =~ s/\///g;
     my $cache = "/tmp/.dpp_cache/$path_cache";
 
-    mkpath("/tmp/.dpp_cache");
-
     if( -f $cache ){ 
         open(my $fh,'<',"$cache");
         local $/; my $res = <$fh>; close $fh; 
@@ -110,11 +108,9 @@ my $meta_conf = sub {
     } else {
         my $url = "https://fastapi.metacpan.org/v1/module/$path?join=release";
         my $res = HTTP::Tiny->new->get($url);
-        #unless( -f "$cache" ){
-            open(my $fh,'>',"$cache");
-            print $fh $res->{content} if length $res->{content};
-            return decode_json $res->{content};
-            #}
+        open(my $fh,'>',"$cache");
+        print $fh $res->{content} if length $res->{content};
+        return decode_json $res->{content};
     }
 };
 
@@ -143,7 +139,6 @@ my $depends = sub {
              $d{version} = $dep->{$_};
              $d{dist} = $m->{release}->{_source}->{distribution};
              $d{package} = 'lib' . lc $m->{release}->{_source}->{distribution} . "-perl$c->{perl}->{version}.$c->{perl}->{subversion}-" . lc $c->{package_prefix}; 
-             #$d{package} = 'lib' . lc $m->{release}->{_source}->{distribution} . "-perl" if core_module($_, $c->{perl}->{corepath}, $c->{arch});
              $d{package} =~ s/\./\-/g;
              push @depends,{%d} unless $d{dist} eq 'perl';
          }
@@ -188,7 +183,6 @@ my $control = sub {
         Section =>  'perl',
         Maintainer  =>  $c->{maintainer},
         Homepage    => $c->{module}->{homepage},
-        #Homepage    => 'http://api.metacpan.org/v0/module/' . $c->{module}->{name} . '?join=release',
         Description => $c->{meta}->{release}->{_source}->{abstract},
         Depends => $depends->(),
     );
@@ -208,7 +202,7 @@ sub conf {
     $c->{arch} = $arch->();
     $c->{module}->{name} = $module;
     
-    # create dpp home dir
+    # create dpp dirs
     my $dir = $c->{dir};
     for( keys %{$dir}){ mkpath( $dir->{$_} ) }
 
@@ -242,7 +236,6 @@ sub conf {
            my( $m ) = grep{ $_->{version} =~ /.?$local_ver$/ } @{$meta_ver};
            $c->{meta} = {};
            $c->{module}->{homepage} = "https://metacpan.org/release/$m->{author}/$m->{dist}";
-           say "########"."$m->{author}/$m->{dist}";#test
            $c->{meta} = $meta_conf->("$m->{author}/$m->{dist}");
            $c->{module}->{version} = $c->{meta}->{version}; # set version to meta version which might have different format
        } 
@@ -291,7 +284,8 @@ $c = {
                   'dir' => {
                              'dpp' => "$dpp_home",
                              'build' => "$dpp_home/.build",
-                             'deb' => "$dpp_home/deb"
+                             'deb' => "$dpp_home/deb",
+                             'cache' => "$dpp_home/.cache",
                            },
                   'url' => 'http://api.metacpan.org/v0/module/'."$module".'?join=release',
                   'html' => {
