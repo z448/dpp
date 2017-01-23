@@ -69,9 +69,8 @@ my $version_path = sub {
     while( <$fh> ){
         my %m = ();
         if(/Jump to version/){ $field = 1 }
-        if( /(value|label)\=\"(.*?)\/(.*?)\/.*">(.*?)\ / ){
-                return \%version if( $field == 1 and defined $version{"$4"});
-                unless( $field == 0 or defined $version{"$4"} ){ 
+            if( /(value|label)\=\"(.*?)\/(.*?)\/.*">(.*?)\ / ){
+                unless( $field == 0 ){ 
                     $m{version} = $4;
                     $m{author} = $2;
                     $m{dist} = $3;
@@ -89,9 +88,9 @@ my $version_path = sub {
             $m{path} = $m{author};
             $m{path} =~ s/(.)(.)(.*)/$1\/$1$2/;
             push @m, {%m};
+            return \@m;
         }
     }
-    return \@m;
 };
 
 

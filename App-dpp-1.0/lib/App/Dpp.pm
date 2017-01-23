@@ -92,7 +92,7 @@ while( <$CONF> ){
     if(/(^dpp_home)(\=)(.*)/){ $dpp_home=$3; chomp $dpp_home }
     if(/(^repository)(\=)(.*)/){ $repository = $3 }
 }
-$index->($dpp_home, $repository) unless $repository == 0;
+#$index->($dpp_home, $repository) unless $repository == 0;
 close $CONF;
 
 sub init {
