@@ -87,12 +87,12 @@ my $index = sub {
 
 # read ~/.dpp conf file and get $dpp_home;
 open(my $CONF,'<',"$ENV{HOME}/.dpp") || die "cant open $ENV{HOME}/.dpp: $!";
-my $repository = 0;
+my $repository;
 while( <$CONF> ){
     if(/(^dpp_home)(\=)(.*)/){ $dpp_home=$3; chomp $dpp_home }
     if(/(^repository)(\=)(.*)/){ $repository = $3 }
 }
-#$index->($dpp_home, $repository) unless $repository == 0;
+$index->($dpp_home, $repository) if defined $repository;
 close $CONF;
 
 sub init {
