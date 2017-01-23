@@ -10,7 +10,7 @@ use Config;
 use JSON::PP;
 use Data::Dumper;
 use File::Path;
-use App::Dpp::Verm qw< verm verl >;
+use App::Dpp::Verm qw< verm verl get >;
 
 use warnings;
 use strict;
@@ -67,27 +67,37 @@ unless(-f "$ENV{HOME}/.dpp"){
     close $CONF;
 }
 
+# get index.html from remote server if defined in ~/.dpp
+my $index = sub {
+    my( $dpp_home, $repository ) = @_;
+
+    my $html = ' ';
+    my $foot = 0;
+    my $g = get("http://$repository/index.html");
+
+    open(my $fh,'<', \$g->() );
+    while(<$fh>){
+        $foot = 1 if $_ =~ /^<div class="footer" align="center" >.*/;
+        $html = $html . $_ unless $foot == 1;
+    }; close $fh;
+    open($fh,'>', "$dpp_home/index.html");
+    print $fh $html if length $html;
+    close $fh;
+};
+
 # read ~/.dpp conf file and get $dpp_home;
 open(my $CONF,'<',"$ENV{HOME}/.dpp") || die "cant open $ENV{HOME}/.dpp: $!";
+my $repository = 0;
 while( <$CONF> ){
-    if(/(.*dpp_home)(\=)(.*)/){ $dpp_home=$3; chomp $dpp_home }
+    if(/(^dpp_home)(\=)(.*)/){ $dpp_home=$3; chomp $dpp_home }
+    if(/(^repository)(\=)(.*)/){ $repository = $3 }
 }
+$index->($dpp_home, $repository) unless $repository == 0;
 close $CONF;
 
 sub init {
     return $dpp_home;
 }
-
-my $index = sub {
-    my $c = shift;
-    #unless $c->{pkgid} eq hostname
-    # create head style for index.html
-    unless( -f "$c->{dir}->{dpp}/index.html" ){
-        open(my $fh,'>',"$c->{dir}->{dpp}/index.html") || die "cant open $c->{dir}->{dpp}/index.html:$!";
-        say $fh $_ for @{$c->{html}->{head}};
-        say $fh $_ for @{$c->{html}->{style}};
-    }
-};
 
 # architecture
 my $arch = sub {
@@ -226,14 +236,12 @@ sub conf {
         $c->{$_} = $u->{$_} if defined $u->{$_} and exists $c->{$_};
     }
 
-=head1
     # create head style for index.html
     unless( -f "$c->{dir}->{dpp}/index.html" ){
         open(my $fh,'>',"$c->{dir}->{dpp}/index.html") || die "cant open $c->{dir}->{dpp}/index.html:$!";
         say $fh $_ for @{$c->{html}->{head}};
         say $fh $_ for @{$c->{html}->{style}};
     }
-=cut
 
     # add core paths on osx
     #push @{$c->{perl}->{corepath}}, ( "installsitearch", "installsitelib" ) if $c->{arch} eq 'darwin';
@@ -280,6 +288,7 @@ sub conf {
 __DATA__
 $c = {
                   'pkgid' => '',
+                  'repo_path' => '/index.html',
                   'perl' => {
                         'corepath' => [
                             'installarchlib', 'installprivlib', 'installextrasarch', 'installextraslib', 'installupdatesarch', 'installupdateslib', 'installvendorarch', 'installvendorlib'

@@ -98,9 +98,9 @@ my $version_path = sub {
 
 =head1 FUNCTIONS
 
-=head2 verp
+=head2 verm
 
-C<verp($module)> 
+C<verm> 
 
 Takes module name, returns hash ref: version => /path/to/version
 
@@ -138,7 +138,5 @@ sub verm {
 
 sub get {
     my $g = $get->(shift);
-    open(my $fh,'<',\$g->());
-    return $fh;
 }
 
