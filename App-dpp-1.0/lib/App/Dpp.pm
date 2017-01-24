@@ -76,15 +76,7 @@ my $index = sub {
     unlink("$c->{dir}->{dpp}/index.html");
 
     if( defined $c->{repository} ){
-    #my( $html, $foot ) = (' ', 0 );
         my $html = get("http://$c->{repository}/index.html");
-
-        #open(my $fh,'<', \$g->() );
-    #while(<$fh>){
-        #$foot = 1 if $_ =~ /^<div class="footer" align="center" >.*/;
-        #    $html = $html . $_;
-        #$html = $html . $_ unless $foot == 1;
-        #}; close $fh;
         open(my $fh,'>', "$c->{dir}->{dpp}/index.html");
         print $fh $html->() if length $html;
         close $fh;
@@ -99,12 +91,9 @@ my $index = sub {
 
 # read ~/.dpp conf file and get $dpp_home;
 open(my $CONF,'<',"$ENV{HOME}/.dpp") || die "cant open $ENV{HOME}/.dpp: $!";
-#my $repository;
 while( <$CONF> ){
     if(/(^dpp_home)(\=)(.*)/){ $dpp_home=$3; chomp $dpp_home }
-    #   if(/(^repository)(\=)(.*)/){ $repository = $3 }
 }
-#$index->($dpp_home, $repository) if defined $repository;
 close $CONF;
 
 sub init {
@@ -250,7 +239,8 @@ sub conf {
     }
 
 # create head style for index.html
-    $index->($c) unless exists $initialized{index};
+    $index->($c) unless $initialized{index};
+    #$index->($c) unless exists $initialized{index};
     #}
 
     # add core paths on osx
