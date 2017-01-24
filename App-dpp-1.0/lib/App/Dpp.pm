@@ -29,6 +29,8 @@ BEGIN {
 }
 
 my $dpp_home = "$ENV{HOME}/dpp";
+my %initialized = (); 
+
 
 # get name email from gitconfig if exist
 my $gitconfig = sub {
@@ -69,30 +71,40 @@ unless(-f "$ENV{HOME}/.dpp"){
 
 # get index.html from remote server if defined in ~/.dpp
 my $index = sub {
-    my( $dpp_home, $repository ) = @_;
+    my $c = shift;
+    say "running \$index->()";
+    unlink("$c->{dir}->{dpp}/index.html");
 
-    my $html = ' ';
-    my $foot = 0;
-    my $g = get("http://$repository/index.html");
+    if( defined $c->{repository} ){
+    #my( $html, $foot ) = (' ', 0 );
+        my $html = get("http://$c->{repository}/index.html");
 
-    open(my $fh,'<', \$g->() );
-    while(<$fh>){
-        $foot = 1 if $_ =~ /^<div class="footer" align="center" >.*/;
-        $html = $html . $_ unless $foot == 1;
-    }; close $fh;
-    open($fh,'>', "$dpp_home/index.html");
-    print $fh $html if length $html;
-    close $fh;
+        #open(my $fh,'<', \$g->() );
+    #while(<$fh>){
+        #$foot = 1 if $_ =~ /^<div class="footer" align="center" >.*/;
+        #    $html = $html . $_;
+        #$html = $html . $_ unless $foot == 1;
+        #}; close $fh;
+        open(my $fh,'>', "$c->{dir}->{dpp}/index.html");
+        print $fh $html->() if length $html;
+        close $fh;
+    } else { 
+        open(my $fh,'>',"$c->{dir}->{dpp}/index.html") || die "cant open $c->{dir}->{dpp}/index.html:$!";
+        say $fh $_ for @{$c->{html}->{head}};
+        say $fh $_ for @{$c->{html}->{style}};
+        close $fh;
+    }
+    $initialized{index} = "$c->{dir}->{dpp}/index.html";
 };
 
 # read ~/.dpp conf file and get $dpp_home;
 open(my $CONF,'<',"$ENV{HOME}/.dpp") || die "cant open $ENV{HOME}/.dpp: $!";
-my $repository;
+#my $repository;
 while( <$CONF> ){
     if(/(^dpp_home)(\=)(.*)/){ $dpp_home=$3; chomp $dpp_home }
-    if(/(^repository)(\=)(.*)/){ $repository = $3 }
+    #   if(/(^repository)(\=)(.*)/){ $repository = $3 }
 }
-$index->($dpp_home, $repository) if defined $repository;
+#$index->($dpp_home, $repository) if defined $repository;
 close $CONF;
 
 sub init {
@@ -233,15 +245,13 @@ sub conf {
     # read .dpp conf file
     my $u = $user_conf->("$ENV{HOME}/.dpp");
     for( keys %{$u} ){
-        $c->{$_} = $u->{$_} if defined $u->{$_} and exists $c->{$_};
+        $c->{$_} = $u->{$_} if defined $u->{$_};
+        #$c->{$_} = $u->{$_} if defined $u->{$_} and exists $c->{$_};
     }
 
-    # create head style for index.html
-    unless( -f "$c->{dir}->{dpp}/index.html" ){
-        open(my $fh,'>',"$c->{dir}->{dpp}/index.html") || die "cant open $c->{dir}->{dpp}/index.html:$!";
-        say $fh $_ for @{$c->{html}->{head}};
-        say $fh $_ for @{$c->{html}->{style}};
-    }
+# create head style for index.html
+    $index->($c) unless exists $initialized{index};
+    #}
 
     # add core paths on osx
     #push @{$c->{perl}->{corepath}}, ( "installsitearch", "installsitelib" ) if $c->{arch} eq 'darwin';
@@ -288,7 +298,7 @@ sub conf {
 __DATA__
 $c = {
                   'pkgid' => '',
-                  'repo_path' => '/index.html',
+                  #'repository' => '',
                   'perl' => {
                         'corepath' => [
                             'installarchlib', 'installprivlib', 'installextrasarch', 'installextraslib', 'installupdatesarch', 'installupdateslib', 'installvendorarch', 'installvendorlib'
