@@ -315,15 +315,16 @@ $c = {
                   'html' => {
                                'body' => sub{  
                                         my $c = shift;
-                                        my $b = '<div class="dpp"> </div><div class="dpp"><a href="deb/'. $c->{debfile} . '" target="_blank"><i class="fa fa-download" aria-hidden="true"></i> &nbsp;</a><a href="https://widgets.stratopan.com/wheel?q='. $c->{distribution} .'-'. $c->{version} .
-                                      '" target="_blank"><i class="fa fa-asterisk" aria-hidden="true"></i>&nbsp;</a><a href="http://api.metacpan.org/v0/pod/'."$module".'?content-type=text/plain" target="_blank"><i class="fa fa-file" aria-hidden="true"></i></a></div>'.
-                                      '<div class="module">' . "$module" . '</div>'.
-                                      '<div class="description">'.$c->{description}.
-                                      '</br></div>';
+                                        my $b = '<div class="dpp"> </div>'.
+                                        '<div class="module">' . "$module" . '</div>'.
+                                        '<div class="dpp"><a href="deb/'. $c->{debfile} . '" target="_blank"><i class="fa fa-download" aria-hidden="true"></i> &nbsp; &nbsp; &nbsp;</a><a href="https://widgets.stratopan.com/wheel?q='. $c->{distribution} .'-'. $c->{version} .
+                                      '" target="_blank"><i class="fa fa-asterisk" aria-hidden="true"></i> &nbsp; &nbsp; &nbsp;</a><a href="http://api.metacpan.org/v0/pod/'."$module".'?content-type=text/plain" target="_blank"><i class="fa fa-file" aria-hidden="true"></i></a></div>'.
+                                      '<div class="description">' . $c->{description}.
+                                      '</br></br></div>';
                                       return $b;
                               },
                           'foot' => [
-                                      '<div class="footer" align="center" >dpp<br></div>',
+                          #'<div class="footer" align="center" >dpp<br></div>',
                                       '</body>',
                                       '</html>'
                                     ],
@@ -345,7 +346,8 @@ $c = {
                                       '',
                                       '<body bgcolor="#090811">',
                                       '<div align="center" >',
-                                      '<div class="headtext"><br><br><sub>This is APT repository index.</sub><br><br></div>'
+                                      '<div class="headtext"><br><br><sub>This is APT repository index.</sub><br><br></div>',
+                                      '<div class="footer" align="center" >dpp<br></div>',
                                     ],
                           'style' => [
                                        '<style type="text/css"> ',
@@ -376,6 +378,7 @@ $c = {
                                        '',
                                        '.dpp {',
                                        '    background: #090811;',
+                                       '	line-height: 110%;',
                                        '}',
                                        '',
                                        '.headtext {',
@@ -392,6 +395,7 @@ $c = {
                                        '.description {',
                                        '	font-family: \'Fira Mono\';',
                                        '	font-size: 11px;',
+                                       '	line-height: 110%;',
                                        '    text-align = "center";',
                                        '	background : #090811;',
                                        '    color: #4F4F50;',
