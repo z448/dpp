@@ -161,7 +161,8 @@ my $depends = sub {
              $d{module} = $_; 
              $d{version} = $dep->{$_};
              $d{dist} = $m->{release}->{_source}->{distribution};
-             $d{package} = 'lib' . lc $m->{release}->{_source}->{distribution} . "-perl$c->{perl}->{version}.$c->{perl}->{subversion}-" . lc $c->{pkgid}; 
+             $d{package} = 'lib' . lc $m->{release}->{_source}->{distribution} . "-perl"; 
+             #$d{package} = 'lib' . lc $m->{release}->{_source}->{distribution} . "-perl$c->{perl}->{version}.$c->{perl}->{subversion}-" . lc $c->{pkgid}; 
              $d{package} =~ s/\./\-/g;
              push @depends,{%d} unless $d{dist} eq 'perl';
          }
@@ -270,7 +271,8 @@ sub conf {
     # module description
     $c->{module}->{description} = $c->{meta}->{release}->{_source}->{abstract};
     # module package name
-    $c->{module}->{package} = 'lib' . lc $c->{module}->{distribution} . '-perl' . "$c->{perl}->{version}-$c->{perl}->{subversion}-" . lc $c->{pkgid};
+    $c->{module}->{package} = 'lib' . lc $c->{module}->{distribution} . '-perl';
+    #$c->{module}->{package} = 'lib' . lc $c->{module}->{distribution} . '-perl' . "$c->{perl}->{version}-$c->{perl}->{subversion}-" . lc $c->{pkgid};
     $c->{module}->{package} =~ s/\./\-/g;
     # module .deb file name
     $c->{module}->{debfile} = 'lib'.lc $c->{module}->{distribution}."$c->{module}->{version}-$c->{arch}".'-perl'."$c->{perl}->{version}.$c->{perl}->{subversion}-" . lc $c->{pkgid}.'.deb';
@@ -291,7 +293,8 @@ $c = {
                   #'repository' => '',
                   'perl' => {
                         'corepath' => [
-                            'installarchlib', 'installprivlib', 'installextrasarch', 'installextraslib', 'installupdatesarch', 'installupdateslib', 'installvendorarch', 'installvendorlib'
+                            'installvendorarch', 'installvendorlib', 'installprivlib', 'installarchlib'
+                            #'installarchlib', 'installprivlib', 'installextrasarch', 'installextraslib', 'installupdatesarch', 'installupdateslib', 'installvendorarch', 'installvendorlib'
                         ],
                         'version' => "$Config{PERL_REVISION}" . '.' . "$Config{PERL_VERSION}",
                         'subversion' => "$Config{PERL_SUBVERSION}",
@@ -410,7 +413,7 @@ $c = {
                                        '.module {',
                                        '    font-family: \'Open Sans\', sans-serif;',
                                        '    text-align = "center";',
-                                       '	font-size: 12px;',
+                                       '	font-size: 13px;',
                                        '	background : #090811;',
                                        '	color: #fefefe;',
                                        '}',
