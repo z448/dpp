@@ -226,6 +226,7 @@ sub conf {
     $c->{arch} = $arch->();
     $c->{module}->{name} = $module;
     
+    print $module;
     # create dpp dirs
     my $dir = $c->{dir};
     for( keys %{$dir}){ mkpath( $dir->{$_} ) }
@@ -250,6 +251,7 @@ sub conf {
     # get meta conf from metacpan API
     $c->{meta} = $meta_conf->($module,$c);
     my $latest_ver = $c->{meta}->{version}; $latest_ver =~ s/[a-zA-Z]//g;
+    print "--------$latest_ver---------\n";
     my $local_ver = verl($c->{module}->{name});
     $c->{module}->{version} = $c->{meta}->{version};
     $c->{module}->{distribution} = $c->{meta}->{release}->{_source}->{distribution};
@@ -314,14 +316,14 @@ $c = {
                              'deb' => "$dpp_home/deb",
                              'cache' => "$dpp_home/.cache",
                            },
-                  'url' => 'http://api.metacpan.org/v0/module/'."$module".'?join=release',
+                  'url' => 'http://fastapi.metacpan.org/v1/module/'."$module".'?join=release',
                   'html' => {
                                'body' => sub{  
                                         my $c = shift;
                                         my $b = '<div class="dpp"> </div>'.
                                         '<div class="module">' . "$module" . '</div>'.
                                         '<div class="dpp"><a href="deb/'. $c->{debfile} . '" target="_blank"><i class="fa fa-download" aria-hidden="true"></i> &nbsp; &nbsp; &nbsp;</a><a href="https://widgets.stratopan.com/wheel?q='. $c->{distribution} .'-'. $c->{version} .
-                                      '" target="_blank"><i class="fa fa-asterisk" aria-hidden="true"></i> &nbsp; &nbsp; &nbsp;</a><a href="http://api.metacpan.org/v0/pod/'."$module".'?content-type=text/plain" target="_blank"><i class="fa fa-file" aria-hidden="true"></i></a></div>'.
+                                      '" target="_blank"><i class="fa fa-asterisk" aria-hidden="true"></i> &nbsp; &nbsp; &nbsp;</a><a href="http://fastapi.metacpan.org/v1/pod/'."$module".'?content-type=text/plain" target="_blank"><i class="fa fa-file" aria-hidden="true"></i></a></div>'.
                                       '<div class="description">' . $c->{description}.
                                       '</br></br></div>';
                                       return $b;

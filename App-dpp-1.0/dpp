@@ -23,6 +23,7 @@ getopts('d:', $opt);
 
 my $conf = sub {
     my $module = shift;
+    print "------- $modulei -------\n";
     my $c = conf($module);
     return $c;
 };
@@ -123,7 +124,9 @@ sub pack_packlist {
     my $pack_path = "$c->{dir}->{build}/$c->{module}->{package}";
 
     remove_tree( $c->{dir}->{build} ); mkpath("$pack_path");
-    system("tar pcz $c->{path} -T $c->{path} -f $c->{dir}->{build}/data.tar.gz && cd $c->{dir}->{build} && mv data.tar.gz .. && rm -rf * && mv ../data.tar.gz . && mkdir -p $pack_path/DEBIAN");
+    # mac uses different tar cmd
+    system("tar pcz -T $c->{path} -f $c->{dir}->{build}/data.tar.gz && cd $c->{dir}->{build} && mv data.tar.gz .. && rm -rf * && mv ../data.tar.gz . && mkdir -p $pack_path/DEBIAN");
+    #system("tar pcz $c->{path} -T $c->{path} -f $c->{dir}->{build}/data.tar.gz && cd $c->{dir}->{build} && mv data.tar.gz .. && rm -rf * && mv ../data.tar.gz . && mkdir -p $pack_path/DEBIAN");
 
     # write preinst script
     open(my $fh,">", "$pack_path/DEBIAN/preinst") || die "cant open $pack_path/DEBIAN/preinst$!";
